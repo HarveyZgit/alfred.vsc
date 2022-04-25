@@ -1,0 +1,42 @@
+/**
+ * Copy from https://github.com/mohuishou/utools/blob/master/plugins/vscode/src/files.ts
+ */
+
+import { readFileSync } from 'fs';
+import initSqlJs from 'sql.js';
+
+export interface Recent {
+  entries: Entry[];
+}
+
+export interface Entry {
+  folderUri?: string;
+  workspace?: Workspace;
+  label?: string;
+  remoteAuthority?: string;
+  fileUri?: string;
+}
+
+export interface Workspace {
+  id: string;
+  configPath: string;
+}
+
+export async function GetFiles(path: string) {
+  let db = new (await initSqlJs()).Database(readFileSync(path));
+  let sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
+  let results = db.exec(sql);
+  let res = results[0].values.toString();
+  if (!res)
+    throw new Error(
+      '数据获取失败, 请检查 vsc-setting 配置, <br/> 注意当前仅在 vscode 1.64 版本进行过测试'
+    );
+  let data = JSON.parse(res) as Recent;
+
+  return data.entries.map((file) => {
+    if (typeof file === 'string') return decodeURIComponent(file);
+    let path = file.fileUri || file.folderUri || file.workspace?.configPath;
+    return decodeURIComponent(path ?? '');
+  });
+}
+
