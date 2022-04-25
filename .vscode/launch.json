@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "本地调试",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "ts-node",
+        "${file}"
+      ],
+      "type": "node",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
