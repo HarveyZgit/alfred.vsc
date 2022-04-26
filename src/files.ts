@@ -2,7 +2,9 @@
  * Copy from https://github.com/mohuishou/utools/blob/master/plugins/vscode/src/files.ts
  */
 
+import { IconElement } from 'alfy';
 import { readFileSync } from 'fs';
+import { extname } from 'path';
 import initSqlJs from 'sql.js';
 
 export interface Recent {
@@ -22,10 +24,23 @@ export interface Workspace {
   configPath: string;
 }
 
-const gerProjectName = (path: string) => path.match(/.*\/(.*?)$/)?.[1] ?? path;
+const gerProjectName = (inputPath: string) => inputPath.match(/.*\/(.*?)$/)?.[1] ?? inputPath;
+const getIcon = (inputPath: string): IconElement => {
+  let iconFileName = 'file';
 
-export async function GetFiles(path: string) {
-  const db = new (await initSqlJs()).Database(readFileSync(path));
+  if (inputPath.includes('remote')) {
+    iconFileName = 'remote'
+  } else if (!extname(inputPath)) {
+    iconFileName = 'folder'
+  }
+
+  return {
+    path: `./assets/${iconFileName}.png`,
+  }
+}
+
+export async function GetFiles(dbPath: string) {
+  const db = new (await initSqlJs()).Database(readFileSync(dbPath));
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
   const results = db.exec(sql);
   const res = results[0].values.toString();
@@ -38,16 +53,18 @@ export async function GetFiles(path: string) {
 
   return data.entries.map((file) => {
     if (typeof file === 'string') {
-      const name = gerProjectName(file);
-      return {
-        name,
-        path: decodeURIComponent(file),
-      };
+      file = { fileUri: file };
     }
-    let path = file.fileUri || file.folderUri || file.workspace?.configPath;
-    path = decodeURIComponent(path ?? '')
+    const originPath = file.fileUri || file.folderUri || file.workspace?.configPath;
+    const path = decodeURIComponent(originPath ?? '')
     const name = gerProjectName(path);
-    return { name, path };
+    const icon = getIcon(path);
+
+    return {
+      name,
+      path,
+      icon,
+    };
   });
 }
 
