@@ -12,6 +12,7 @@ async function getHistory(keyWord: string) {
     title: item.name,
     subtitle: item.path,
     arg: item.path,
+    icon: item.icon,
   }));
 
   return outputContent;
