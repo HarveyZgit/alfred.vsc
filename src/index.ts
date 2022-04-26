@@ -1,4 +1,3 @@
-// @ts-ignore
 import alfy from 'alfy';
 import { GetFiles } from './files';
 
@@ -16,3 +15,5 @@ async function main() {
 }
 
 main();
+
+export default main;

@@ -3,8 +3,8 @@
     "outDir": "dist",
     "sourceMap": false,
     "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "ES2018",
+    "module": "CommonJS",
+    "target": "ES6",
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "declaration": true

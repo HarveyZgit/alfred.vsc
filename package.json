@@ -4,17 +4,18 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "alfy": "^0.9.1",
+    "alfy": "^0.11.1",
     "sql.js": "^1.6.2"
+  },
+  "scripts": {
+    "t": "node --loader ts-node/esm",
+    "libln":"sh ./scripts/link.sh"
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.3",
-    "got": "^12.0.4",
     "rollup": "^2.70.2",
+    "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
-  },
-  "execMap": {
-    "ts": "node --loader ts-node/esm"
   },
   "alfredConfig": {
     "releasePath": "/Users/example/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows/user.workflow.D35CAA4D-0B5B-536F-9382-5102111FCB18"
