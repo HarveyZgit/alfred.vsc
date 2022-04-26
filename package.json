@@ -9,7 +9,8 @@
   },
   "scripts": {
     "t": "node --loader ts-node/esm",
-    "build": "rollup -c rollup.config.js"
+    "build": "rollup -c rollup.config.js",
+    "release": "yarn build && sh ./scripts/release.sh"
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.3",
