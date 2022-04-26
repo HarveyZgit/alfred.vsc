@@ -14,5 +14,5 @@ export default {
       tsconfig: buildTsConfigPath,
     }),
   ],
-  external: ['alfy', 'fs', 'sql.js'],
+  external: ['alfy', 'fs', 'sql.js', 'lodash', 'os', 'path'],
 };
