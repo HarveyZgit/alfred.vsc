@@ -3,10 +3,10 @@
     "outDir": "dist",
     "sourceMap": false,
     "noImplicitAny": true,
-    "module": "ES2015",
-    "target": "ES2015",
+    "module": "CommonJS",
+    "target": "ES6",
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": false
   }
 }
