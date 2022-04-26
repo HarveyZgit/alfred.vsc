@@ -1,11 +1,13 @@
 /**
- * Copy from https://github.com/mohuishou/utools/blob/master/plugins/vscode/src/files.ts
+ * Reference from https://github.com/mohuishou/utools/blob/master/plugins/vscode/src/files.ts
  */
 
 import { IconElement } from 'alfy';
 import { readFileSync } from 'fs';
 import { extname } from 'path';
-import initSqlJs from 'sql.js';
+import initSqlJs, { Database } from 'sql.js';
+import { envNames, envs, __VSC_DB_CACHE__ } from './constant';
+import { store } from './store';
 
 export interface Recent {
   entries: Entry[];
@@ -39,8 +41,26 @@ const getIcon = (inputPath: string): IconElement => {
   }
 }
 
-export async function GetFiles(dbPath: string) {
-  const db = new (await initSqlJs()).Database(readFileSync(dbPath));
+async function createDB() {
+  const sqlJS = await initSqlJs();
+  const dbPath = envs.get(envNames.dbPath);
+  const db = new sqlJS.Database(readFileSync(dbPath));
+  store.set(__VSC_DB_CACHE__, db);
+
+  return db;
+}
+
+async function getDB() {
+  const cachedDB = store.get<Database>(__VSC_DB_CACHE__);
+  if (cachedDB) return cachedDB;
+
+  const db = await createDB();
+  return db;
+}
+
+export async function GetFiles() {
+  const db = await getDB();
+
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
   const results = db.exec(sql);
   const res = results[0].values.toString();
