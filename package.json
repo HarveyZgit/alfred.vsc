@@ -9,11 +9,12 @@
   },
   "scripts": {
     "t": "node --loader ts-node/esm",
-    "libln":"sh ./scripts/link.sh"
+    "build": "rollup -c rollup.config.js"
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.3",
     "rollup": "^2.70.2",
+    "rollup-plugin-typescript2": "^0.31.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   },
