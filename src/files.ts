@@ -4,6 +4,7 @@
 
 import { IconElement } from 'alfy';
 import { readFileSync } from 'fs';
+import { isNil } from 'lodash';
 import { extname } from 'path';
 import initSqlJs, { Database } from 'sql.js';
 import { envNames, envs, __VSC_DB_CACHE__ } from './constant';
@@ -58,7 +59,7 @@ async function getDB() {
   return db;
 }
 
-export async function GetFiles() {
+export async function getFiles(length?: number) {
   const db = await getDB();
 
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
@@ -70,8 +71,12 @@ export async function GetFiles() {
     );
   }
   const data = JSON.parse(res) as Recent;
+  let { entries } = data;
+  if (!isNil(length)) {
+    entries = entries.slice(0, length);
+  }
 
-  return data.entries.map((file) => {
+  return entries.map((file) => {
     if (typeof file === 'string') {
       file = { fileUri: file };
     }

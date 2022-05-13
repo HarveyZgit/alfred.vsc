@@ -10,11 +10,13 @@ export const HOME_PATH = os.homedir();
 export const envNames = {
   dbPath: 'VSC_DB_PATH',
   codeBin: 'VSC_CODE_BIN',
+  recentLength: 'VSC_RESENT_LENGTH',
 };
 
-export const defaultEnvs = {
+export const defaultEnvs: Record<string, any> = {
   [envNames.dbPath]: `${HOME_PATH}/Library/Application Support/Code/User/globalStorage/state.vscdb`,
   [envNames.codeBin]: '/usr/local/bin/code',
+  [envNames.recentLength]: 50,
 }
 
 export type EnvKeys = string;
@@ -27,6 +29,10 @@ export const envs = {
 
   get(key: EnvKeys) {
     return get(envs.all, key);
+  },
+
+  getWithDefault(key: EnvKeys, dft?: any) {
+    return get(envs.all, key, dft ?? get(envNames, key));
   },
 
   has(key: EnvKeys) {
