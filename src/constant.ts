@@ -11,12 +11,16 @@ export const envNames = {
   dbPath: 'VSC_DB_PATH',
   codeBin: 'VSC_CODE_BIN',
   recentLength: 'VSC_RESENT_LENGTH',
+  watchDirectories: 'VSC_DIRECTORIES',
+  useVscodeRecent: 'VSC_LEGACY_USE_VSCODE_RECENT'
 };
 
 export const defaultEnvs: Record<string, any> = {
   [envNames.dbPath]: `${HOME_PATH}/Library/Application Support/Code/User/globalStorage/state.vscdb`,
   [envNames.codeBin]: '/usr/local/bin/code',
   [envNames.recentLength]: 50,
+  [envNames.watchDirectories]: '',
+  [envNames.useVscodeRecent]: false,
 }
 
 export type EnvKeys = string;

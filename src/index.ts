@@ -1,42 +1,34 @@
-import alfy, { IconElement, ScriptFilterItem } from 'alfy';
-import { values } from 'lodash';
-import { EnvKeys, envNames, envs } from './constant';
-import { getFiles } from './files';
+import alfy from 'alfy';
+import { envNames, envs } from './constant';
+import { fmtSearchList } from './utils';
+import getDirectoryRecords, { updateDirectoryRecords } from './directory';
+import { useSqlJs2SearchHistory } from './legacy/useSqlJs2SearchHistory';
 
-interface SearchListItem {
-  name: string;
-  path: string;
-  icon: IconElement;
-};
-
-function fmtSearchList(list: SearchListItem[]) {
-  return list.map<ScriptFilterItem>(item => ({
-    title: item.name,
-    subtitle: item.path,
-    arg: item.path,
-    icon: item.icon,
-  }));
-}
-
-async function getHistory(keyWord: string) {
-  const recentCountLenth = +envs.getWithDefault(envNames.recentLength);
-  const res = await getFiles(recentCountLenth);
+function getHistory(keyWord: string) {
+  const res = getDirectoryRecords();
 
   if (!keyWord) return fmtSearchList(res);;
-  const search = res.filter(item => item.name.includes(keyWord));
+  const search = res.filter(item => new RegExp(keyWord, 'i').test(item.name));
   return fmtSearchList(search);
-}
-
-function checkEnvs() {
-  const noConfEnvs = values(envNames).filter((name: EnvKeys) => !envs.has(name));
-  return noConfEnvs.length ? Promise.reject(`Can not get envs: ${noConfEnvs.join(', ')}`) : Promise.resolve;
 }
 
 async function main() {
   try {
-    await checkEnvs();
+    if (alfy.input === '@update') {
+      updateDirectoryRecords();
+      alfy.output([{
+        title: 'update record success',
+      }]);
+      return;
+    }
 
-    const showList = await getHistory(alfy.input);
+    let showList = [];
+    if (envs.get(envNames.useVscodeRecent)) {
+      showList = await useSqlJs2SearchHistory(alfy.input);
+    } else {
+      showList = getHistory(alfy.input);
+    }
+
     alfy.output(showList);
   } catch(err) {
     alfy.log(err);
