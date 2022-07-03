@@ -5,9 +5,9 @@
 import { readFileSync } from 'fs';
 import { isNil } from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
-import { envNames, envs, __VSC_DB_CACHE__ } from './constant';
-import { store } from './store';
-import { getIcon } from './utils';
+import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
+import { store } from '../common/store';
+import { getIcon, SearchListItem } from '../common/utils';
 
 export interface Recent {
   entries: Entry[];
@@ -45,7 +45,7 @@ async function getDB() {
   return db;
 }
 
-export async function getFiles(length?: number) {
+export async function getRecordsFromVscodeDB(length?: number): Promise<SearchListItem[]> {
   const db = await getDB();
 
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
