@@ -1,8 +1,9 @@
 import fs from 'fs';
 import { noop } from 'lodash';
 import path from 'path';
-import { envNames, envs } from './constant';
-import { getIcon, SearchListItem } from './utils';
+import { envNames, envs } from '../common/constant';
+import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
+import { getIcon, SearchListItem } from '../common/utils';
 
 const RECORD_CACHE_FILE = path.join(__dirname, '.records.cache.json');
 
@@ -30,7 +31,10 @@ function getDirectoriesByPath(dirPath: string): SearchListItem[] {
   return result
     .filter(item => item.isDirectory())
     .map(item => {
-      const path = `file://${dirPath}/${item.name}`;
+      const path = getVscodeMenuItemUriPath({
+        scheme: 'file',
+        path: `${dirPath}/${item.name}`,
+      });
       return {
         name: item.name,
         path,
@@ -39,22 +43,10 @@ function getDirectoriesByPath(dirPath: string): SearchListItem[] {
     });
 }
 
-export function updateDirectoryRecords() {
+export function getRecordsFromSpecifiedDirectory(writeFile = true) {
   const paths = parseEnv();
   const records = paths.map(getDirectoriesByPath).flat();
 
-  updateCacheFile(records);
+  writeFile && updateCacheFile(records);
   return records;
 }
-
-function main(): SearchListItem[] {
-  try {
-    const content = fs.readFileSync(RECORD_CACHE_FILE, { encoding: 'utf-8' });
-    return JSON.parse(content);
-  } catch {
-    return updateDirectoryRecords();
-  }
-}
-
-export default main;
-main();
