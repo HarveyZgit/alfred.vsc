@@ -2,13 +2,12 @@
  * Reference from https://github.com/mohuishou/utools/blob/master/plugins/vscode/src/files.ts
  */
 
-import { IconElement } from 'alfy';
 import { readFileSync } from 'fs';
 import { isNil } from 'lodash';
-import { extname } from 'path';
 import initSqlJs, { Database } from 'sql.js';
-import { envNames, envs, __VSC_DB_CACHE__ } from './constant';
-import { store } from './store';
+import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
+import { store } from '../common/store';
+import { getIcon, SearchListItem } from '../common/utils';
 
 export interface Recent {
   entries: Entry[];
@@ -28,19 +27,6 @@ export interface Workspace {
 }
 
 const gerProjectName = (inputPath: string) => inputPath.match(/.*\/(.*?)$/)?.[1] ?? inputPath;
-const getIcon = (inputPath: string): IconElement => {
-  let iconFileName = 'file';
-
-  if (inputPath.includes('remote')) {
-    iconFileName = 'remote'
-  } else if (!extname(inputPath)) {
-    iconFileName = 'folder'
-  }
-
-  return {
-    path: `./assets/${iconFileName}.png`,
-  }
-}
 
 async function createDB() {
   const sqlJS = await initSqlJs();
@@ -59,7 +45,7 @@ async function getDB() {
   return db;
 }
 
-export async function getFiles(length?: number) {
+export async function getRecordsFromVscodeDB(length?: number): Promise<SearchListItem[]> {
   const db = await getDB();
 
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;

@@ -8,16 +8,21 @@ export const HOME_PATH = os.homedir();
 
 /** 环境变量 */
 export const envNames = {
-  dbPath: 'VSC_DB_PATH',
+  IDEPath: 'VSC_IDE_PATH',
+  globalStoragePath: 'VSC_IDE_GS_PATH',
+  dbPath: 'VSC_IDE_DB_PATH',
   codeBin: 'VSC_CODE_BIN',
-  recentLength: 'VSC_RESENT_LENGTH',
+  watchDirectories: 'VSC_DIRECTORIES',
 };
 
 export const defaultEnvs: Record<string, any> = {
-  [envNames.dbPath]: `${HOME_PATH}/Library/Application Support/Code/User/globalStorage/state.vscdb`,
+  [envNames.IDEPath]: `${HOME_PATH}/Library/Application Support/Code`,
   [envNames.codeBin]: '/usr/local/bin/code',
-  [envNames.recentLength]: 50,
+  [envNames.watchDirectories]: '',
 }
+
+defaultEnvs[envNames.globalStoragePath] = `${defaultEnvs[envNames.IDEPath]}/User/globalStorage`;
+defaultEnvs[envNames.dbPath] = `${defaultEnvs[envNames.globalStoragePath]}/state.vscdb`;
 
 export type EnvKeys = string;
 
