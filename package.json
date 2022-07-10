@@ -1,19 +1,21 @@
 {
   "name": "vsc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "alfy": "^0.11.1",
+    "commander": "^9.3.0",
     "lodash": "^4.17.21",
     "sql.js": "^1.6.2"
   },
   "scripts": {
     "t": "node --loader ts-node/esm",
-    "build": "rollup -c rollup.config.js",
+    "build": "node ./scripts/build.js",
     "release": "yarn build && sh ./scripts/release.sh"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0",
     "@types/sql.js": "^1.4.3",
     "rollup": "^2.70.2",
     "rollup-plugin-typescript2": "^0.31.2",
