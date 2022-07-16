@@ -3,7 +3,7 @@ import { external, input, plugins } from './share';
 export default {
   input: input('src/cli/command.ts'),
   output: {
-    file: 'build/cli.js',
+    file: 'build/lib/cli.js',
     format: 'cjs'
   },
   plugins,

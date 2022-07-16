@@ -3,7 +3,7 @@ import { external, input, plugins } from './share';
 export default {
   input: input('src/vscli.ts'),
   output: {
-    file: 'build/vscli.js',
+    file: 'build/lib/vscli.js',
     format: 'cjs'
   },
   plugins,
