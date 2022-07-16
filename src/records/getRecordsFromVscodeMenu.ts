@@ -32,6 +32,26 @@ function getFallbackName(path?: string) {
   return lastIdx > -1 ? path.slice(lastIdx + 1) : path;
 }
 
+interface MenuItem {
+  id: string;
+  name: string;
+  submenu?: {
+    items: MenuItem[];
+  }
+}
+
+function isVscodeRecentOpenMenu(item: MenuItem) {
+  const { id, submenu } = item;
+  if (!id || !id.startsWith('submenuitem')) return false;
+  if (!submenu || !submenu.items) return false;
+
+  for (let i = 0; i < submenu.items.length; i++) {
+    const item = submenu.items[i];
+    if (item.id === 'openRecentFolder') return true;
+  }
+  return false;
+}
+
 export function getRecordsFromVscodeMenu() {
   try {
     const content = fs.readFileSync(
@@ -40,7 +60,7 @@ export function getRecordsFromVscodeMenu() {
     );
     const config = JSON.parse(content);
     const fileMenusItems = get(config, 'lastKnownMenubarData.menus.File.items', []);
-    const recentFolderConfig = find(fileMenusItems, item => item.id === 'submenuitem.36');
+    const recentFolderConfig = find(fileMenusItems, isVscodeRecentOpenMenu);
     const recentFolderList = get(recentFolderConfig, 'submenu.items', []) as any[];
     const openRecentFolderList = recentFolderList
       .filter(item => item.id === 'openRecentFolder' && item.uri)
