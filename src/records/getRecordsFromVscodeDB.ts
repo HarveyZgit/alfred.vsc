@@ -30,8 +30,8 @@ const gerProjectName = (inputPath: string) => inputPath.match(/.*\/(.*?)$/)?.[1]
 
 async function createDB() {
   const sqlJS = await initSqlJs();
-  const dbPath = envs.get(envNames.dbPath);
-  const db = new sqlJS.Database(readFileSync(dbPath));
+  const databasePath = envs.get(envNames.databasePath);
+  const db = new sqlJS.Database(readFileSync(databasePath));
   store.set(__VSC_DB_CACHE__, db);
 
   return db;
