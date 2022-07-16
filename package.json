@@ -1,5 +1,7 @@
 {
   "name": "vsc",
+  "description": "An aflred workflow for finds recent vscode open records",
+  "author": "Harvey Z",
   "version": "1.1.0",
   "main": "index.js",
   "license": "MIT",
@@ -11,18 +13,17 @@
   },
   "scripts": {
     "t": "node --loader ts-node/esm",
-    "build": "node ./scripts/build.js",
-    "release": "yarn build && sh ./scripts/release.sh"
+    "build": "rm -rf build && node ./scripts/build.js",
+    "updateWorkflow": "sh ./scripts/updateWorkflow.sh",
+    "release:dev": "yarn build && sh ./scripts/release.sh"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@types/sql.js": "^1.4.3",
     "rollup": "^2.70.2",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-typescript2": "^0.31.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
-  },
-  "alfredConfig": {
-    "releasePath": "/Users/bytedance/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows/user.workflow.1926E4D2-CCE6-4356-A444-5C827ACCBD9D"
   }
 }
