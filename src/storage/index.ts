@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { merge, noop, uniqBy } from 'lodash';
-import path from 'path';
+import { storageFilesPath } from '../common/paths';
 import { SearchListItem } from '../common/utils';
 import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpecifiedDirectory';
 import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
@@ -17,7 +17,7 @@ function writeFile<T>(path: string, content: T, sync: boolean) {
 }
 
 export const records = {
-  filePath: path.join(__dirname, '.records.cache.json'),
+  filePath: storageFilesPath.records,
 
   update: (content: SearchListItem[], sync = false) => {
     writeFile(records.filePath, content, sync);
@@ -69,7 +69,7 @@ interface UserConfig {
 }
 
 export const userConfig = {
-  filePath: path.join(__dirname, '.user.config.json'),
+  filePath: storageFilesPath.user,
 
   update: (content: Partial<UserConfig>) => {
     const prevConfig = userConfig.getContent();
@@ -99,7 +99,7 @@ export const userConfig = {
 
   setup: () => {
     records.setup();
-    const res = userConfig.update({
+    userConfig.update({
       hasInitial: true,
     });
   },

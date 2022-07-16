@@ -1,16 +1,14 @@
 import fs from 'fs';
 import { noop } from 'lodash';
-import path from 'path';
 import { envNames, envs } from '../common/constant';
 import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
 import { getIcon, SearchListItem } from '../common/utils';
-
-const RECORD_CACHE_FILE = path.join(__dirname, '.records.cache.json');
+import { storageFilesPath } from '../common/paths';
 
 function parseEnv() {
   const paths = envs.get(envNames.watchDirectories) as string;
   try {
-    return paths.split(',');
+    return paths ? paths.split(',') : [];
   } catch {
     return [];
   }
@@ -18,7 +16,7 @@ function parseEnv() {
 
 function updateCacheFile(content: SearchListItem[]) {
   fs.writeFile(
-    RECORD_CACHE_FILE,
+    storageFilesPath.records,
     JSON.stringify(content),
     noop,
   );
@@ -45,6 +43,7 @@ function getDirectoriesByPath(dirPath: string): SearchListItem[] {
 
 export function getRecordsFromSpecifiedDirectory(writeFile = true) {
   const paths = parseEnv();
+  if (!paths.length) return [];
   const records = paths.map(getDirectoriesByPath).flat();
 
   writeFile && updateCacheFile(records);
