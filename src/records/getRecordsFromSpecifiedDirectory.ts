@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import { noop } from 'lodash';
 import { envNames, envs } from '../common/constant';
 import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
@@ -19,6 +20,9 @@ function updateCacheFile(content: SearchListItem[]) {
 }
 
 function getDirectoriesByPath(dirPath: string): SearchListItem[] {
+  if (dirPath.startsWith('~')) {
+    dirPath = dirPath.replace('~', os.homedir());
+  }
   if (!fs.statSync(dirPath).isDirectory()) return [];
 
   const result = fs.readdirSync(dirPath, {
