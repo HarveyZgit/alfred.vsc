@@ -3,3 +3,7 @@ node_modules
 yarn-error.log
 .**.json
 *.env
+logs
+
+.yalc
+yalc.lock
