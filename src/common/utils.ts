@@ -13,7 +13,7 @@ export function getIcon(inputPath: string): Workflow.Icon {
   const pathWithoutScheme = inputPath.replace(/^(.*?):\/\//, '');
   let iconFileName = 'file';
 
-  if (inputPath.startsWith('remote')) {
+  if (inputPath.includes('remote')) {
     iconFileName = 'remote';
   } else if (isDirectory(pathWithoutScheme)) {
     iconFileName = 'folder';
