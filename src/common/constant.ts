@@ -24,8 +24,8 @@ export const defaultEnvs: Record<string, any> = {
   },
   get [envNames.databasePath]() {
     return `${defaultEnvs[envNames.globalStoragePath]}/state.vscdb`;
-  }
-}
+  },
+};
 
 export type EnvKeys = string;
 
@@ -55,4 +55,11 @@ export const envs = {
     const { env } = process;
     return has(env, key);
   },
-}
+};
+
+export const vscliResult = {
+  rebuildIndex: {
+    success: 'rebuild_index_success',
+    fail: 'rebuild_index_fail',
+  },
+};

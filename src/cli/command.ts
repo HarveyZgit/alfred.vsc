@@ -6,6 +6,7 @@ import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
 import { records } from '../storage';
 import { vscliLogger } from '../common/logger';
+import { vscliResult } from '../common/constant';
 
 const program = new Command();
 
@@ -16,8 +17,14 @@ program
   .description('Rebuild records index')
   .action(async () => {
     vscliLogger.info('Start Rebuilding Index.');
-    await records.setup();
-    vscliLogger.info('Update Records Success!');
+    try {
+      await records.setup();
+      vscliLogger.info('Update Records Success!');
+      console.log(vscliResult.rebuildIndex.success);
+    } catch (error) {
+      console.log(vscliResult.rebuildIndex.fail);
+      vscliLogger.error(error);
+    }
   });
 
 program
