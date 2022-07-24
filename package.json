@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^9.3.0",
-    "halfred-tools": "^1.0.1-beta.6",
+    "halfred-tools": "^1.0.0",
     "lodash": "^4.17.21",
     "sql.js": "^1.6.2"
   },
