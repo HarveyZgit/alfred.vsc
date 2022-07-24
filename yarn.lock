@@ -418,10 +418,10 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   resolved "https://registry.npmmirror.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
 
-halfred-tools@^1.0.1-beta.1:
-  version "1.0.1-beta.1"
-  resolved "https://registry.npmmirror.com/halfred-tools/-/halfred-tools-1.0.1-beta.1.tgz#431ca727da1f319a1e2cf275200a5a4cc2cea175"
-  integrity sha512-jSXXGy7otqFADiHKl3gsO4aFOm3/rqXm1rCXCY1LJsbBCC+BnsKuiUn0ycYHtrgIVPKis7ndQzo2mHn8JkxqXw==
+halfred-tools@^1.0.1-beta.6:
+  version "1.0.1-beta.6"
+  resolved "https://registry.npmjs.org/halfred-tools/-/halfred-tools-1.0.1-beta.6.tgz#f6e46953a09eaef2afd3050a511c102e6c7a4b0e"
+  integrity sha512-e019P7JO7xLCYar2OnZGSBvRyUgXWZ1BT5IYA8ZSpK+bBwDZggnsmYUzsEZ3rV+wE8YbMSUjO9qto6AT1dRaxA==
   dependencies:
     conf "^10.1.2"
     dayjs "^1.11.4"

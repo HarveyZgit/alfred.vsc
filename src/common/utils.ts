@@ -1,14 +1,25 @@
 import { Workflow } from 'halfred-tools';
-import { extname } from 'path';
+import fs from 'fs';
+import { vscLogger } from './logger';
+
+function isDirectory(input: string) {
+  if (fs.existsSync(input)) {
+    return fs.statSync(input).isDirectory();
+  }
+  return false;
+}
 
 export function getIcon(inputPath: string): Workflow.Icon {
+  const pathWithoutScheme = inputPath.replace(/^(.*?):\/\//, '');
   let iconFileName = 'file';
 
-  if (inputPath.includes('remote')) {
+  if (inputPath.startsWith('remote')) {
     iconFileName = 'remote';
-  } else if (!extname(inputPath)) {
+  } else if (isDirectory(pathWithoutScheme)) {
     iconFileName = 'folder';
   }
+
+  vscLogger.info(`${iconFileName} -- ${inputPath}`);
 
   return {
     path: `./assets/${iconFileName}.png`,
@@ -19,6 +30,10 @@ export interface SearchListItem {
   name: string;
   path: string;
   icon: Workflow.Icon;
+  extra?: {
+    from: string;
+    [x: string]: any;
+  };
 }
 
 export function fmtSearchList(list: SearchListItem[]) {

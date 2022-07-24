@@ -1,23 +1,23 @@
+import '../setup';
 import { Command } from 'commander';
 import { uniqBy } from 'lodash';
 import pkg from '../../package.json';
 import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
 import { records } from '../storage';
+import { vscliLogger } from '../common/logger';
 
 const program = new Command();
 
-program
-  .name(`${pkg.name}-cli`)
-  .version(pkg.version);
+program.name(`${pkg.name}-cli`).version(pkg.version);
 
 program
   .command('rebuild')
   .description('Rebuild records index')
   .action(async () => {
-    console.log('Start Rebuilding Index.');
+    vscliLogger.info('Start Rebuilding Index.');
     await records.setup();
-    console.log('Update Records Success!');
+    vscliLogger.info('Update Records Success!');
   });
 
 program
@@ -28,7 +28,10 @@ program
     const { record } = params;
     const [item, allRecords] = findRecordByPath(record || '');
     if (!record || !item) return;
-    records.update(uniqBy([item, ...allRecords], (record: SearchListItem) => record.path));
+    records.update(
+      'records',
+      uniqBy([item, ...allRecords], (record: SearchListItem) => record.path)
+    );
   });
 
 program
@@ -39,7 +42,10 @@ program
     const { record } = params;
     const [item, allRecords] = findRecordByPath(record || '');
     if (!record || !item) return;
-    records.update(allRecords.filter(item => item.path !== record));
+    records.update(
+      'records',
+      allRecords.filter((item) => item.path !== record)
+    );
   });
 
 program.parse();

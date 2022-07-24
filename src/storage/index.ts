@@ -1,10 +1,29 @@
 import fs from 'fs';
-import { merge, noop, uniqBy } from 'lodash';
+import { get, merge, noop, set, uniqBy } from 'lodash';
 import { storageFilesPath } from '../common/paths';
 import { SearchListItem } from '../common/utils';
 import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpecifiedDirectory';
 import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
 import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
+
+export interface RecordsStorage {
+  records: SearchListItem[];
+}
+
+function readFile<T>(path: string, parse: true, defaultValue?: T): T;
+function readFile<T>(path: string, parse: false, defaultValue?: T): string;
+function readFile<T>(path: string, parse: boolean, defaultValue?: T) {
+  const content = fs.readFileSync(path, { encoding: 'utf-8' });
+  if (parse) {
+    try {
+      return JSON.parse(content) as T;
+    } catch (error) {
+      return defaultValue;
+    }
+  }
+
+  return content;
+}
 
 function writeFile<T>(path: string, content: T, sync: boolean) {
   const write = sync ? fs.writeFileSync : fs.writeFile;
@@ -12,36 +31,44 @@ function writeFile<T>(path: string, content: T, sync: boolean) {
     fs,
     path,
     JSON.stringify(content, null, 2),
-    sync ? undefined : noop,
+    sync ? undefined : noop
   );
 }
 
 export const records = {
   filePath: storageFilesPath.records,
 
-  update: (content: SearchListItem[], sync = false) => {
+  get fillContent(): RecordsStorage {
+    return readFile(records.filePath, true, records.getDefaultContent());
+  },
+
+  getDefaultContent(custom?: RecordsStorage): RecordsStorage {
+    return merge({ records: [] }, custom);
+  },
+
+  update<T extends keyof RecordsStorage>(
+    key: T,
+    content: RecordsStorage[T],
+    sync = false
+  ) {
+    const prevContent = readFile<RecordsStorage>(
+      records.filePath,
+      true,
+      records.getDefaultContent()
+    );
+    const nextContent = set(prevContent, key, content);
+    writeFile(records.filePath, nextContent, sync);
+  },
+
+  replaceAll: (content: RecordsStorage, sync = false) => {
     writeFile(records.filePath, content, sync);
   },
 
-  getContent: (): SearchListItem[] => {
-    const userConf = userConfig.getContent();
-
-    // 第一次获取内容的时候，自动初始化
-    if (!userConf?.hasInitial) {
-      userConfig.setup();
-      return getRecordsFromVscodeMenu();
-    }
-
-    try {
-      const content = fs.readFileSync(records.filePath, { encoding: 'utf-8' });
-      return JSON.parse(content);
-    } catch {
-      const fallbackRecords = getRecordsFromVscodeMenu();
-      // TODO 执行更新规则
-      records.update(fallbackRecords);
-      return fallbackRecords;
-    }
+  getContent<T extends keyof RecordsStorage>(key: T): RecordsStorage[T] {
+    return get(records.fillContent, key, get(records.getDefaultContent(), key));
   },
+
+  getAllContent: (): RecordsStorage => records.fillContent,
 
   setup: async () => {
     // 初始化 .records.cache.json
@@ -51,18 +78,22 @@ export const records = {
     // 3. 写入 .records.cache.json
 
     // 先同步写一个文件，防止初始化时其他搜索操作报错
-    records.update([], true);
+    records.replaceAll(
+      records.getDefaultContent({
+        records: getRecordsFromVscodeMenu(),
+      }),
+      true
+    );
 
     const initialRecords = await Promise.all([
       getRecordsFromSpecifiedDirectory(false),
       getRecordsFromVscodeDB(100), // 只取最近用的 100 条应该就够了
     ]);
 
-    const uniqRecords = uniqBy(initialRecords.flat(), record => record.path);
-
-    records.update(uniqRecords, true);
+    const uniqRecords = uniqBy(initialRecords.flat(), (record) => record.path);
+    records.update('records', uniqRecords, true);
   },
-}
+};
 
 interface UserConfig {
   hasInitial: boolean;
@@ -76,11 +107,7 @@ export const userConfig = {
     const nextConfig = merge(prevConfig ?? {}, content);
 
     try {
-      writeFile(
-        userConfig.filePath,
-        nextConfig,
-        true,
-      )
+      writeFile(userConfig.filePath, nextConfig, true);
 
       return { success: true, config: nextConfig };
     } catch {
@@ -90,7 +117,9 @@ export const userConfig = {
 
   getContent: (): UserConfig => {
     try {
-      const content = fs.readFileSync(userConfig.filePath, { encoding: 'utf-8' });
+      const content = fs.readFileSync(userConfig.filePath, {
+        encoding: 'utf-8',
+      });
       return JSON.parse(content);
     } catch {
       return null;
@@ -98,9 +127,13 @@ export const userConfig = {
   },
 
   setup: () => {
+    const userConf = userConfig.getContent();
+    if (userConf && userConf.hasInitial) {
+      return;
+    }
     records.setup();
     userConfig.update({
       hasInitial: true,
     });
   },
-}
+};

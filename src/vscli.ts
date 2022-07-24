@@ -1,3 +1,4 @@
+import './setup';
 import { workflow } from 'halfred-tools';
 
 workflow.output([

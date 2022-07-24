@@ -15,20 +15,19 @@ function parseEnv() {
 }
 
 function updateCacheFile(content: SearchListItem[]) {
-  fs.writeFile(
-    storageFilesPath.records,
-    JSON.stringify(content),
-    noop,
-  );
+  fs.writeFile(storageFilesPath.records, JSON.stringify(content), noop);
 }
 
 function getDirectoriesByPath(dirPath: string): SearchListItem[] {
   if (!fs.statSync(dirPath).isDirectory()) return [];
 
-  const result = fs.readdirSync(dirPath, { encoding: 'utf-8', withFileTypes: true });
+  const result = fs.readdirSync(dirPath, {
+    encoding: 'utf-8',
+    withFileTypes: true,
+  });
   return result
-    .filter(item => item.isDirectory())
-    .map(item => {
+    .filter((item) => item.isDirectory())
+    .map((item) => {
       const path = getVscodeMenuItemUriPath({
         scheme: 'file',
         path: `${dirPath}/${item.name}`,
@@ -37,7 +36,10 @@ function getDirectoriesByPath(dirPath: string): SearchListItem[] {
         name: item.name,
         path,
         icon: getIcon(path),
-      }
+        extra: {
+          from: 'getRecordsFromSpecifiedDirectory',
+        },
+      };
     });
 }
 

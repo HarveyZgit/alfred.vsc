@@ -1,19 +1,22 @@
+import './setup';
 import path from 'path';
 import { setup, workflow } from 'halfred-tools';
 import { fmtSearchList } from './common/utils';
-import { getRecordsFromVscodeMenu } from './records/getRecordsFromVscodeMenu';
 import { filterRecordBySearchKey } from './records/utils';
 import { vscliLogger, vscLogger } from './common/logger';
+import { userConfig } from './storage';
 
 setup({
-  logs: path.join(__dirname, './logs'),
+  logsDir: path.join(process.cwd(), './logs'),
 });
+
+userConfig.setup();
 
 async function main() {
   try {
-    const outputList = workflow.input
-      ? filterRecordBySearchKey(workflow.input)
-      : getRecordsFromVscodeMenu();
+    vscLogger.info(`workflow.input, ${workflow.input}`);
+
+    const outputList = filterRecordBySearchKey(workflow.input);
     const result = fmtSearchList(outputList);
 
     workflow.output(result);
