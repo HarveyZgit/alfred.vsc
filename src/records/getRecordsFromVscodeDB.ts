@@ -7,7 +7,7 @@ import { isNil } from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
 import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
 import { store } from '../common/store';
-import { getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, SearchListItem } from '../common/utils';
 
 export interface Recent {
   entries: Entry[];
@@ -26,7 +26,10 @@ export interface Workspace {
   configPath: string;
 }
 
-const gerProjectName = (inputPath: string) => inputPath.match(/.*\/(.*?)$/)?.[1] ?? inputPath;
+const gerProjectName = (input: string) => {
+  let inputPath = decodeURIComponent(input);
+  return inputPath.match(/.*\/(.*?)$/)?.[1] ?? inputPath;
+};
 
 async function createDB() {
   const sqlJS = await initSqlJs();
@@ -45,16 +48,16 @@ async function getDB() {
   return db;
 }
 
-export async function getRecordsFromVscodeDB(length?: number): Promise<SearchListItem[]> {
+export async function getRecordsFromVscodeDB(
+  length?: number
+): Promise<SearchListItem[]> {
   const db = await getDB();
 
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
   const results = db.exec(sql);
   const res = results[0].values.toString();
   if (!res) {
-    throw new Error(
-      '数据获取失败, 注意当前仅在 vscode 1.64 版本进行过测试'
-    );
+    throw new Error('数据获取失败, 注意当前仅在 vscode 1.64 版本进行过测试');
   }
   const data = JSON.parse(res) as Recent;
   let { entries } = data;
@@ -66,16 +69,20 @@ export async function getRecordsFromVscodeDB(length?: number): Promise<SearchLis
     if (typeof file === 'string') {
       file = { fileUri: file };
     }
-    const originPath = file.fileUri || file.folderUri || file.workspace?.configPath;
-    const path = decodeURIComponent(originPath ?? '')
+    const originPath =
+      file.fileUri || file.folderUri || file.workspace?.configPath;
+    const path = decodeURIComponent(originPath ?? '');
     const name = gerProjectName(path);
     const icon = getIcon(path);
 
     return {
+      __vsc_id__: genRecordId(path),
       name,
       path,
       icon,
+      extra: {
+        from: 'getRecordsFromVscodeDB',
+      },
     };
   });
 }
-

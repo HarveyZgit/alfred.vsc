@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export VSC_WORKFLOW_ID="1926E4D2-CCE6-4356-A444-5C827ACCBD9D"
+export VSC_WORKFLOW_ID="harvey.vsc.development"
 
 export ROOT_DIR=$(pwd)
 export BUILD_DIR="$ROOT_DIR/build"
@@ -12,7 +12,7 @@ injectEnv() {
   IFS=$'\n'
 
   for line in `cat $ROOT_DIR/$1`
-  do 
+  do
     if [[ ! $line =~ ^(\#+).* ]]
     then
       export $line

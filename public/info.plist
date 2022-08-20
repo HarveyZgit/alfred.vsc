@@ -19,8 +19,74 @@
 				<false/>
 			</dict>
 		</array>
-		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
+		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>2682452D-CE3B-4244-8F38-447B6050507B</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
 		<array/>
+		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8834DFC3-808C-4423-A9EC-8D7B94F61590</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>FB22746E-5A56-4316-999C-68D172F71639</key>
 		<array>
 			<dict>
@@ -73,8 +139,8 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>$VSC_CODE_BIN --folder-uri $1
-./node_modules/.bin/run-node lib/cli.js selected --record=$1</string>
+				<string>$VSC_CODE_BIN --folder-uri "$1"
+./node_modules/.bin/run-node lib/cli.js selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -117,7 +183,7 @@
 				<key>runningsubtext</key>
 				<string>searching...</string>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/vsc.js $1</string>
+				<string>./node_modules/.bin/run-node lib/vsc.js "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -146,7 +212,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/cli.js delete --record=$1</string>
+				<string>./node_modules/.bin/run-node lib/cli.js delete --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -169,8 +235,8 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>$VSC_CODE_INSIDERS_BIN --folder-uri $1
-./node_modules/.bin/run-node lib/cli.js selected --record=$1</string>
+				<string>$VSC_CODE_INSIDERS_BIN --folder-uri "$1"
+./node_modules/.bin/run-node lib/cli.js selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -188,51 +254,33 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>alfredfiltersresults</key>
-				<false/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
-				<true/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
-				<integer>2</integer>
-				<key>escaping</key>
-				<integer>102</integer>
+				<integer>1</integer>
+				<key>fixedorder</key>
+				<true/>
+				<key>items</key>
+				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"}]</string>
 				<key>keyword</key>
 				<string>vscli</string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<true/>
-				<key>queuedelaymode</key>
+				<key>matchmode</key>
 				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
 				<key>runningsubtext</key>
 				<string></string>
-				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/vscli.js $1</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
 				<key>subtext</key>
-				<string>Update available: 1.1.0 → 0.1.10. Run `npm install -g vsc`</string>
+				<string></string>
 				<key>title</key>
-				<string>Command for vsc</string>
-				<key>type</key>
-				<integer>0</integer>
+				<string></string>
 				<key>withspace</key>
-				<false/>
+				<true/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
+			<string>alfred.workflow.input.listfilter</string>
 			<key>uid</key>
 			<string>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</string>
 			<key>version</key>
-			<integer>3</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -242,8 +290,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>pwd
-./node_modules/.bin/run-node lib/cli.js rebuild</string>
+				<string>./node_modules/.bin/run-node lib/cli.js $1</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -258,6 +305,117 @@
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<true/>
+				<key>onlyshowifquerypopulated</key>
+				<true/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string></string>
+				<key>title</key>
+				<string>{var:notice_title}</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>passthroughargument</key>
+				<true/>
+				<key>variables</key>
+				<dict>
+					<key>notice_title</key>
+					<string>索引重建成功</string>
+					<key>notive_id</key>
+					<string>rebuild_index_success</string>
+				</dict>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>4</integer>
+						<key>matchstring</key>
+						<string>rebuild_index_success</string>
+						<key>outputlabel</key>
+						<string>索引重建成功</string>
+						<key>uid</key>
+						<string>2682452D-CE3B-4244-8F38-447B6050507B</string>
+					</dict>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>4</integer>
+						<key>matchstring</key>
+						<string>rebuild_index_fail</string>
+						<key>outputlabel</key>
+						<string>索引重建失败</string>
+						<key>uid</key>
+						<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>else</string>
+				<key>hideelse</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>8834DFC3-808C-4423-A9EC-8D7B94F61590</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>passthroughargument</key>
+				<true/>
+				<key>variables</key>
+				<dict>
+					<key>notice_id</key>
+					<string>rebuild_index_fail</string>
+					<key>notice_title</key>
+					<string>索引重建失败，请根据日志进行排查</string>
+				</dict>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -266,46 +424,76 @@
 		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
 		<dict>
 			<key>xpos</key>
-			<integer>345</integer>
+			<real>345</real>
 			<key>ypos</key>
-			<integer>515</integer>
+			<real>515</real>
 		</dict>
 		<key>1DB7B2E5-9BD3-4652-819B-293D4F03C795</key>
 		<dict>
 			<key>xpos</key>
-			<integer>615</integer>
+			<real>615</real>
 			<key>ypos</key>
-			<integer>30</integer>
+			<real>30</real>
 		</dict>
 		<key>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</key>
 		<dict>
 			<key>xpos</key>
-			<integer>615</integer>
+			<real>615</real>
 			<key>ypos</key>
-			<integer>170</integer>
+			<real>170</real>
+		</dict>
+		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
+		<dict>
+			<key>xpos</key>
+			<real>745</real>
+			<key>ypos</key>
+			<real>535</real>
+		</dict>
+		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
+		<dict>
+			<key>xpos</key>
+			<real>875</real>
+			<key>ypos</key>
+			<real>530</real>
+		</dict>
+		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
+		<dict>
+			<key>xpos</key>
+			<real>1090</real>
+			<key>ypos</key>
+			<real>520</real>
 		</dict>
 		<key>E31A4D5C-24E1-477A-9DFB-266646FADB99</key>
 		<dict>
 			<key>xpos</key>
-			<integer>620</integer>
+			<real>620</real>
 			<key>ypos</key>
-			<integer>325</integer>
+			<real>325</real>
+		</dict>
+		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
+		<dict>
+			<key>xpos</key>
+			<real>970</real>
+			<key>ypos</key>
+			<real>560</real>
 		</dict>
 		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
 		<dict>
 			<key>xpos</key>
-			<integer>615</integer>
+			<real>580</real>
 			<key>ypos</key>
-			<integer>515</integer>
+			<real>515</real>
 		</dict>
 		<key>FB22746E-5A56-4316-999C-68D172F71639</key>
 		<dict>
 			<key>xpos</key>
-			<integer>340</integer>
+			<real>340</real>
 			<key>ypos</key>
-			<integer>130</integer>
+			<real>130</real>
 		</dict>
 	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
 	<key>variables</key>
 	<dict>
 		<key>VSC_CODE_BIN</key>

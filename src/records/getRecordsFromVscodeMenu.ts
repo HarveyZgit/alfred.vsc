@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { find, get } from 'lodash';
 import { envNames, envs } from '../common/constant';
-import { getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, SearchListItem } from '../common/utils';
 
 interface BaseMenuItemUri {
   path: string;
@@ -18,11 +18,13 @@ interface RemoteMenuItemUri extends BaseMenuItemUri {
   authority: string;
 }
 
-export function getVscodeMenuItemUriPath(uri: FileMenuItemUri | RemoteMenuItemUri) {
+export function getVscodeMenuItemUriPath(
+  uri: FileMenuItemUri | RemoteMenuItemUri
+) {
   const { path, scheme, external } = uri;
   if (external) return external;
   if (scheme === 'file') return `${scheme}://${path}`;
-  if (scheme === 'vscode-remote') return `${scheme}://${encodeURIComponent(uri.authority)}${path}`;
+  if (scheme === 'vscode-remote') return `${scheme}://${uri.authority}${path}`;
   return '';
 }
 
@@ -37,7 +39,7 @@ interface MenuItem {
   name: string;
   submenu?: {
     items: MenuItem[];
-  }
+  };
 }
 
 function isVscodeRecentOpenMenu(item: MenuItem) {
@@ -52,24 +54,36 @@ function isVscodeRecentOpenMenu(item: MenuItem) {
   return false;
 }
 
-export function getRecordsFromVscodeMenu() {
+export function getRecordsFromVscodeMenu(): SearchListItem[] {
   try {
     const content = fs.readFileSync(
       `${envs.get(envNames.globalStoragePath)}/storage.json`,
       { encoding: 'utf-8' }
     );
     const config = JSON.parse(content);
-    const fileMenusItems = get(config, 'lastKnownMenubarData.menus.File.items', []);
+    const fileMenusItems = get(
+      config,
+      'lastKnownMenubarData.menus.File.items',
+      []
+    );
     const recentFolderConfig = find(fileMenusItems, isVscodeRecentOpenMenu);
-    const recentFolderList = get(recentFolderConfig, 'submenu.items', []) as any[];
+    const recentFolderList = get(
+      recentFolderConfig,
+      'submenu.items',
+      []
+    ) as any[];
     const openRecentFolderList = recentFolderList
-      .filter(item => item.id === 'openRecentFolder' && item.uri)
-      .map(item => {
+      .filter((item) => item.id === 'openRecentFolder' && item.uri)
+      .map((item) => {
         const path = getVscodeMenuItemUriPath(item.uri);
         return {
+          __vsc_id__: genRecordId(path),
           name: getFallbackName(path),
           path,
           icon: getIcon(path),
+          extra: {
+            from: 'getRecordsFromVscodeMenu',
+          },
         } as SearchListItem;
       });
     return openRecentFolderList;
