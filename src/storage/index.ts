@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { get, isFunction, merge, noop, set, uniqBy } from 'lodash';
+import { get, isFunction, keys, merge, noop, set, uniqBy } from 'lodash';
 import { storageFilesPath } from '../common/paths';
 import { SearchListItem } from '../common/utils';
 import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpecifiedDirectory';
@@ -84,28 +84,49 @@ export const records = {
 
   getAllContent: (): RecordsStorage => records.fillContent,
 
-  setup: async () => {
+  /** 确保有一个缓存文件 */
+  ensureHasCacheFile: () => {
+    try {
+      readFile(records.filePath, true);
+    } catch {
+      // 同步写一个文件，防止初始化时其他搜索操作报错
+      records.replaceAll(
+        records.getDefaultContent({
+          records: getRecordsFromVscodeMenu(),
+          trash: {},
+        }),
+        true
+      );
+    }
+  },
+
+  setup: async (dropAll?: boolean) => {
     // 初始化 .records.cache.json
     // 1-1. 从 vscode db 中获取记录
     // 1-2. 从用户指定目录获取记录
     // 2. 合并二者的目录，去重
     // 3. 写入 .records.cache.json
 
-    // 先同步写一个文件，防止初始化时其他搜索操作报错
-    records.replaceAll(
-      records.getDefaultContent({
-        records: getRecordsFromVscodeMenu(),
-        trash: {},
-      }),
-      true
-    );
+    records.ensureHasCacheFile();
 
     const initialRecords = await Promise.all([
       getRecordsFromSpecifiedDirectory(false),
       getRecordsFromVscodeDB(100), // 只取最近用的 100 条应该就够了
     ]);
 
-    const uniqRecords = uniqBy(initialRecords.flat(), (record) => record.path);
+    let uniqRecords = uniqBy(initialRecords.flat(), (record) => record.path);
+
+    if (dropAll) {
+      records.update('trash', {}, true);
+    } else {
+      const prevTrash = records.getContent('trash') ?? {};
+      const prevTrashIds = keys(prevTrash);
+
+      uniqRecords = uniqRecords.filter(
+        (item) => !prevTrashIds.includes(item.__vsc_id__)
+      );
+    }
+
     records.update('records', uniqRecords, true);
   },
 };

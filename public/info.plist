@@ -259,9 +259,9 @@
 				<key>argumenttype</key>
 				<integer>1</integer>
 				<key>fixedorder</key>
-				<false/>
+				<true/>
 				<key>items</key>
-				<string>[{"title":"rebuild-index","arg":"rebuild","subtitle":"重建索引"}]</string>
+				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"}]</string>
 				<key>keyword</key>
 				<string>vscli</string>
 				<key>matchmode</key>
@@ -290,7 +290,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/cli.js "$1"</string>
+				<string>./node_modules/.bin/run-node lib/cli.js $1</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
