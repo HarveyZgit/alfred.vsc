@@ -24,8 +24,8 @@ export const defaultEnvs: Record<string, any> = {
   },
   get [envNames.databasePath]() {
     return `${defaultEnvs[envNames.globalStoragePath]}/state.vscdb`;
-  }
-}
+  },
+};
 
 export type EnvKeys = string;
 
@@ -55,4 +55,14 @@ export const envs = {
     const { env } = process;
     return has(env, key);
   },
-}
+};
+
+/** 用于 console 输出，并将结果传递给 alfred */
+export const vscliResult = {
+  rebuildIndex: {
+    success: 'rebuild_index_success',
+    fail: 'rebuild_index_fail',
+  },
+};
+
+export const passResultToAlfred = console.log;

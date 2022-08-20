@@ -1,8 +1,9 @@
 import fs from 'fs';
+import os from 'os';
 import { noop } from 'lodash';
 import { envNames, envs } from '../common/constant';
 import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
-import { getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, SearchListItem } from '../common/utils';
 import { storageFilesPath } from '../common/paths';
 
 function parseEnv() {
@@ -15,29 +16,35 @@ function parseEnv() {
 }
 
 function updateCacheFile(content: SearchListItem[]) {
-  fs.writeFile(
-    storageFilesPath.records,
-    JSON.stringify(content),
-    noop,
-  );
+  fs.writeFile(storageFilesPath.records, JSON.stringify(content), noop);
 }
 
 function getDirectoriesByPath(dirPath: string): SearchListItem[] {
+  if (dirPath.startsWith('~')) {
+    dirPath = dirPath.replace('~', os.homedir());
+  }
   if (!fs.statSync(dirPath).isDirectory()) return [];
 
-  const result = fs.readdirSync(dirPath, { encoding: 'utf-8', withFileTypes: true });
+  const result = fs.readdirSync(dirPath, {
+    encoding: 'utf-8',
+    withFileTypes: true,
+  });
   return result
-    .filter(item => item.isDirectory())
-    .map(item => {
+    .filter((item) => item.isDirectory())
+    .map((item) => {
       const path = getVscodeMenuItemUriPath({
         scheme: 'file',
         path: `${dirPath}/${item.name}`,
       });
       return {
+        __vsc_id__: genRecordId(path),
         name: item.name,
         path,
         icon: getIcon(path),
-      }
+        extra: {
+          from: 'getRecordsFromSpecifiedDirectory',
+        },
+      };
     });
 }
 

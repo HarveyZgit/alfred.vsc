@@ -1,18 +1,34 @@
-import alfy from 'alfy';
+import './setup';
+import path from 'path';
+import { setup, workflow } from 'halfred-tools';
 import { fmtSearchList } from './common/utils';
-import { getRecordsFromVscodeMenu } from './records/getRecordsFromVscodeMenu';
 import { filterRecordBySearchKey } from './records/utils';
+import { vscliLogger, vscLogger } from './common/logger';
+import { userConfig } from './storage';
+
+setup({
+  logsDir: path.join(process.cwd(), './logs'),
+});
+
+userConfig.setup();
 
 async function main() {
   try {
-    const outputList = alfy.input
-      ? filterRecordBySearchKey(alfy.input)
-      : getRecordsFromVscodeMenu();
+    vscLogger.info(`workflow.input, ${workflow.input}`);
+
+    const outputList = filterRecordBySearchKey(workflow.input);
     const result = fmtSearchList(outputList);
 
-    alfy.output(result);
-  } catch(err) {
-    alfy.log(err);
+    workflow.output(result);
+  } catch (err) {
+    vscliLogger.error(err);
+    workflow.output([
+      {
+        title: 'Some Error',
+        subtitle: `See log ${vscLogger.logFile}`,
+        arg: '',
+      },
+    ]);
   }
 }
 
