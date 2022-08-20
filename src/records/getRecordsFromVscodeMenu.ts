@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { find, get } from 'lodash';
 import { envNames, envs } from '../common/constant';
-import { getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, SearchListItem } from '../common/utils';
 
 interface BaseMenuItemUri {
   path: string;
@@ -54,7 +54,7 @@ function isVscodeRecentOpenMenu(item: MenuItem) {
   return false;
 }
 
-export function getRecordsFromVscodeMenu() {
+export function getRecordsFromVscodeMenu(): SearchListItem[] {
   try {
     const content = fs.readFileSync(
       `${envs.get(envNames.globalStoragePath)}/storage.json`,
@@ -77,6 +77,7 @@ export function getRecordsFromVscodeMenu() {
       .map((item) => {
         const path = getVscodeMenuItemUriPath(item.uri);
         return {
+          __vsc_id__: genRecordId(path),
           name: getFallbackName(path),
           path,
           icon: getIcon(path),

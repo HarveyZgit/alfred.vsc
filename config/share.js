@@ -19,6 +19,7 @@ export const external = [
   'os',
   'path',
   'commander',
+  'crypto',
 ];
 
 export function input(entry) {

@@ -3,7 +3,7 @@ import os from 'os';
 import { noop } from 'lodash';
 import { envNames, envs } from '../common/constant';
 import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
-import { getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, SearchListItem } from '../common/utils';
 import { storageFilesPath } from '../common/paths';
 
 function parseEnv() {
@@ -37,6 +37,7 @@ function getDirectoriesByPath(dirPath: string): SearchListItem[] {
         path: `${dirPath}/${item.name}`,
       });
       return {
+        __vsc_id__: genRecordId(path),
         name: item.name,
         path,
         icon: getIcon(path),

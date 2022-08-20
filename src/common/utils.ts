@@ -1,6 +1,7 @@
 import { Workflow } from 'halfred-tools';
 import fs from 'fs';
 import { vscLogger } from './logger';
+import crypto from 'crypto';
 
 function isDirectory(input: string) {
   if (fs.existsSync(input)) {
@@ -27,6 +28,7 @@ export function getIcon(inputPath: string): Workflow.Icon {
 }
 
 export interface SearchListItem {
+  __vsc_id__: string;
   name: string;
   path: string;
   icon: Workflow.Icon;
@@ -43,4 +45,8 @@ export function fmtSearchList(list: SearchListItem[]) {
     arg: item.path,
     icon: item.icon,
   }));
+}
+
+export function genRecordId(str: string) {
+  return crypto.createHash('md5').update(str).digest('hex');
 }
