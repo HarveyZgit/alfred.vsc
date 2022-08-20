@@ -4,8 +4,7 @@
 
 ### vsc
 
-- 🎉 新增 completely rebuild index，在 rebuild index 时会忽略所有缓存记录
-- 🍀 vsc: 保存删除的记录
+- 🎉 vsc: 保存删除的记录
 
 ### vscli
 
