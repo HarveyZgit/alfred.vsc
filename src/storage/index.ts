@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { get, merge, noop, set, uniqBy } from 'lodash';
+import { get, isFunction, merge, noop, set, uniqBy } from 'lodash';
 import { storageFilesPath } from '../common/paths';
 import { SearchListItem } from '../common/utils';
 import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpecifiedDirectory';
@@ -8,7 +8,13 @@ import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
 
 export interface RecordsStorage {
   records: SearchListItem[];
+  trash: Record<string, SearchListItem>;
 }
+
+const getRecordsStorageDefaultValue: () => RecordsStorage = () => ({
+  records: [],
+  trash: {},
+});
 
 function readFile<T>(path: string, parse: true, defaultValue?: T): T;
 function readFile<T>(path: string, parse: false, defaultValue?: T): string;
@@ -43,12 +49,14 @@ export const records = {
   },
 
   getDefaultContent(custom?: RecordsStorage): RecordsStorage {
-    return merge({ records: [] }, custom);
+    return merge(getRecordsStorageDefaultValue(), custom);
   },
 
   update<T extends keyof RecordsStorage>(
     key: T,
-    content: RecordsStorage[T],
+    content:
+      | RecordsStorage[T]
+      | ((prevContent: RecordsStorage[T]) => RecordsStorage[T]),
     sync = false
   ) {
     const prevContent = readFile<RecordsStorage>(
@@ -56,7 +64,13 @@ export const records = {
       true,
       records.getDefaultContent()
     );
-    const nextContent = set(prevContent, key, content);
+
+    const inputContent = isFunction(content)
+      ? content(
+          get(prevContent, key, get(getRecordsStorageDefaultValue(), key))
+        )
+      : content;
+    const nextContent = set(prevContent, key, inputContent);
     writeFile(records.filePath, nextContent, sync);
   },
 
@@ -81,6 +95,7 @@ export const records = {
     records.replaceAll(
       records.getDefaultContent({
         records: getRecordsFromVscodeMenu(),
+        trash: {},
       }),
       true
     );

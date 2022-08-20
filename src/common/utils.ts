@@ -48,5 +48,11 @@ export function fmtSearchList(list: SearchListItem[]) {
 }
 
 export function genRecordId(str: string) {
+  if (isRecordId(str)) return str;
   return crypto.createHash('md5').update(str).digest('hex');
+}
+
+export function isRecordId(str: string) {
+  // 用是否存在 path 标识来判断是否为 record id
+  return str.indexOf('://') < 0;
 }

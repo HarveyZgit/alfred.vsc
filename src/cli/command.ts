@@ -1,6 +1,6 @@
 import '../setup';
 import { Command } from 'commander';
-import { uniqBy } from 'lodash';
+import { set, uniqBy } from 'lodash';
 import pkg from '../../package.json';
 import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
@@ -46,12 +46,21 @@ program
   .description('Delete one item in records.')
   .option('--record <filePath>', 'record file path')
   .action((params) => {
-    const { record } = params;
-    const [item, allRecords] = findRecordByPath(record || '');
-    if (!record || !item) return;
+    const { record: recordPath } = params;
+    const [deleteTarget, allRecords] = findRecordByPath(recordPath || '');
+    if (!recordPath || !deleteTarget) return;
+
+    // update trash
+    records.update(
+      'trash',
+      (prevContent) => set(prevContent, deleteTarget.__vsc_id__, deleteTarget),
+      true
+    );
+
+    // update records
     records.update(
       'records',
-      allRecords.filter((item) => item.path !== record)
+      allRecords.filter((item) => item.__vsc_id__ !== deleteTarget.__vsc_id__)
     );
   });
 
