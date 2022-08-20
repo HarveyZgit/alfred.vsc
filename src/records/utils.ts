@@ -1,16 +1,19 @@
 import { SearchListItem } from '../common/utils';
+import { filterRecords } from '../filter';
+import { InputInfo } from '../input';
 import { records } from '../storage';
 import { getRecordsFromVscodeMenu } from './getRecordsFromVscodeMenu';
 
-export function filterRecordBySearchKey(searchKey: string) {
+export function filterRecordBySearchKey(inputInfo: InputInfo) {
+  const { original: originalSearchKey } = inputInfo;
   const originalRecords = records.getContent('records');
 
   const recordsList = originalRecords.length
     ? originalRecords
     : getRecordsFromVscodeMenu();
 
-  return searchKey
-    ? recordsList.filter((item) => new RegExp(searchKey, 'i').test(item.name))
+  return originalSearchKey
+    ? filterRecords(inputInfo)(recordsList)
     : recordsList;
 }
 
