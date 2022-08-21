@@ -1,32 +1,12 @@
 #!/bin/bash
 
-export VSC_WORKFLOW_ID="harvey.vsc.development"
+WORKFLOW_ID="harvey.vsc.development"
 
-export ROOT_DIR=$(pwd)
-export BUILD_DIR="$ROOT_DIR/build"
-
-injectEnv() {
-  OLD_IFS=$IFS
-
-  # 使用换行符作为 for...in... 的空白符
-  IFS=$'\n'
-
-  for line in `cat $ROOT_DIR/$1`
-  do
-    if [[ ! $line =~ ^(\#+).* ]]
-    then
-      export $line
-    fi
-  done
-
-  IFS=$OLD_IFS
-}
-
-if [ ! -f "$ROOT_DIR/.release.env" ]; then
-  echo "Can not find .release.env, use default config"
-else
-  injectEnv .release.env
+if [ "$VSC_RELEASE_MODE" = "1" ]; then
+  WORKFLOW_ID="harvey.vsc.production"
 fi
 
-export VSC_WORLFLOW_DIR="/Alfred/Alfred.alfredpreferences/workflows/user.workflow.$VSC_WORKFLOW_ID"
-
+export VSC_WORKFLOW_ID=$WORKFLOW_ID
+export VSC_WORLFLOW_DIR="/Alfred/Alfred.alfredpreferences/workflows/user.workflow.$WORKFLOW_ID"
+export ROOT_DIR=$(pwd)
+export BUILD_DIR="$ROOT_DIR/build"

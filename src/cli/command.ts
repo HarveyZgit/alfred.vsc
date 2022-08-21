@@ -25,7 +25,7 @@ program
       passResultToAlfred(vscliResult.rebuildIndex.success);
     } catch (error) {
       passResultToAlfred(vscliResult.rebuildIndex.fail);
-      vscLogger.error(error);
+      vscLogger.error('rebuild index error', { error });
     }
   });
 

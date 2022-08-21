@@ -4,7 +4,7 @@
 
 import { readFileSync } from 'fs';
 import { isNil } from 'lodash';
-import initSqlJs, { Database } from 'sql.js';
+import initSqlJs from 'sqljs';
 import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
 import { store } from '../common/store';
 import { genRecordId, getIcon, SearchListItem } from '../common/utils';
@@ -41,7 +41,7 @@ async function createDB() {
 }
 
 async function getDB() {
-  const cachedDB = store.get<Database>(__VSC_DB_CACHE__);
+  const cachedDB = store.get(__VSC_DB_CACHE__);
   if (cachedDB) return cachedDB;
 
   const db = await createDB();

@@ -1,21 +1,12 @@
-import copy from 'rollup-plugin-copy';
+import { defineConfig } from 'rollup';
 import { external, input, plugins } from './share';
 
-export default {
+export default defineConfig({
   input: input('src/vsc.ts'),
   output: {
     file: 'build/lib/vsc.js',
     format: 'cjs',
   },
-  plugins: [
-    ...plugins,
-    copy({
-      targets: [
-        { src: 'public/*', dest: 'build' },
-        { src: 'assets', dest: 'build' },
-        { src: ['package.json', 'pnpm-lock.yaml'], dest: 'build' },
-      ],
-    }),
-  ],
+  plugins,
   external,
-};
+});

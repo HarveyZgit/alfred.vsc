@@ -20,8 +20,8 @@ async function main() {
     const result = fmtSearchList(outputList);
 
     workflow.output(result);
-  } catch (err) {
-    vscLogger.error(err);
+  } catch (error) {
+    vscLogger.error('search result error', { error });
     workflow.output([
       {
         title: 'Some Error',
