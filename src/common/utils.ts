@@ -2,14 +2,7 @@ import { Workflow } from 'halfred-tools';
 import fs from 'fs';
 import { vscLogger } from './logger';
 import crypto from 'crypto';
-import {
-  entries,
-  isArray,
-  isNumber,
-  isObject,
-  isRegExp,
-  isString,
-} from 'lodash';
+import { entries, isArray, isObject, isRegExp } from 'lodash';
 
 export function isFolderPath(path: string, removeScheme: boolean = false) {
   if (removeScheme) {

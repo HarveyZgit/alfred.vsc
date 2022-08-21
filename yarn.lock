@@ -234,6 +234,11 @@ conf@^10.1.2:
     pkg-up "^3.1.0"
     semver "^7.3.5"
 
+core-decorators@^0.20.0:
+  version "0.20.0"
+  resolved "https://registry.npmmirror.com/core-decorators/-/core-decorators-0.20.0.tgz#605896624053af8c28efbe735c25a301a61c65c5"
+  integrity sha512-7cp/Pz3AmQXjRwhAsFN+8ndRiBNyLxtZgC/fhKvrwQTf2ZlZma6LnimoJPrOqgxZ0tIeI9VvSs+QKe0OPJ0SuA==
+
 create-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.npmmirror.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
@@ -418,12 +423,13 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   resolved "https://registry.npmmirror.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
 
-halfred-tools@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmmirror.com/halfred-tools/-/halfred-tools-1.1.0.tgz#1d85dee2633e70158f8a060b473cbc6c009a240f"
-  integrity sha512-HJeX8pMS4urhtyTVD1sD+pYU6oNZZG5xyPk6EhIRVcptKU9eNlxOXBnIqhs3dWQdv5HGL01cP86xogBcBl6qsw==
+halfred-tools@^1.2.0-beta.2:
+  version "1.2.0-beta.2"
+  resolved "https://registry.npmmirror.com/halfred-tools/-/halfred-tools-1.2.0-beta.2.tgz#33d888fc155e06feab708fbcf35bff13b361cf56"
+  integrity sha512-n909eV0m3xeqjjg54KF0YZdvBlPMsqsVHY0EtXnNtKOcNPI3fqNuyTPv4BX6DiX2NUbRdAR3D26F0rhNyMSEmA==
   dependencies:
     conf "^10.1.2"
+    core-decorators "^0.20.0"
     dayjs "^1.11.4"
     lodash "^4.17.21"
 

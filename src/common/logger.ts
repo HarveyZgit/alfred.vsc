@@ -1,5 +1,5 @@
-import { Logger } from 'halfred-tools';
+import { GCLogger } from 'halfred-tools';
 
-export const vscLogger = new Logger('vsc');
+export const vscLogger = new GCLogger('vsc');
 
-export const vscliLogger = new Logger('vscli');
+export const vscliLogger = new GCLogger('vscli');
