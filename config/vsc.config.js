@@ -5,7 +5,7 @@ export default {
   input: input('src/vsc.ts'),
   output: {
     file: 'build/lib/vsc.js',
-    format: 'cjs'
+    format: 'cjs',
   },
   plugins: [
     ...plugins,
@@ -13,9 +13,9 @@ export default {
       targets: [
         { src: 'public/*', dest: 'build' },
         { src: 'assets', dest: 'build' },
-        { src: ['package.json', 'yarn.lock'], dest: 'build' },
-      ]
+        { src: ['package.json', 'pnpm-lock.yaml'], dest: 'build' },
+      ],
     }),
   ],
-  external
+  external,
 };

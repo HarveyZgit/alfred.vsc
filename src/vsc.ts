@@ -1,17 +1,9 @@
 import './setup';
-import path from 'path';
-import { setup, workflow } from 'halfred-tools';
+import { workflow } from 'halfred-tools';
 import { fmtInput4JsonStringify, fmtSearchList } from './common/utils';
 import { filterRecordBySearchKey } from './records/utils';
 import { vscliLogger, vscLogger } from './common/logger';
-import { userConfig } from './storage';
 import { inputParser } from './input';
-
-setup({
-  logsDir: path.join(process.cwd(), './logs'),
-});
-
-userConfig.setup();
 
 async function main() {
   try {

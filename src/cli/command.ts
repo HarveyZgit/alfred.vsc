@@ -5,7 +5,7 @@ import pkg from '../../package.json';
 import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
 import { records } from '../storage';
-import { vscliLogger } from '../common/logger';
+import { vscliLogger, vscLogger } from '../common/logger';
 import { passResultToAlfred, vscliResult } from '../common/constant';
 
 const program = new Command();
@@ -41,6 +41,10 @@ program
       'records',
       uniqBy([item, ...allRecords], (record: SearchListItem) => record.path)
     );
+
+    vscLogger.info(`select item ${item.__vsc_id__}`, {
+      target: item,
+    });
   });
 
 program
@@ -64,6 +68,10 @@ program
       'records',
       allRecords.filter((item) => item.__vsc_id__ !== deleteTarget.__vsc_id__)
     );
+
+    vscLogger.info(`delete item ${deleteTarget.__vsc_id__}`, {
+      target: deleteTarget,
+    });
   });
 
 program.parse();

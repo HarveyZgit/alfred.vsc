@@ -7,7 +7,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "t",
         "${file}"
