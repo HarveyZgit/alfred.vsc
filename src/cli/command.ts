@@ -5,7 +5,7 @@ import pkg from '../../package.json';
 import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
 import { records } from '../storage';
-import { vscliLogger, vscLogger } from '../common/logger';
+import { vscLogger } from '../common/logger';
 import { passResultToAlfred, vscliResult } from '../common/constant';
 
 const program = new Command();
@@ -17,15 +17,15 @@ program
   .description('Rebuild records index')
   .option('--drop-all', 'rebuild index without save trash records')
   .action(async ({ dropAll }) => {
-    vscliLogger.info('Start Rebuilding Index.');
-    vscliLogger.info(`Rebuild Mode: ${dropAll ? 'drop all' : 'save trash'}`);
+    vscLogger.info('Start Rebuilding Index.');
+    vscLogger.info(`Rebuild Mode: ${dropAll ? 'drop all' : 'save trash'}`);
     try {
       await records.setup(dropAll);
-      vscliLogger.info('Update Records Success!');
+      vscLogger.info('Update Records Success!');
       passResultToAlfred(vscliResult.rebuildIndex.success);
     } catch (error) {
       passResultToAlfred(vscliResult.rebuildIndex.fail);
-      vscliLogger.error(error);
+      vscLogger.error(error);
     }
   });
 

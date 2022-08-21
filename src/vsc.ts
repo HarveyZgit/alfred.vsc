@@ -2,7 +2,7 @@ import './setup';
 import { workflow } from 'halfred-tools';
 import { fmtInput4JsonStringify, fmtSearchList } from './common/utils';
 import { filterRecordBySearchKey } from './records/utils';
-import { vscliLogger, vscLogger } from './common/logger';
+import { vscLogger } from './common/logger';
 import { inputParser } from './input';
 
 async function main() {
@@ -21,7 +21,7 @@ async function main() {
 
     workflow.output(result);
   } catch (err) {
-    vscliLogger.error(err);
+    vscLogger.error(err);
     workflow.output([
       {
         title: 'Some Error',
