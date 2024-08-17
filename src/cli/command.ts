@@ -67,19 +67,19 @@ program
   });
 
 program
-  .command('ignore')
+  .command('ignore <pattern>')
   .description('Ignore some files or folders by pattern')
-  .option('-p, --pattern <pattern>', 'the pattern to filter files and folders')
   .option(
     '-t, --ignoreByType',
     "the pattern will used to filter by record's type"
   )
-  .action((params) => {
+  .action((pattern, { ignoreByType } = {}) => {
     try {
-      const { pattern, ignoreByType } = params;
       vscliLogger.info(
-        '[cli::ignore] start to exec ignore, ' + JSON.stringify(params)
+        '[cli::ignore] start to exec ignore, ' +
+          JSON.stringify({ pattern, ignoreByType })
       );
+
       if (!pattern) return;
 
       const allIgnorePatterns = records.getContent('ignorePatterns');
@@ -94,7 +94,10 @@ program
           : [pattern];
       }
 
-      vscliLogger.info('[cli::ignore] start to save ignorePatterns');
+      vscliLogger.info(
+        '[cli::ignore] start to save ignorePatterns' +
+          JSON.stringify(allIgnorePatterns)
+      );
 
       // save pattern
       records.update('ignorePatterns', allIgnorePatterns, true);
