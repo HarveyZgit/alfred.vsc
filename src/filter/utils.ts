@@ -1,11 +1,11 @@
 import { get } from 'lodash';
-import { SearchListItem } from '../common/utils';
 import { InputInfo } from '../input';
+import { RecordItem } from '../typings/records';
 
 export namespace Condition {
   export type Checker = (Target: InputInfo) => Runner;
 
-  export type Runner = (record: SearchListItem) => boolean;
+  export type Runner = (record: RecordItem) => boolean;
 }
 
 export const isDefaultCondition = (..._args: any[]) => true;
