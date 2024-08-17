@@ -16,6 +16,7 @@ import {
 } from '../common/utils';
 import { RecordItem } from '../typings/records';
 import { generateFolderGitInfo } from '../storage/gitInfo';
+import { filterByIgnorePatterns } from './utils';
 
 export interface Recent {
   entries: Entry[];
@@ -73,7 +74,7 @@ export async function getRecordsFromVscodeDB(
     entries = entries.slice(0, length);
   }
 
-  return entries.map((file) => {
+  const list = entries.map((file) => {
     if (typeof file === 'string') {
       file = { fileUri: file };
     }
@@ -99,4 +100,6 @@ export async function getRecordsFromVscodeDB(
       },
     };
   });
+
+  return filterByIgnorePatterns(list).records;
 }

@@ -1,8 +1,8 @@
 import '../setup';
 import { Command } from 'commander';
-import { set, uniqBy } from 'lodash';
+import { set, uniq, uniqBy } from 'lodash';
 import pkg from '../../package.json';
-import { findRecordByPath } from '../records/utils';
+import { filterByIgnorePatterns, findRecordByPath } from '../records/utils';
 import { records } from '../storage';
 import { vscliLogger } from '../common/logger';
 import { passResultToAlfred, vscliResult } from '../common/constant';
@@ -64,6 +64,50 @@ program
       'records',
       allRecords.filter((item) => item.__vsc_id__ !== deleteTarget.__vsc_id__)
     );
+  });
+
+program
+  .command('ignore')
+  .description('Ignore some files or folders by pattern')
+  .option('-p, --pattern <pattern>', 'the pattern to filter files and folders')
+  .option(
+    '-t, --ignoreByType',
+    "the pattern will used to filter by record's type"
+  )
+  .action((params) => {
+    const { pattern, ignoreByType } = params;
+    if (!pattern) return;
+
+    const allRecords = records.getContent('records');
+    if (!allRecords || !allRecords.length) return;
+
+    const allIgnorePatterns = records.getContent('ignorePatterns');
+
+    if (ignoreByType) {
+      allIgnorePatterns.type = allIgnorePatterns.type
+        ? uniq([...allIgnorePatterns.type, pattern])
+        : [pattern];
+    } else {
+      allIgnorePatterns.path = allIgnorePatterns.path
+        ? uniq([...allIgnorePatterns.path, pattern])
+        : [pattern];
+    }
+
+    // save pattern
+    records.update('ignorePatterns', allIgnorePatterns, true);
+
+    const { records: nextRecords, needDeleteRecords } =
+      filterByIgnorePatterns(allRecords);
+
+    // update trash
+    records.update(
+      'trash',
+      (prevContent) => ({ ...prevContent, ...needDeleteRecords }),
+      true
+    );
+
+    // update records
+    records.update('records', nextRecords);
   });
 
 program.parse();

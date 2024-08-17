@@ -12,11 +12,19 @@ import { vscLogger } from '../common/logger';
 export interface RecordsStorage {
   records: RecordItem[];
   trash: Record<string, RecordItem>;
+  ignorePatterns: {
+    path: string[];
+    type: string[];
+  };
 }
 
 const getRecordsStorageDefaultValue: () => RecordsStorage = () => ({
   records: [],
   trash: {},
+  ignorePatterns: {
+    path: [],
+    type: [],
+  },
 });
 
 function readFile<T>(path: string, parse: true, defaultValue?: T): T;
@@ -97,6 +105,10 @@ export const records = {
         records.getDefaultContent({
           records: getRecordsFromVscodeMenu(),
           trash: {},
+          ignorePatterns: {
+            path: [],
+            type: [],
+          },
         }),
         true
       );

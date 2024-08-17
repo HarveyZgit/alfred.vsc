@@ -7,6 +7,7 @@ import { genRecordId, getIcon, getRecordType } from '../common/utils';
 import { storageFilesPath } from '../common/paths';
 import { RecordItem } from '../typings/records';
 import { generateFolderGitInfo } from '../storage/gitInfo';
+import { filterByIgnorePatterns } from './utils';
 
 function parseEnv() {
   const paths = envs.get(envNames.watchDirectories) as string;
@@ -31,7 +32,7 @@ function getDirectoriesByPath(dirPath: string): RecordItem[] {
     encoding: 'utf-8',
     withFileTypes: true,
   });
-  return result
+  const list = result
     .filter((item) => item.isDirectory())
     .map((item) => {
       const pathWithoutProtocol = `${dirPath}/${item.name}`;
@@ -54,6 +55,8 @@ function getDirectoriesByPath(dirPath: string): RecordItem[] {
         },
       };
     });
+
+  return filterByIgnorePatterns(list).records;
 }
 
 export function getRecordsFromSpecifiedDirectory(writeFile = true) {

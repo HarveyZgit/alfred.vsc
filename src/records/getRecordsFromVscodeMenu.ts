@@ -4,6 +4,7 @@ import { envNames, envs } from '../common/constant';
 import { genRecordId, getIcon, getRecordType } from '../common/utils';
 import { RecordItem } from '../typings/records';
 import { generateFolderGitInfo } from '../storage/gitInfo';
+import { filterByIgnorePatterns } from './utils';
 
 interface BaseMenuItemUri {
   path: string;
@@ -91,7 +92,8 @@ export function getRecordsFromVscodeMenu(): RecordItem[] {
           },
         } as RecordItem;
       });
-    return openRecentFolderList;
+
+    return filterByIgnorePatterns(openRecentFolderList).records;
   } catch {
     return [];
   }
