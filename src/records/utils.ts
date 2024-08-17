@@ -39,8 +39,8 @@ export function filterByIgnorePatterns(recordList: RecordItem[]): {
     type: [],
   };
 
-  const ignoreTypeRegexps = pathPatterns.map((pattern) => new RegExp(pattern));
-  const ignorePathRegexps = typePatterns.map((pattern) => new RegExp(pattern));
+  const ignoreTypeRegexps = typePatterns.map((pattern) => new RegExp(pattern, 'g'));
+  const ignorePathRegexps = pathPatterns.map((pattern) => new RegExp(pattern, 'g'));
 
   const nextRecords: RecordItem[] = [];
   const needDeleteRecords: RecordsStorage['trash'] = {};
