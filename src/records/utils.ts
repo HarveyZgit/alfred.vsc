@@ -16,6 +16,8 @@ export function filterRecordBySearchKey(inputInfo: InputInfo) {
     ? filterRecords(inputInfo)(recordsList)
     : recordsList;
 
+  records.brushRecords(list);
+
   return list;
 }
 
