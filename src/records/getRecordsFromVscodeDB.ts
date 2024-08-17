@@ -4,10 +4,12 @@
 
 import { readFileSync } from 'fs';
 import { isNil } from 'lodash';
+// @ts-ignore
 import initSqlJs, { Database } from 'sql.js';
 import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
 import { store } from '../common/store';
-import { genRecordId, getIcon, SearchListItem } from '../common/utils';
+import { genRecordId, getIcon, getRecordType } from '../common/utils';
+import { RecordItem } from '../typings/records';
 
 export interface Recent {
   entries: Entry[];
@@ -50,7 +52,7 @@ async function getDB() {
 
 export async function getRecordsFromVscodeDB(
   length?: number
-): Promise<SearchListItem[]> {
+): Promise<RecordItem[]> {
   const db = await getDB();
 
   const sql = `select value from ItemTable where key = 'history.recentlyOpenedPathsList'`;
@@ -73,11 +75,13 @@ export async function getRecordsFromVscodeDB(
       file.fileUri || file.folderUri || file.workspace?.configPath;
     const path = decodeURIComponent(originPath ?? '');
     const name = gerProjectName(path);
+    const type = getRecordType(path);
     const icon = getIcon(path);
 
     return {
       __vsc_id__: genRecordId(path),
       name,
+      type,
       path,
       icon,
       extra: {
