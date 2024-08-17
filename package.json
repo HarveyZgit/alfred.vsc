@@ -15,7 +15,7 @@
     "t": "node --loader ts-node/esm",
     "build": "rm -rf build && node ./scripts/build.js",
     "updateWorkflow": "sh ./scripts/updateWorkflow.sh",
-    "release:dev": "yarn build && sh ./scripts/release.sh"
+    "release": "yarn build && sh ./scripts/release.sh"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",

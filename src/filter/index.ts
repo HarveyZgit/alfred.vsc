@@ -1,8 +1,8 @@
 import { every, filter } from 'lodash';
-import { SearchListItem } from '../common/utils';
 import { InputInfo } from '../input';
 import { getPathTypeCondition, getSearchKeyCondition } from './conditions';
 import { Condition } from './utils';
+import { RecordItem } from '../typings/records';
 
 /**
  * 在这里添加需要用到的 condition checkers
@@ -18,7 +18,7 @@ const genCheckers = (inputInfo: InputInfo) =>
 export function filterRecords(inputInfo: InputInfo) {
   const conditionCheckers: Condition.Runner[] = genCheckers(inputInfo);
 
-  return (records: SearchListItem[]) => {
+  return (records: RecordItem[]) => {
     return filter(records, (record) => {
       return every(conditionCheckers, (checker) => checker(record));
     });

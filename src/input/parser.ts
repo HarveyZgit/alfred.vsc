@@ -10,7 +10,7 @@ import { InputInfo, PathType, pathTypeAliases } from './common';
  *   - command: 执行某个命令（比如 rm - 删除）
  *   - ...
  */
-export const parser = (original: string): InputInfo => {
+export const parser = (original: string = ''): InputInfo => {
   const params = original.split(' ');
   const searchKey = getSearchKey(params).join(' ');
   const pathType = getSpecifyPathType(params);
