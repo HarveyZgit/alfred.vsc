@@ -4,6 +4,8 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.harvey.alfredapp.vsc</string>
+	<key>category</key>
+	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
@@ -61,6 +63,19 @@
 		</array>
 		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
 		<array/>
+		<key>C11ECEAC-3202-4801-94DF-A08FF439EFDC</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>FB22746E-5A56-4316-999C-68D172F71639</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
 		<array>
 			<dict>
@@ -224,6 +239,37 @@
 			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
 			<string>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>action</key>
+				<integer>0</integer>
+				<key>argument</key>
+				<integer>0</integer>
+				<key>focusedappvariable</key>
+				<false/>
+				<key>focusedappvariablename</key>
+				<string></string>
+				<key>hotkey</key>
+				<integer>9</integer>
+				<key>hotmod</key>
+				<integer>1179648</integer>
+				<key>hotstring</key>
+				<string>V</string>
+				<key>leftcursor</key>
+				<false/>
+				<key>modsmode</key>
+				<integer>0</integer>
+				<key>relatedAppsMode</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.hotkey</string>
+			<key>uid</key>
+			<string>C11ECEAC-3202-4801-94DF-A08FF439EFDC</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
@@ -463,6 +509,13 @@
 			<key>ypos</key>
 			<real>520</real>
 		</dict>
+		<key>C11ECEAC-3202-4801-94DF-A08FF439EFDC</key>
+		<dict>
+			<key>xpos</key>
+			<real>40</real>
+			<key>ypos</key>
+			<real>175</real>
+		</dict>
 		<key>E31A4D5C-24E1-477A-9DFB-266646FADB99</key>
 		<dict>
 			<key>xpos</key>
@@ -504,7 +557,7 @@
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.1.1-beta.2</string>
+	<string>1.5.0</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>
