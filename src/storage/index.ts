@@ -165,23 +165,23 @@ export const records = {
     return Promise.all(
       list.map((record) => {
         /** 刷数：添加 gitInfo */
-        const gitInfo = generateFolderGitInfoAsync(
-          record.pathWithoutProtocol
-        ).then((data) => {
-          vscLogger.info(
-            [
-              '[brushRecordsGitInfoAsync]',
-              'gitInfo',
-              '-',
-              record.pathWithoutProtocol,
-              gitInfo ? JSON.stringify(gitInfo) : null,
-            ].join(' ')
-          );
+        return generateFolderGitInfoAsync(record.pathWithoutProtocol).then(
+          (gitInfo) => {
+            vscLogger.info(
+              [
+                '[brushRecordsGitInfoAsync]',
+                'gitInfo',
+                '-',
+                record.pathWithoutProtocol,
+                gitInfo ? JSON.stringify(gitInfo) : null,
+              ].join(' ')
+            );
 
-          set(record, 'gitInfo', gitInfo);
+            set(record, 'gitInfo', gitInfo);
 
-          return data;
-        });
+            return record;
+          }
+        );
       })
     );
   },

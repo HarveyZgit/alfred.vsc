@@ -83,7 +83,6 @@ function getGitBranchAsync(path: string): Promise<string> {
 
     terminal.stdout.on('data', (data) => {
       const branch = data.toString('utf8').replace(/\n/g, '');
-      console.log("🚀 ~ terminal.stdout.on ~ branch:", branch)
       resolve(branch);
     });
 
