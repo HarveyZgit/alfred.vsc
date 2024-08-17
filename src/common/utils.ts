@@ -58,7 +58,11 @@ export function getIcon(inputPath: string): Workflow.Icon {
 
 function generateSubtitle(item: RecordItem): string {
   const subtitleArr: string[] = [item.pathWithoutProtocol];
-  const moreInfo: string[] = [item.gitInfo?.branch].filter(Boolean);
+  const moreInfo: string[] = [];
+
+  if (item.gitInfo?.branch) {
+    moreInfo.push(`[${item.gitInfo?.branch}]`);
+  }
 
   if (moreInfo.length) {
     subtitleArr.push(moreInfo.join(', '));
