@@ -56,10 +56,21 @@ export function getIcon(inputPath: string): Workflow.Icon {
   };
 }
 
+function generateSubtitle(item: RecordItem): string {
+  const subtitleArr: string[] = [item.pathWithoutProtocol];
+  const moreInfo: string[] = [item.gitInfo?.branch].filter(Boolean);
+
+  if (moreInfo.length) {
+    subtitleArr.push(moreInfo.join(', '));
+  }
+
+  return subtitleArr.join(' - ');
+}
+
 export function fmtSearchList(list: RecordItem[]) {
   return list.map<Workflow.Item>((item) => ({
     title: item.name,
-    subtitle: item.path,
+    subtitle: generateSubtitle(item),
     arg: item.path,
     icon: item.icon,
   }));
