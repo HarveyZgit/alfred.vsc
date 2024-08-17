@@ -5,7 +5,9 @@ import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpeci
 import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
 import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
 import { RecordItem } from '../typings/records';
-import { getRecordType } from '../common/utils';
+import { getRecordType, removePathScheme } from '../common/utils';
+import { generateFolderGitInfo } from './gitInfo';
+import { vscLogger } from '../common/logger';
 
 export interface RecordsStorage {
   records: RecordItem[];
@@ -101,10 +103,33 @@ export const records = {
     }
   },
 
-  brushRecordsType: (recordList: RecordItem[]) => {
+  brushRecords: (recordList: RecordItem[]) => {
     recordList.forEach((record) => {
+      /** 刷数：添加 type */
       if (!has(record, 'type')) {
         set(record, 'type', getRecordType(record.path));
+      }
+
+      /** 刷数：添加 pathWithoutProtocol */
+      if (!has(record, 'pathWithoutProtocol')) {
+        set(record, 'pathWithoutProtocol', removePathScheme(record.path));
+      }
+
+      /** 刷数：添加 gitInfo */
+      if (record.type === 'folder') {
+        const gitInfo = generateFolderGitInfo(record.pathWithoutProtocol);
+
+        vscLogger.info(
+          [
+            '[brushRecords]',
+            'gitInfo',
+            '-',
+            record.pathWithoutProtocol,
+            gitInfo ? gitInfo : JSON.stringify(gitInfo),
+          ].join(' ')
+        );
+
+        set(record, 'gitInfo', gitInfo);
       }
     });
   },
@@ -125,7 +150,7 @@ export const records = {
 
     let uniqRecords = uniqBy(initialRecords.flat(), (record) => record.path);
 
-    records.brushRecordsType(uniqRecords);
+    records.brushRecords(uniqRecords);
 
     if (dropAll) {
       records.update('trash', {}, true);
