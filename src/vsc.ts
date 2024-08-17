@@ -3,7 +3,7 @@ import path from 'path';
 import { setup, workflow } from 'halfred-tools';
 import { fmtInput4JsonStringify, fmtSearchList } from './common/utils';
 import { filterRecordBySearchKey } from './records/utils';
-import { vscliLogger, vscLogger } from './common/logger';
+import { vscLogger } from './common/logger';
 import { userConfig } from './storage';
 import { inputParser } from './input';
 
@@ -29,7 +29,7 @@ async function main() {
 
     workflow.output(result);
   } catch (err) {
-    vscliLogger.error(err);
+    vscLogger.error([err, (err as Error).stack].join(' - '));
     workflow.output([
       {
         title: 'Some Error',

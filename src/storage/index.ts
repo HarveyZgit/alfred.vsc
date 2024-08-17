@@ -125,7 +125,7 @@ export const records = {
             'gitInfo',
             '-',
             record.pathWithoutProtocol,
-            gitInfo ? gitInfo : JSON.stringify(gitInfo),
+            gitInfo ? JSON.stringify(gitInfo) : null,
           ].join(' ')
         );
 
