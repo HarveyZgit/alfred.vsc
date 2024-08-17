@@ -21,6 +21,32 @@
 				<false/>
 			</dict>
 		</array>
+		<key>11F7AA52-BEFB-42EB-8FBF-62B14756ACC8</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>59341C9F-B2C5-47F3-BA2D-7E9FA24F3605</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
 		<array>
 			<dict>
@@ -44,6 +70,30 @@
 				<string></string>
 				<key>sourceoutputuid</key>
 				<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>59341C9F-B2C5-47F3-BA2D-7E9FA24F3605</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>AF9DAC99-3374-4644-A77A-B5E56B7E68D3</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>11F7AA52-BEFB-42EB-8FBF-62B14756ACC8</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>5BD9C98A-DCBB-4263-B97B-A5B7B2257574</string>
 				<key>vitoclose</key>
 				<false/>
 			</dict>
@@ -300,31 +350,44 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>fixedorder</key>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>passthroughargument</key>
 				<true/>
-				<key>items</key>
-				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"}]</string>
-				<key>keyword</key>
-				<string>vscli</string>
-				<key>matchmode</key>
-				<integer>0</integer>
-				<key>runningsubtext</key>
-				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string></string>
-				<key>withspace</key>
-				<true/>
+				<key>variables</key>
+				<dict>
+					<key>notice_title</key>
+					<string>索引重建成功</string>
+					<key>notive_id</key>
+					<string>rebuild_index_success</string>
+				</dict>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.listfilter</string>
+			<string>alfred.workflow.utility.argument</string>
 			<key>uid</key>
-			<string>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</string>
+			<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>passthroughargument</key>
+				<true/>
+				<key>variables</key>
+				<dict>
+					<key>notice_id</key>
+					<string>rebuild_index_fail</string>
+					<key>notice_title</key>
+					<string>索引重建失败，请根据日志进行排查</string>
+				</dict>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -354,6 +417,37 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>fixedorder</key>
+				<true/>
+				<key>items</key>
+				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"},{"title":"ignore by path","arg":"ignore --pattern","subtitle":"input keyword in path"},{"title":"ignore by type","arg":"ignore --ignoreByType --pattern ","subtitle":"file, folder, remote"}]</string>
+				<key>keyword</key>
+				<string>vscli</string>
+				<key>matchmode</key>
+				<integer>0</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string></string>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.listfilter</string>
+			<key>uid</key>
+			<string>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>lastpathcomponent</key>
 				<true/>
 				<key>onlyshowifquerypopulated</key>
@@ -369,28 +463,6 @@
 			<string>alfred.workflow.output.notification</string>
 			<key>uid</key>
 			<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argument</key>
-				<string>{query}</string>
-				<key>passthroughargument</key>
-				<true/>
-				<key>variables</key>
-				<dict>
-					<key>notice_title</key>
-					<string>索引重建成功</string>
-					<key>notive_id</key>
-					<string>rebuild_index_success</string>
-				</dict>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -427,6 +499,34 @@
 						<key>uid</key>
 						<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
 					</dict>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>4</integer>
+						<key>matchstring</key>
+						<string>ignore_filter_success</string>
+						<key>outputlabel</key>
+						<string>ignore success!</string>
+						<key>uid</key>
+						<string>AF9DAC99-3374-4644-A77A-B5E56B7E68D3</string>
+					</dict>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>4</integer>
+						<key>matchstring</key>
+						<string>ignore_filter_fail</string>
+						<key>outputlabel</key>
+						<string>ignore failed!!!</string>
+						<key>uid</key>
+						<string>5BD9C98A-DCBB-4263-B97B-A5B7B2257574</string>
+					</dict>
 				</array>
 				<key>elselabel</key>
 				<string>else</string>
@@ -450,15 +550,37 @@
 				<key>variables</key>
 				<dict>
 					<key>notice_id</key>
-					<string>rebuild_index_fail</string>
+					<string>ignore_filter_success</string>
 					<key>notice_title</key>
-					<string>索引重建失败，请根据日志进行排查</string>
+					<string>根据 ignore 配置过滤成功</string>
 				</dict>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.utility.argument</string>
 			<key>uid</key>
-			<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
+			<string>59341C9F-B2C5-47F3-BA2D-7E9FA24F3605</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>passthroughargument</key>
+				<true/>
+				<key>variables</key>
+				<dict>
+					<key>notice_id</key>
+					<string>ignore_filter_fail</string>
+					<key>notice_title</key>
+					<string>根据 ignore 配置过滤成功，请根据日志进行排查</string>
+				</dict>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>11F7AA52-BEFB-42EB-8FBF-62B14756ACC8</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -474,6 +596,13 @@
 			<key>ypos</key>
 			<real>515</real>
 		</dict>
+		<key>11F7AA52-BEFB-42EB-8FBF-62B14756ACC8</key>
+		<dict>
+			<key>xpos</key>
+			<real>940</real>
+			<key>ypos</key>
+			<real>645</real>
+		</dict>
 		<key>1DB7B2E5-9BD3-4652-819B-293D4F03C795</key>
 		<dict>
 			<key>xpos</key>
@@ -488,6 +617,13 @@
 			<key>ypos</key>
 			<real>170</real>
 		</dict>
+		<key>59341C9F-B2C5-47F3-BA2D-7E9FA24F3605</key>
+		<dict>
+			<key>xpos</key>
+			<real>945</real>
+			<key>ypos</key>
+			<real>565</real>
+		</dict>
 		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
 		<dict>
 			<key>xpos</key>
@@ -498,9 +634,9 @@
 		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
 		<dict>
 			<key>xpos</key>
-			<real>875</real>
+			<real>965</real>
 			<key>ypos</key>
-			<real>530</real>
+			<real>400</real>
 		</dict>
 		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
 		<dict>
@@ -526,9 +662,9 @@
 		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
 		<dict>
 			<key>xpos</key>
-			<real>970</real>
+			<real>965</real>
 			<key>ypos</key>
-			<real>560</real>
+			<real>485</real>
 		</dict>
 		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
 		<dict>
@@ -557,7 +693,7 @@
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.5.0</string>
+	<string>1.5.1</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>

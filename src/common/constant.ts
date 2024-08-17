@@ -63,6 +63,11 @@ export const vscliResult = {
     success: 'rebuild_index_success',
     fail: 'rebuild_index_fail',
   },
+
+  ignore: {
+    success: 'ignore_filter_success',
+    fail: 'ignore_filter_fail',
+  },
 };
 
 export const passResultToAlfred = console.log;

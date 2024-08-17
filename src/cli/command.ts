@@ -75,39 +75,64 @@ program
     "the pattern will used to filter by record's type"
   )
   .action((params) => {
-    const { pattern, ignoreByType } = params;
-    if (!pattern) return;
+    try {
+      const { pattern, ignoreByType } = params;
+      vscliLogger.info(
+        '[cli::ignore] start to exec ignore, ' + JSON.stringify(params)
+      );
+      if (!pattern) return;
 
-    const allRecords = records.getContent('records');
-    if (!allRecords || !allRecords.length) return;
+      const allIgnorePatterns = records.getContent('ignorePatterns');
 
-    const allIgnorePatterns = records.getContent('ignorePatterns');
+      if (ignoreByType) {
+        allIgnorePatterns.type = allIgnorePatterns.type
+          ? uniq([...allIgnorePatterns.type, pattern])
+          : [pattern];
+      } else {
+        allIgnorePatterns.path = allIgnorePatterns.path
+          ? uniq([...allIgnorePatterns.path, pattern])
+          : [pattern];
+      }
 
-    if (ignoreByType) {
-      allIgnorePatterns.type = allIgnorePatterns.type
-        ? uniq([...allIgnorePatterns.type, pattern])
-        : [pattern];
-    } else {
-      allIgnorePatterns.path = allIgnorePatterns.path
-        ? uniq([...allIgnorePatterns.path, pattern])
-        : [pattern];
+      vscliLogger.info('[cli::ignore] start to save ignorePatterns');
+
+      // save pattern
+      records.update('ignorePatterns', allIgnorePatterns, true);
+
+      vscliLogger.info('[cli::ignore] start to save ignorePatterns, success');
+
+      const allRecords = records.getContent('records');
+      if (!allRecords || !allRecords.length) {
+        vscliLogger.info(
+          '[cli::ignore] records are empty, skip filter records'
+        );
+        return;
+      }
+
+      const { records: nextRecords, needDeleteRecords } =
+        filterByIgnorePatterns(allRecords);
+
+      vscliLogger.info('[cli::ignore] start to update trash');
+
+      // update trash
+      records.update(
+        'trash',
+        (prevContent) => ({ ...prevContent, ...needDeleteRecords }),
+        true
+      );
+      vscliLogger.info('[cli::ignore] start to update trash, success');
+
+      vscliLogger.info('[cli::ignore] start to update records, success');
+
+      // update records
+      records.update('records', nextRecords);
+      vscliLogger.info('[cli::ignore] start to update records, success');
+
+      passResultToAlfred(vscliResult.ignore.success);
+    } catch (error) {
+      passResultToAlfred(vscliResult.ignore.fail);
+      vscliLogger.error(error);
     }
-
-    // save pattern
-    records.update('ignorePatterns', allIgnorePatterns, true);
-
-    const { records: nextRecords, needDeleteRecords } =
-      filterByIgnorePatterns(allRecords);
-
-    // update trash
-    records.update(
-      'trash',
-      (prevContent) => ({ ...prevContent, ...needDeleteRecords }),
-      true
-    );
-
-    // update records
-    records.update('records', nextRecords);
   });
 
 program.parse();
