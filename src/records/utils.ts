@@ -1,7 +1,7 @@
-import { SearchListItem } from '../common/utils';
 import { filterRecords } from '../filter';
 import { InputInfo } from '../input';
 import { records } from '../storage';
+import { RecordItem } from '../typings/records';
 import { getRecordsFromVscodeMenu } from './getRecordsFromVscodeMenu';
 
 export function filterRecordBySearchKey(inputInfo: InputInfo) {
@@ -12,14 +12,16 @@ export function filterRecordBySearchKey(inputInfo: InputInfo) {
     ? originalRecords
     : getRecordsFromVscodeMenu();
 
-  return originalSearchKey
+  const list = originalSearchKey
     ? filterRecords(inputInfo)(recordsList)
     : recordsList;
+
+  records.brushRecords(list);
+
+  return list;
 }
 
-export function findRecordByPath(
-  path: string
-): [SearchListItem, SearchListItem[]] {
+export function findRecordByPath(path: string): [RecordItem, RecordItem[]] {
   const allRecords = records.getContent('records');
   const item = allRecords.find((item) => item.path === path);
   return [item, allRecords];

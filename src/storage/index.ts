@@ -1,14 +1,17 @@
 import fs from 'fs';
-import { get, isFunction, keys, merge, noop, set, uniqBy } from 'lodash';
+import { get, has, isFunction, keys, merge, noop, set, uniqBy } from 'lodash';
 import { storageFilesPath } from '../common/paths';
-import { SearchListItem } from '../common/utils';
 import { getRecordsFromSpecifiedDirectory } from '../records/getRecordsFromSpecifiedDirectory';
 import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
 import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
+import { RecordItem } from '../typings/records';
+import { getRecordType, removePathScheme } from '../common/utils';
+import { generateFolderGitInfo } from './gitInfo';
+import { vscLogger } from '../common/logger';
 
 export interface RecordsStorage {
-  records: SearchListItem[];
-  trash: Record<string, SearchListItem>;
+  records: RecordItem[];
+  trash: Record<string, RecordItem>;
 }
 
 const getRecordsStorageDefaultValue: () => RecordsStorage = () => ({
@@ -100,6 +103,37 @@ export const records = {
     }
   },
 
+  brushRecords: (recordList: RecordItem[]) => {
+    recordList.forEach((record) => {
+      /** 刷数：添加 type */
+      if (!has(record, 'type')) {
+        set(record, 'type', getRecordType(record.path));
+      }
+
+      /** 刷数：添加 pathWithoutProtocol */
+      if (!has(record, 'pathWithoutProtocol')) {
+        set(record, 'pathWithoutProtocol', removePathScheme(record.path));
+      }
+
+      /** 刷数：添加 gitInfo */
+      if (record.type === 'folder') {
+        const gitInfo = generateFolderGitInfo(record.pathWithoutProtocol);
+
+        vscLogger.info(
+          [
+            '[brushRecords]',
+            'gitInfo',
+            '-',
+            record.pathWithoutProtocol,
+            gitInfo ? JSON.stringify(gitInfo) : null,
+          ].join(' ')
+        );
+
+        set(record, 'gitInfo', gitInfo);
+      }
+    });
+  },
+
   setup: async (dropAll?: boolean) => {
     // 初始化 .records.cache.json
     // 1-1. 从 vscode db 中获取记录
@@ -115,6 +149,8 @@ export const records = {
     ]);
 
     let uniqRecords = uniqBy(initialRecords.flat(), (record) => record.path);
+
+    records.brushRecords(uniqRecords);
 
     if (dropAll) {
       records.update('trash', {}, true);

@@ -2,11 +2,11 @@ import '../setup';
 import { Command } from 'commander';
 import { set, uniqBy } from 'lodash';
 import pkg from '../../package.json';
-import { SearchListItem } from '../common/utils';
 import { findRecordByPath } from '../records/utils';
 import { records } from '../storage';
 import { vscliLogger } from '../common/logger';
 import { passResultToAlfred, vscliResult } from '../common/constant';
+import { RecordItem } from '../typings/records';
 
 const program = new Command();
 
@@ -39,7 +39,7 @@ program
     if (!record || !item) return;
     records.update(
       'records',
-      uniqBy([item, ...allRecords], (record: SearchListItem) => record.path)
+      uniqBy([item, ...allRecords], (record: RecordItem) => record.path)
     );
   });
 

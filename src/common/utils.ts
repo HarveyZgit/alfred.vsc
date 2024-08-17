@@ -10,6 +10,7 @@ import {
   isRegExp,
   isString,
 } from 'lodash';
+import { RecordItem, RecordType } from '../typings/records';
 
 export function isFolderPath(path: string, removeScheme: boolean = false) {
   if (removeScheme) {
@@ -33,37 +34,47 @@ export function removePathScheme(inputPath: string) {
   return inputPath.replace(/^(.*?):\/\//, '');
 }
 
-export function getIcon(inputPath: string): Workflow.Icon {
-  let iconFileName = 'file';
+export function getRecordType(inputPath: string): RecordType {
+  let recordType: RecordType = 'file';
 
   if (inputPath.includes('remote')) {
-    iconFileName = 'remote';
+    recordType = 'remote';
   } else if (isFolderPath(inputPath, true)) {
-    iconFileName = 'folder';
+    recordType = 'folder';
   }
 
-  vscLogger.info(`${iconFileName} -- ${inputPath}`);
+  vscLogger.info(`${recordType} -- ${inputPath}`);
+
+  return recordType;
+}
+
+export function getIcon(inputPath: string): Workflow.Icon {
+  const iconFileName = getRecordType(inputPath);
 
   return {
     path: `./assets/${iconFileName}.png`,
   };
 }
 
-export interface SearchListItem {
-  __vsc_id__: string;
-  name: string;
-  path: string;
-  icon: Workflow.Icon;
-  extra?: {
-    from: string;
-    [x: string]: any;
-  };
+function generateSubtitle(item: RecordItem): string {
+  const subtitleArr: string[] = [item.pathWithoutProtocol];
+  const moreInfo: string[] = [];
+
+  if (item.gitInfo?.branch) {
+    moreInfo.push(`[${item.gitInfo?.branch}]`);
+  }
+
+  if (moreInfo.length) {
+    subtitleArr.push(moreInfo.join(', '));
+  }
+
+  return subtitleArr.join(' - ');
 }
 
-export function fmtSearchList(list: SearchListItem[]) {
+export function fmtSearchList(list: RecordItem[]) {
   return list.map<Workflow.Item>((item) => ({
     title: item.name,
-    subtitle: item.path,
+    subtitle: generateSubtitle(item),
     arg: item.path,
     icon: item.icon,
   }));
