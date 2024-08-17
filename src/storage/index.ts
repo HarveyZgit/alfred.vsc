@@ -115,6 +115,12 @@ export const records = {
         set(record, 'pathWithoutProtocol', removePathScheme(record.path));
       }
 
+      records.brushRecordsGitInfo(recordList);
+    });
+  },
+
+  brushRecordsGitInfo: (recordList: RecordItem[]) => {
+    recordList.forEach((record) => {
       /** 刷数：添加 gitInfo */
       if (record.type === 'folder') {
         const gitInfo = generateFolderGitInfo(record.pathWithoutProtocol);
