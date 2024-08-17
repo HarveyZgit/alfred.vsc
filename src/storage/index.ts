@@ -6,7 +6,7 @@ import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
 import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
 import { RecordItem } from '../typings/records';
 import { getRecordType, removePathScheme } from '../common/utils';
-import { generateFolderGitInfo } from './gitInfo';
+import { generateFolderGitInfo, generateFolderGitInfoAsync } from './gitInfo';
 import { vscLogger } from '../common/logger';
 
 export interface RecordsStorage {
@@ -130,14 +130,17 @@ export const records = {
   },
 
   brushRecordsGitInfo: (recordList: RecordItem[]) => {
-    recordList.forEach((record) => {
-      /** 刷数：添加 gitInfo */
-      if (record.type === 'folder') {
+    recordList
+      .filter((record) => record.type === 'folder')
+      // 出于性能考虑，只更新前 10 条数据的 gitInfo
+      .slice(0, 10)
+      .forEach((record) => {
+        /** 刷数：添加 gitInfo */
         const gitInfo = generateFolderGitInfo(record.pathWithoutProtocol);
 
         vscLogger.info(
           [
-            '[brushRecords]',
+            '[brushRecordsGitInfo]',
             'gitInfo',
             '-',
             record.pathWithoutProtocol,
@@ -146,8 +149,41 @@ export const records = {
         );
 
         set(record, 'gitInfo', gitInfo);
-      }
-    });
+      });
+  },
+
+  brushRecordsGitInfoAsync: async (recordList: RecordItem[]) => {
+    const list = recordList
+      .filter((record) => record.type === 'folder')
+      // 出于性能考虑，只更新前 10 条数据的 gitInfo
+      .slice(0, 10);
+
+    if (!list.length) {
+      return;
+    }
+
+    return Promise.all(
+      list.map((record) => {
+        /** 刷数：添加 gitInfo */
+        const gitInfo = generateFolderGitInfoAsync(
+          record.pathWithoutProtocol
+        ).then((data) => {
+          vscLogger.info(
+            [
+              '[brushRecordsGitInfoAsync]',
+              'gitInfo',
+              '-',
+              record.pathWithoutProtocol,
+              gitInfo ? JSON.stringify(gitInfo) : null,
+            ].join(' ')
+          );
+
+          set(record, 'gitInfo', gitInfo);
+
+          return data;
+        });
+      })
+    );
   },
 
   setup: async (dropAll?: boolean) => {

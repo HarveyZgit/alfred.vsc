@@ -16,8 +16,24 @@ export function filterRecordBySearchKey(inputInfo: InputInfo) {
     ? filterRecords(inputInfo)(recordsList)
     : recordsList;
 
-  // 出于性能考虑，只更新搜索结果前 10 条数据的 gitInfo
-  records.brushRecordsGitInfo(list.slice(0, 10));
+  records.brushRecordsGitInfo(list);
+
+  return list;
+}
+
+export async function filterRecordBySearchKeyAsync(inputInfo: InputInfo) {
+  const { original: originalSearchKey } = inputInfo;
+  const originalRecords = records.getContent('records');
+
+  const recordsList = originalRecords.length
+    ? originalRecords
+    : getRecordsFromVscodeMenu();
+
+  const list = originalSearchKey
+    ? filterRecords(inputInfo)(recordsList)
+    : recordsList;
+
+  await records.brushRecordsGitInfoAsync(list);
 
   return list;
 }
@@ -39,8 +55,12 @@ export function filterByIgnorePatterns(recordList: RecordItem[]): {
     type: [],
   };
 
-  const ignoreTypeRegexps = typePatterns.map((pattern) => new RegExp(pattern, 'g'));
-  const ignorePathRegexps = pathPatterns.map((pattern) => new RegExp(pattern, 'g'));
+  const ignoreTypeRegexps = typePatterns.map(
+    (pattern) => new RegExp(pattern, 'g')
+  );
+  const ignorePathRegexps = pathPatterns.map(
+    (pattern) => new RegExp(pattern, 'g')
+  );
 
   const nextRecords: RecordItem[] = [];
   const needDeleteRecords: RecordsStorage['trash'] = {};

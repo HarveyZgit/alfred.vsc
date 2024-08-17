@@ -36,6 +36,25 @@ export function generateFolderGitInfo(path: string): null | GitInfo {
   };
 }
 
+export async function generateFolderGitInfoAsync(
+  path: string
+): Promise<null | GitInfo> {
+  const isGitFolder = assertGitFolder(path);
+
+  if (!isGitFolder) {
+    vscLogger.info(
+      ['[getFolderGitInfo]', 'not a git folder', '-', path].join(' ')
+    );
+    return null;
+  }
+
+  const branch = await getGitBranchAsync(path);
+
+  return {
+    branch,
+  };
+}
+
 function getGitBranch(path: string): string {
   const result = childProcess.spawnSync(
     'git',
@@ -50,4 +69,26 @@ function getGitBranch(path: string): string {
   }
 
   return result.stdout.toString('utf8').replace(/\n/g, '');
+}
+
+function getGitBranchAsync(path: string): Promise<string> {
+  return new Promise((resolve) => {
+    const terminal = childProcess.spawn(
+      'git',
+      ['rev-parse', '--abbrev-ref', 'HEAD'],
+      {
+        cwd: path,
+      }
+    );
+
+    terminal.stdout.on('data', (data) => {
+      const branch = data.toString('utf8').replace(/\n/g, '');
+      console.log("🚀 ~ terminal.stdout.on ~ branch:", branch)
+      resolve(branch);
+    });
+
+    terminal.stderr.on('data', () => {
+      resolve('');
+    });
+  });
 }
