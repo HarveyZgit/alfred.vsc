@@ -16,7 +16,7 @@ export function filterRecordBySearchKey(inputInfo: InputInfo) {
     ? filterRecords(inputInfo)(recordsList)
     : recordsList;
 
-  // 出于性能考虑，只更新搜索结果的前 10 条
+  // 出于性能考虑，只更新搜索结果前 10 条数据的 gitInfo
   records.brushRecordsGitInfo(list.slice(0, 10));
 
   return list;

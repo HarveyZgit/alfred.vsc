@@ -15,7 +15,6 @@ import {
   removePathScheme,
 } from '../common/utils';
 import { RecordItem } from '../typings/records';
-import { generateFolderGitInfo } from '../storage/gitInfo';
 import { filterByIgnorePatterns } from './utils';
 
 export interface Recent {
@@ -85,7 +84,6 @@ export async function getRecordsFromVscodeDB(
     const type = getRecordType(path);
     const icon = getIcon(path);
     const pathWithoutProtocol = removePathScheme(path);
-    const gitInfo = generateFolderGitInfo(pathWithoutProtocol);
 
     return {
       __vsc_id__: genRecordId(path),
@@ -94,7 +92,7 @@ export async function getRecordsFromVscodeDB(
       path,
       pathWithoutProtocol,
       icon,
-      gitInfo,
+      gitInfo: null,
       extra: {
         from: 'getRecordsFromVscodeDB',
       },

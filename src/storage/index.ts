@@ -126,8 +126,6 @@ export const records = {
       if (!has(record, 'pathWithoutProtocol')) {
         set(record, 'pathWithoutProtocol', removePathScheme(record.path));
       }
-
-      records.brushRecordsGitInfo(recordList);
     });
   },
 

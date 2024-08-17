@@ -3,7 +3,6 @@ import { find, get } from 'lodash';
 import { envNames, envs } from '../common/constant';
 import { genRecordId, getIcon, getRecordType } from '../common/utils';
 import { RecordItem } from '../typings/records';
-import { generateFolderGitInfo } from '../storage/gitInfo';
 import { filterByIgnorePatterns } from './utils';
 
 interface BaseMenuItemUri {
@@ -84,7 +83,7 @@ export function getRecordsFromVscodeMenu(): RecordItem[] {
           name: getFallbackName(path),
           path,
           pathWithoutProtocol: item.uri.path,
-          gitInfo: generateFolderGitInfo(item.uri.path),
+          gitInfo: null,
           type: getRecordType(path),
           icon: getIcon(path),
           extra: {

@@ -6,7 +6,6 @@ import { getVscodeMenuItemUriPath } from './getRecordsFromVscodeMenu';
 import { genRecordId, getIcon, getRecordType } from '../common/utils';
 import { storageFilesPath } from '../common/paths';
 import { RecordItem } from '../typings/records';
-import { generateFolderGitInfo } from '../storage/gitInfo';
 import { filterByIgnorePatterns } from './utils';
 
 function parseEnv() {
@@ -40,8 +39,6 @@ function getDirectoriesByPath(dirPath: string): RecordItem[] {
         scheme: 'file',
         path: pathWithoutProtocol,
       });
-      const gitInfo = generateFolderGitInfo(pathWithoutProtocol);
-
       return {
         __vsc_id__: genRecordId(path),
         name: item.name,
@@ -49,7 +46,7 @@ function getDirectoriesByPath(dirPath: string): RecordItem[] {
         pathWithoutProtocol,
         type: getRecordType(path),
         icon: getIcon(path),
-        gitInfo,
+        gitInfo: null,
         extra: {
           from: 'getRecordsFromSpecifiedDirectory',
         },
