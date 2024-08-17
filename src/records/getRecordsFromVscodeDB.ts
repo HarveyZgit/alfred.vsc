@@ -8,8 +8,14 @@ import { isNil } from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
 import { envNames, envs, __VSC_DB_CACHE__ } from '../common/constant';
 import { store } from '../common/store';
-import { genRecordId, getIcon, getRecordType } from '../common/utils';
+import {
+  genRecordId,
+  getIcon,
+  getRecordType,
+  removePathScheme,
+} from '../common/utils';
 import { RecordItem } from '../typings/records';
+import { generateFolderGitInfo } from '../storage/gitInfo';
 
 export interface Recent {
   entries: Entry[];
@@ -77,13 +83,17 @@ export async function getRecordsFromVscodeDB(
     const name = gerProjectName(path);
     const type = getRecordType(path);
     const icon = getIcon(path);
+    const pathWithoutProtocol = removePathScheme(path);
+    const gitInfo = generateFolderGitInfo(pathWithoutProtocol);
 
     return {
       __vsc_id__: genRecordId(path),
       name,
       type,
       path,
+      pathWithoutProtocol,
       icon,
+      gitInfo,
       extra: {
         from: 'getRecordsFromVscodeDB',
       },
