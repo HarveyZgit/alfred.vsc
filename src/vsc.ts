@@ -1,22 +1,12 @@
 import './setup';
-import path from 'path';
+
 import { setup, workflow } from 'halfred-tools';
 import { fmtInput4JsonStringify, fmtSearchList } from './common/utils';
-import {
-  filterRecordBySearchKey,
-  filterRecordBySearchKeyAsync,
-} from './records/utils';
+import { filterRecordBySearchKey } from './records/utils';
 import { vscLogger } from './common/logger';
-import { userConfig } from './storage';
 import { inputParser } from './input';
 
-setup({
-  logsDir: path.join(process.cwd(), './logs'),
-});
-
-userConfig.setup();
-
-async function main() {
+function main() {
   try {
     const inputInfo = inputParser(workflow.input);
 
@@ -27,7 +17,7 @@ async function main() {
       )}`
     );
 
-    const outputList = await filterRecordBySearchKeyAsync(inputInfo);
+    const outputList = filterRecordBySearchKey(inputInfo);
 
     const result = fmtSearchList(outputList);
 

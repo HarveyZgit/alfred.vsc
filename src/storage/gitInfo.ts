@@ -1,6 +1,10 @@
 import childProcess from 'child_process';
 import { vscLogger } from '../common/logger';
 import { GitInfo } from '../typings/gitInfo';
+import { readFile, writeFile } from './utils';
+import { storageFilesPath } from '../common/paths';
+import { get, isFunction, set } from 'lodash';
+import { RecordItem } from '../typings/records';
 
 function assertSpawnSyncError(
   result: ReturnType<typeof childProcess.spawnSync>
@@ -19,7 +23,8 @@ function assertGitFolder(path: string): boolean {
   return !hasError;
 }
 
-export function generateFolderGitInfo(path: string): null | GitInfo {
+export function generateFolderGitInfo(record: RecordItem): null | GitInfo {
+  const path = record.pathWithoutProtocol;
   const isGitFolder = assertGitFolder(path);
 
   if (!isGitFolder) {
@@ -27,18 +32,39 @@ export function generateFolderGitInfo(path: string): null | GitInfo {
       ['[getFolderGitInfo]', 'not a git folder', '-', path].join(' ')
     );
     return null;
+  }
+
+  const cache = gitInfoCache.getCachedGitInfo(record.__vsc_id__);
+  if (cache) {
+    vscLogger.info(
+      [
+        '[generateFolderGitInfoAsync]',
+        'using gitInfo cache',
+        '-',
+        path,
+        '-',
+        record.__vsc_id__,
+      ].join(' ')
+    );
+    return cache;
   }
 
   const branch = getGitBranch(path);
 
-  return {
+  const data = {
     branch,
   };
+
+  gitInfoCache.update(record.__vsc_id__, data, true);
+
+  return data;
 }
 
+/** @deprecated */
 export async function generateFolderGitInfoAsync(
-  path: string
+  record: RecordItem
 ): Promise<null | GitInfo> {
+  const path = record.pathWithoutProtocol;
   const isGitFolder = assertGitFolder(path);
 
   if (!isGitFolder) {
@@ -48,11 +74,30 @@ export async function generateFolderGitInfoAsync(
     return null;
   }
 
+  const cache = gitInfoCache.getCachedGitInfo(record.__vsc_id__);
+  if (cache) {
+    vscLogger.info(
+      [
+        '[generateFolderGitInfoAsync]',
+        'using gitInfo cache',
+        '-',
+        path,
+        '-',
+        record.__vsc_id__,
+      ].join(' ')
+    );
+    return cache;
+  }
+
   const branch = await getGitBranchAsync(path);
 
-  return {
+  const data = {
     branch,
   };
+
+  gitInfoCache.update(record.__vsc_id__, data, true);
+
+  return data;
 }
 
 function getGitBranch(path: string): string {
@@ -71,6 +116,7 @@ function getGitBranch(path: string): string {
   return result.stdout.toString('utf8').replace(/\n/g, '');
 }
 
+/** @deprecated */
 function getGitBranchAsync(path: string): Promise<string> {
   return new Promise((resolve) => {
     const terminal = childProcess.spawn(
@@ -91,3 +137,75 @@ function getGitBranchAsync(path: string): Promise<string> {
     });
   });
 }
+
+type GitInfoCacheContent = { ts: number; gitInfo: GitInfo | null };
+type GitInfoCacheObject = Record<string, GitInfoCacheContent>;
+
+export const gitInfoCache = {
+  filePath: storageFilesPath.gitInfoCache,
+
+  get fillContent(): GitInfoCacheObject {
+    return readFile(
+      gitInfoCache.filePath,
+      true,
+      gitInfoCache.getDefaultContent()
+    );
+  },
+
+  getDefaultContent: (): GitInfoCacheObject => ({}),
+
+  getDefaultItemContent: (): GitInfoCacheContent => ({
+    ts: Date.now(),
+    gitInfo: null,
+  }),
+
+  ensureHasCacheFile: () => {
+    try {
+      readFile(gitInfoCache.filePath, true);
+    } catch {
+      // 同步写一个文件，防止初始化时其他搜索操作报错
+      writeFile(gitInfoCache.filePath, gitInfoCache.getDefaultContent(), true);
+    }
+  },
+
+  update: (
+    recordId: string,
+    content: GitInfo | ((prevContent: GitInfo) => GitInfo),
+    sync = false
+  ) => {
+    const prevContent = readFile<GitInfoCacheObject>(
+      gitInfoCache.filePath,
+      true,
+      gitInfoCache.getDefaultContent()
+    );
+
+    const inputContent = isFunction(content)
+      ? content(get(prevContent, recordId).gitInfo)
+      : content;
+    const nextContent = set(prevContent, recordId, {
+      ts: Date.now(),
+      gitInfo: inputContent,
+    });
+    writeFile(gitInfoCache.filePath, nextContent, sync);
+  },
+
+  getItem: (recordId: string): GitInfoCacheContent => {
+    return get(
+      gitInfoCache.fillContent,
+      recordId,
+      gitInfoCache.getDefaultItemContent()
+    );
+  },
+
+  getCachedGitInfo: (recordId: string): GitInfo => {
+    const cache = gitInfoCache.getItem(recordId);
+    if (gitInfoCache.isExpired(cache.ts)) {
+      return null;
+    }
+    return cache.gitInfo;
+  },
+
+  isExpired: (ts: number) => {
+    return Date.now() - ts > 30 * 1000;
+  },
+};

@@ -21,6 +21,7 @@ export function filterRecordBySearchKey(inputInfo: InputInfo) {
   return list;
 }
 
+/** @deprecated */
 export async function filterRecordBySearchKeyAsync(inputInfo: InputInfo) {
   const { original: originalSearchKey } = inputInfo;
   const originalRecords = records.getContent('records');

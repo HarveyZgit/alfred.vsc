@@ -6,8 +6,9 @@ import { getRecordsFromVscodeDB } from '../records/getRecordsFromVscodeDB';
 import { getRecordsFromVscodeMenu } from '../records/getRecordsFromVscodeMenu';
 import { RecordItem } from '../typings/records';
 import { getRecordType, removePathScheme } from '../common/utils';
-import { generateFolderGitInfo, generateFolderGitInfoAsync } from './gitInfo';
+import { generateFolderGitInfo, generateFolderGitInfoAsync, gitInfoCache } from './gitInfo';
 import { vscLogger } from '../common/logger';
+import { readFile, writeFile } from './utils';
 
 export interface RecordsStorage {
   records: RecordItem[];
@@ -26,31 +27,6 @@ const getRecordsStorageDefaultValue: () => RecordsStorage = () => ({
     type: [],
   },
 });
-
-function readFile<T>(path: string, parse: true, defaultValue?: T): T;
-function readFile<T>(path: string, parse: false, defaultValue?: T): string;
-function readFile<T>(path: string, parse: boolean, defaultValue?: T) {
-  const content = fs.readFileSync(path, { encoding: 'utf-8' });
-  if (parse) {
-    try {
-      return JSON.parse(content) as T;
-    } catch (error) {
-      return defaultValue;
-    }
-  }
-
-  return content;
-}
-
-function writeFile<T>(path: string, content: T, sync: boolean) {
-  const write = sync ? fs.writeFileSync : fs.writeFile;
-  write.call(
-    fs,
-    path,
-    JSON.stringify(content, null, 2),
-    sync ? undefined : noop
-  );
-}
 
 export const records = {
   filePath: storageFilesPath.records,
@@ -136,7 +112,7 @@ export const records = {
       .slice(0, 10)
       .forEach((record) => {
         /** 刷数：添加 gitInfo */
-        const gitInfo = generateFolderGitInfo(record.pathWithoutProtocol);
+        const gitInfo = generateFolderGitInfo(record);
 
         vscLogger.info(
           [
@@ -165,7 +141,7 @@ export const records = {
     return Promise.all(
       list.map((record) => {
         /** 刷数：添加 gitInfo */
-        return generateFolderGitInfoAsync(record.pathWithoutProtocol).then(
+        return generateFolderGitInfoAsync(record).then(
           (gitInfo) => {
             vscLogger.info(
               [
@@ -194,6 +170,7 @@ export const records = {
     // 3. 写入 .records.cache.json
 
     records.ensureHasCacheFile();
+    gitInfoCache.ensureHasCacheFile();
 
     const initialRecords = await Promise.all([
       getRecordsFromSpecifiedDirectory(false),
