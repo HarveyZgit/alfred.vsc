@@ -108,8 +108,8 @@ export const records = {
   brushRecordsGitInfo: (recordList: RecordItem[]) => {
     recordList
       .filter((record) => record.type === 'folder')
-      // 出于性能考虑，只更新前 10 条数据的 gitInfo
-      .slice(0, 10)
+      // 出于性能考虑，只更新前 5 条数据的 gitInfo
+      .slice(0, 5)
       .forEach((record) => {
         /** 刷数：添加 gitInfo */
         const gitInfo = generateFolderGitInfo(record);
@@ -131,8 +131,8 @@ export const records = {
   brushRecordsGitInfoAsync: async (recordList: RecordItem[]) => {
     const list = recordList
       .filter((record) => record.type === 'folder')
-      // 出于性能考虑，只更新前 10 条数据的 gitInfo
-      .slice(0, 10);
+      // 出于性能考虑，只更新前 5 条数据的 gitInfo
+      .slice(0, 5);
 
     if (!list.length) {
       return;
