@@ -1,35 +1,134 @@
-# VSC
+# VSC Alfred Workflow
 
-An alfred workflow for finds recent VScode open records
+<p align="center">
+  <img src="public/logo.svg" alt="VSC Logo" width="128" height="128">
+</p>
 
-# Quick Start
+<p align="center">
+  <strong>快速搜索和打开代码项目的 Alfred Workflow</strong>
+</p>
 
-1. [Download](https://github.com/HarveyZgit/alfred.vsc/releases) the latest Workflow
-2. Double-click to install the workflow
-3. Open your Alfred and input vsc to search
+## ✨ 特性
 
-# Features
+- 🔍 **智能搜索** — 支持模糊匹配，快速定位项目
+- 📂 **自动发现** — 递归扫描目录，自动发现 Git 仓库
+- ⚡ **最近使用** — 记住使用顺序，常用项目优先显示
+- 🌿 **Git 分支** — 显示当前分支名称
+- 🛠️ **开发友好** — 支持隔离的开发调试模式
 
-## Filter by path type
+## 📦 安装
 
-Type the path type to get search result.
+### 方式一：下载安装
+1. 下载 [最新版本](https://github.com/HarveyZgit/alfred.vsc/releases) 的 `.alfredworkflow` 文件
+2. 双击安装到 Alfred
 
-For example, `d` in the following image is one of path types, meaning search for folders whose names contain `vsc`.
-![Filter by path type](https://raw.githubusercontent.com/HarveyZgit/drawing-bed/master/img/20220820175808.png)
+### 方式二：从源码构建
+```bash
+git clone https://github.com/HarveyZgit/alfred.vsc.git
+cd alfred.vsc
+python3 scripts/build_workflow.py
+# 输出: build/vsc.alfredworkflow
+```
 
-### All path types
+## 🚀 使用方式
 
-| path type  | aliases                          |
-| ---------- | -------------------------------- |
-| folder     | `folder`, `fo`, `ff`, `dir`, `d` |
-| file       | `file`, `fi`, `f`                |
-| ssh remote | `remote`, `re`, `r`              |
+| 关键字 | 功能 |
+|-------|------|
+| `vsc` | 搜索项目 |
+| `vsc <关键字>` | 模糊搜索项目 |
+| `vsc d <关键字>` | 只搜索文件夹类型 |
+| `vscli` | 管理命令 |
+| `vscli rebuild index` | 重建索引 |
 
-# Config
+**快捷操作**：
+- `Enter` — 用默认 IDE 打开
+- `Cmd + Enter` — 用备选 IDE 打开
+- `Ctrl + Enter` — 从列表中删除
 
-| env                     | description                                    | required                                                                                     | default value                        |
-| ----------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `VSC_CODE_BIN`          | Command to open `VScode`                       | `yes`<br/> But the default value was packaged into installer, you can modify it by yourself. | `/usr/local/bin/code`                |
-| `VSC_CODE_INSIDERS_BIN` | Command to open `VScode insiders`              | `yes`<br/> but the default value was packaged into installer, you can modify it by yourself. | `/usr/local/bin/code-insiders`       |
-| `VSC_IDE_PATH`          | The data path of the VScode editor             | `no`                                                                                         | `~/Library/Application Support/Code` |
-| `VSC_DIRECTORIES`       | Custom list of directories, separated by `,` . | `no`                                                                                         | `''`                                 |
+## ⚙️ 配置
+
+在 Alfred Workflow 设置中配置环境变量：
+
+| 变量 | 说明 | 示例 |
+|-----|------|------|
+| `VSC_DIRECTORIES` | 项目目录列表（逗号分隔） | `~/Code,~/Projects` |
+| `VSC_OPEN_DEFAULT` | 默认打开方式（Enter 键） | `/usr/local/bin/code` |
+| `VSC_OPEN_WITH_CMD` | 按住 Command 打开 | `/Applications/Cursor.app/Contents/MacOS/Cursor` |
+
+## 🔍 搜索功能
+
+### 模糊匹配
+字符按顺序出现即可匹配：
+
+| 搜索词 | 匹配示例 |
+|-------|---------|
+| `myp` | **my**-**p**roject |
+| `api` | backend-**api** |
+| `fe` | frontend, core-**fe** |
+
+### 路径类型过滤
+| 类型 | 别名 |
+|-----|------|
+| folder | `folder`, `fo`, `ff`, `dir`, `d` |
+| file | `file`, `fi`, `f` |
+| remote | `remote`, `re`, `r` |
+
+### Git 分支显示
+```
+my-project
+⎇ main | ~/Code/my-project
+```
+
+## 🛠️ 开发
+
+### 项目结构
+```
+├── src/
+│   ├── vsc.py           # 主搜索脚本
+│   ├── cli.py           # CLI 命令处理
+│   └── assets/          # 图标资源
+├── public/
+│   ├── info.plist       # Alfred 工作流配置
+│   ├── icon.png         # 工作流图标
+│   ├── logo.svg         # Logo (SVG)
+│   └── logo-dev.svg     # 开发版 Logo
+├── scripts/
+│   ├── build_workflow.py   # 构建 .alfredworkflow
+│   └── dev_install.py      # 安装开发版
+└── README.md
+```
+
+### 本地开发
+
+安装开发版（与正式版完全隔离）：
+
+```bash
+python3 scripts/dev_install.py
+```
+
+开发版特性：
+- **关键词**: `vscd` / `vscdli`（不与正式版冲突）
+- **缓存目录**: `/tmp/vsc-dev/`（独立缓存）
+- **符号链接**: 改代码即时生效
+
+```bash
+# 查看开发版状态
+python3 scripts/dev_install.py --status
+
+# 卸载开发版
+python3 scripts/dev_install.py --remove
+```
+
+### 构建发布
+
+```bash
+# 构建 .alfredworkflow
+python3 scripts/build_workflow.py
+
+# 预览构建内容
+python3 scripts/build_workflow.py --dry-run
+```
+
+## 📄 License
+
+MIT © Harvey Zhang
