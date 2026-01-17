@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.harvey.alfredapp.vsc</string>
-	<key>category</key>
-	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
@@ -63,19 +61,6 @@
 		</array>
 		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
 		<array/>
-		<key>C11ECEAC-3202-4801-94DF-A08FF439EFDC</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>FB22746E-5A56-4316-999C-68D172F71639</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
 		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
 		<array>
 			<dict>
@@ -130,7 +115,20 @@
 				<key>modifiers</key>
 				<integer>1048576</integer>
 				<key>modifiersubtext</key>
-				<string>Open with code-insiders</string>
+				<string>Open with Trae</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>FB22746E-5A56-4316-999C-68D172F71639</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
 				<key>vitoclose</key>
 				<false/>
 			</dict>
@@ -154,8 +152,8 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>$VSC_CODE_BIN --folder-uri "$1"
-./node_modules/.bin/run-node lib/cli.js selected --record="$1"</string>
+				<string>$VSC_OPEN_DEFAULT "$(echo "$1" | sed 's|^file://||')"
+/usr/bin/python3 cli.py selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -167,6 +165,37 @@
 			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
 			<string>1DB7B2E5-9BD3-4652-819B-293D4F03C795</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>action</key>
+				<integer>0</integer>
+				<key>argument</key>
+				<integer>0</integer>
+				<key>focusedappvariable</key>
+				<false/>
+				<key>focusedappvariablename</key>
+				<string></string>
+				<key>hotkey</key>
+				<integer>9</integer>
+				<key>hotmod</key>
+				<integer>1179648</integer>
+				<key>hotstring</key>
+				<string>V</string>
+				<key>leftcursor</key>
+				<false/>
+				<key>modsmode</key>
+				<integer>0</integer>
+				<key>relatedAppsMode</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.hotkey</string>
+			<key>uid</key>
+			<string>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
@@ -198,7 +227,7 @@
 				<key>runningsubtext</key>
 				<string>searching...</string>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/vsc.js "$1"</string>
+				<string>/usr/bin/python3 vsc.py "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -227,7 +256,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/cli.js delete --record="$1"</string>
+				<string>/usr/bin/python3 cli.py delete --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -245,44 +274,13 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>action</key>
-				<integer>0</integer>
-				<key>argument</key>
-				<integer>0</integer>
-				<key>focusedappvariable</key>
-				<false/>
-				<key>focusedappvariablename</key>
-				<string></string>
-				<key>hotkey</key>
-				<integer>9</integer>
-				<key>hotmod</key>
-				<integer>1179648</integer>
-				<key>hotstring</key>
-				<string>V</string>
-				<key>leftcursor</key>
-				<false/>
-				<key>modsmode</key>
-				<integer>0</integer>
-				<key>relatedAppsMode</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.hotkey</string>
-			<key>uid</key>
-			<string>C11ECEAC-3202-4801-94DF-A08FF439EFDC</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>concurrently</key>
 				<false/>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>$VSC_CODE_INSIDERS_BIN --folder-uri "$1"
-./node_modules/.bin/run-node lib/cli.js selected --record="$1"</string>
+				<string>$VSC_OPEN_WITH_CMD "$(echo "$1" | sed 's|^file://||')"
+/usr/bin/python3 cli.py selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -319,7 +317,7 @@
 				<key>title</key>
 				<string></string>
 				<key>withspace</key>
-				<true/>
+				<false/>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.input.listfilter</string>
@@ -336,7 +334,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node lib/cli.js $1</string>
+				<string>/usr/bin/python3 cli.py $1</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -431,7 +429,7 @@
 				<key>elselabel</key>
 				<string>else</string>
 				<key>hideelse</key>
-				<true/>
+				<false/>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.utility.conditional</string>
@@ -464,7 +462,7 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string>python 重构版</string>
 	<key>uidata</key>
 	<dict>
 		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
@@ -509,13 +507,6 @@
 			<key>ypos</key>
 			<real>520</real>
 		</dict>
-		<key>C11ECEAC-3202-4801-94DF-A08FF439EFDC</key>
-		<dict>
-			<key>xpos</key>
-			<real>40</real>
-			<key>ypos</key>
-			<real>175</real>
-		</dict>
 		<key>E31A4D5C-24E1-477A-9DFB-266646FADB99</key>
 		<dict>
 			<key>xpos</key>
@@ -544,20 +535,29 @@
 			<key>ypos</key>
 			<real>130</real>
 		</dict>
+		<key>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</key>
+		<dict>
+			<key>xpos</key>
+			<real>80</real>
+			<key>ypos</key>
+			<real>130</real>
+		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
 	<array/>
 	<key>variables</key>
 	<dict>
-		<key>VSC_CODE_BIN</key>
-		<string>/usr/local/bin/code</string>
-		<key>VSC_CODE_INSIDERS_BIN</key>
-		<string>/usr/local/bin/code-insiders</string>
+		<key>VSC_DIRECTORIES</key>
+		<string>~/Code</string>
+		<key>VSC_DIR_BAK____</key>
+		<string></string>
+		<key>VSC_OPEN_DEFAULT</key>
+		<string>/Users/harvey/.antigravity/antigravity/bin/agy</string>
+		<key>VSC_OPEN_WITH_CMD</key>
+		<string></string>
 	</dict>
-	<key>variablesdontexport</key>
-	<array/>
 	<key>version</key>
-	<string>1.5.0</string>
+	<string>v2.0.0-beta</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>
