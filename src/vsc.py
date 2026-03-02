@@ -16,11 +16,14 @@ from shared import (
     get_cached_records,
     get_git_branch,
     get_records_from_vscode_menu,
+    get_vsc_directory_roots,
+    ENV_TAB_TAIL_SLASH,
     is_file_path,
     is_folder_path,
     is_remote_path,
     read_cache,
     remove_path_scheme,
+    scan_subdirectories,
     write_cache,
 )
 
@@ -211,12 +214,137 @@ def format_for_alfred(records: list) -> dict:
 
 
 # ============================================================
+# Directory Browse Mode
+# ============================================================
+
+def parse_browse_query(query: str) -> tuple:
+    """
+    Parse a browse-mode query (after removing leading '/').
+
+    Returns (segments, search):
+      '/'           -> ([], '')          list top-level
+      '/alf'        -> ([], 'alf')       flat recursive search
+      '/alfred/'    -> (['alfred'], '')  drill into alfred
+      '/alfred/vs'  -> (['alfred'], 'vs') drill + search
+      '/a/b/c/'     -> (['a','b','c'], '') deep drill
+    """
+    # Remove the leading '/'
+    raw = query[1:]
+
+    if not raw:
+        return ([], '')
+
+    parts = raw.split('/')
+
+    # If query ended with '/', last part is empty string -> drill-down mode
+    # e.g. 'alfred/' -> parts = ['alfred', ''] -> segments=['alfred'], search=''
+    if query.endswith('/'):
+        segments = [p for p in parts if p]  # filter empty strings
+        return (segments, '')
+
+    # Otherwise last part is the search keyword
+    # e.g. 'alfred/vs' -> parts = ['alfred', 'vs'] -> segments=['alfred'], search='vs'
+    search = parts[-1]
+    segments = [p for p in parts[:-1] if p]
+    return (segments, search)
+
+
+def format_browse_results(dir_entries: list, segments: list = None) -> dict:
+    """
+    Format browse results for Alfred output.
+
+    Args:
+        dir_entries: List of dicts with 'path' (Path), 'name' (str), 'rel' (str)
+        segments: Current path segments for building autocomplete paths
+
+    Returns:
+        Alfred Script Filter JSON dict
+    """
+    segments = segments or []
+    prefix = '/' + '/'.join(segments) + '/' if segments else '/'
+
+    items = []
+    for entry in dir_entries:
+        dir_path = entry['path']
+        display_name = entry['rel']  # relative name for display
+        full_path = str(dir_path)
+        file_uri = f'file://{full_path}'
+
+        # Tab autocomplete: drill into this directory
+        suffix = '/' if ENV_TAB_TAIL_SLASH else ''
+        autocomplete = f'{prefix}{entry["rel"]}{suffix}'
+        items.append({
+            'title': display_name,
+            'subtitle': full_path,
+            'arg': file_uri,
+            'autocomplete': autocomplete,
+            'icon': {'path': './assets/folder.png'},
+        })
+
+    return {'items': items}
+
+
+def browse_directories(query: str) -> dict:
+    """
+    Handle directory browse mode.
+    Called when query starts with '/'.
+
+    Returns Alfred Script Filter JSON output.
+    """
+    roots = get_vsc_directory_roots()
+    if not roots:
+        return {'items': []}
+
+    segments, search = parse_browse_query(query)
+
+    # Scan directories based on mode
+    dir_entries = scan_subdirectories(
+        roots=roots,
+        segments=segments,
+        search=search,
+    )
+
+    # If there's a search keyword, apply fuzzy match filtering
+    if search:
+        scored = []
+        for entry in dir_entries:
+            match_target = entry['rel']  # match against relative path
+            is_match, score = fuzzy_match(search, match_target)
+            if is_match:
+                scored.append((entry, score))
+        scored.sort(key=lambda x: -x[1])
+        dir_entries = [e[0] for e in scored]
+
+    # If drill-down yields no results, show a hint
+    if not dir_entries and segments and not search:
+        current_path = '/'.join(segments)
+        # Autocomplete pops back up one level
+        parent_autocomplete = '/' + '/'.join(segments[:-1]) + '/' if len(segments) > 1 else '/'
+        return {'items': [{
+            'title': '没有更多子目录了',
+            'subtitle': current_path,
+            'arg': '',
+            'autocomplete': parent_autocomplete,
+            'icon': {'path': './assets/folder.png'},
+            'valid': False,
+        }]}
+
+    return format_browse_results(dir_entries, segments)
+
+
+# ============================================================
 # Main Entry Point
 # ============================================================
 
 def main():
     """Main entry point for search."""
     query = sys.argv[1] if len(sys.argv) > 1 else ""
+
+    # Directory browse mode: query starts with '/'
+    if query.lstrip().startswith('/'):
+        output = browse_directories(query.lstrip())
+        print(json.dumps(output))
+        return
 
     # Parse input
     input_info = parse_input(query)

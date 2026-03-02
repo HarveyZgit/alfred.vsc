@@ -39,11 +39,20 @@ else:
 # Environment variables
 ENV_IDE_PATH = os.environ.get("VSC_IDE_PATH", str(HOME / "Library/Application Support/Code"))
 ENV_DIRECTORIES = os.environ.get("VSC_DIRECTORIES", "")
+ENV_TAB_TAIL_SLASH = os.environ.get("VSC_TAB_TAIL_SLASH", "1") == "1"
 
 # Derived paths
 GLOBAL_STORAGE_PATH = Path(ENV_IDE_PATH) / "User/globalStorage"
 DATABASE_PATH = GLOBAL_STORAGE_PATH / "state.vscdb"
 STORAGE_JSON_PATH = GLOBAL_STORAGE_PATH / "storage.json"
+
+# Directories to skip during browsing (non-project directories)
+SKIP_DIRS = {
+    'node_modules', '__pycache__', 'venv', '.venv',
+    'dist', 'build', 'vendor', 'target', 'Pods',
+    '.git', '.svn', '.hg',
+    'miniprogram_npm',
+}
 
 # ============================================================
 # Path Type Definitions
@@ -384,6 +393,119 @@ def get_records_from_directories() -> list:
             continue
 
     return records
+
+
+def get_vsc_directory_roots() -> list:
+    """Parse VSC_DIRECTORIES env var into a list of resolved Path objects."""
+    if not ENV_DIRECTORIES:
+        return []
+
+    roots = []
+    for p in ENV_DIRECTORIES.split(','):
+        p = p.strip()
+        if not p:
+            continue
+        if p.startswith('~'):
+            p = str(HOME / p[2:])
+        path = Path(p)
+        if path.exists() and path.is_dir():
+            roots.append(path)
+    return roots
+
+
+def scan_subdirectories(
+    roots: list,
+    segments: list = None,
+    search: str = '',
+    max_depth: int = 5,
+) -> list:
+    """
+    Scan directories under VSC_DIRECTORIES roots for browsing.
+
+    Args:
+        roots: List of root Path objects (from get_vsc_directory_roots())
+        segments: Path segments to drill into (e.g., ['alfred', 'vsc'])
+        search: Search keyword for fuzzy matching (empty = list all)
+        max_depth: Max recursion depth for flat search (only used when
+                   segments is empty and search is non-empty)
+
+    Returns:
+        List of dicts with 'path' (Path), 'name' (str), 'rel' (str)
+    """
+    segments = segments or []
+    results = []
+    seen = set()
+
+    def _is_browsable(d: Path) -> bool:
+        """Check if a directory should be included in browse results."""
+        return d.is_dir() and not d.name.startswith('.') and d.name not in SKIP_DIRS
+
+    def _add_dir(d: Path, rel_name: str):
+        """Add a directory to results if not already seen."""
+        resolved = str(d.resolve())
+        if resolved not in seen:
+            seen.add(resolved)
+            results.append({
+                'path': d,
+                'name': d.name,
+                'rel': rel_name,
+            })
+
+    def _collect_recursive(base: Path, rel_prefix: str, depth: int):
+        """Recursively collect directories up to max_depth."""
+        if depth > max_depth:
+            return
+        try:
+            for item in sorted(base.iterdir()):
+                if _is_browsable(item):
+                    rel = f'{rel_prefix}/{item.name}' if rel_prefix else item.name
+                    _add_dir(item, rel)
+                    _collect_recursive(item, rel, depth + 1)
+        except (PermissionError, OSError):
+            pass
+
+    if segments:
+        # Drill-down mode: locate the target directory via segments
+        # Start from all roots, narrow down segment by segment
+        current_dirs = list(roots)
+        for seg in segments:
+            next_dirs = []
+            for parent in current_dirs:
+                try:
+                    candidate = parent / seg
+                    if candidate.exists() and candidate.is_dir():
+                        next_dirs.append(candidate)
+                except (PermissionError, OSError):
+                    pass
+            current_dirs = next_dirs
+            if not current_dirs:
+                return []  # Segment not found
+
+        # List direct children of the target directory(ies)
+        for target in current_dirs:
+            try:
+                for item in sorted(target.iterdir()):
+                    if _is_browsable(item):
+                        _add_dir(item, item.name)
+            except (PermissionError, OSError):
+                pass
+
+    elif search:
+        # Flat recursive search mode: scan all roots up to max_depth
+        for root in roots:
+            _collect_recursive(root, '', 1)
+
+    else:
+        # Top-level listing: direct children of all roots
+        for root in roots:
+            try:
+                for item in sorted(root.iterdir()):
+                    if _is_browsable(item):
+                        _add_dir(item, item.name)
+            except (PermissionError, OSError):
+                pass
+
+    return results
 
 
 # ============================================================
