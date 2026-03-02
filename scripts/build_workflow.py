@@ -37,6 +37,7 @@ BUILD_DIR = PROJECT_ROOT / "build"
 # Files to include in the workflow
 WORKFLOW_FILES = {
     # Core scripts (from src/)
+    "shared.py": SRC_DIR / "shared.py",
     "vsc.py": SRC_DIR / "vsc.py",
     "cli.py": SRC_DIR / "cli.py",
     
