@@ -167,29 +167,20 @@ def install_dev_workflow():
     dev_plist = modify_plist_for_dev(source_plist)
     write_plist(dev_plist, dev_workflow_path / "info.plist")
     
-    # Copy dev icon (convert SVG to PNG or use dev version)
+    # Copy dev icon
     print("   Copying dev icon...")
-    dev_icon_src = PUBLIC_DIR / "logo-dev.svg"
-    prod_icon_src = PUBLIC_DIR / "icon.png"
-    # For now, use the prod icon; logo-dev.svg needs to be converted to PNG
-    # TODO: Convert SVG to PNG automatically, for now just copy prod icon
+    dev_icon_src = PUBLIC_DIR / "icon.png"
     if dev_icon_src.exists():
-        # Try to use cairosvg if available, otherwise fall back to prod icon
-        try:
-            import cairosvg
-            cairosvg.svg2png(url=str(dev_icon_src), write_to=str(dev_workflow_path / "icon.png"), output_width=512, output_height=512)
-            print(f"      Converted logo-dev.svg to icon.png")
-        except ImportError:
-            shutil.copy(prod_icon_src, dev_workflow_path / "icon.png")
-            print(f"      Using prod icon (install cairosvg for dev icon)")
+        shutil.copy(dev_icon_src, dev_workflow_path / "icon.png")
+        print(f"      icon.png copied")
     else:
-        shutil.copy(prod_icon_src, dev_workflow_path / "icon.png")
+        print(f"      ⚠️  icon.png not found")
     
     # Create symlinks to source files
     print("   Creating symlinks to source files...")
     
     # Symlink Python scripts
-    for script in ["vsc.py", "cli.py"]:
+    for script in ["vsc.py", "cli.py", "shared.py"]:
         src = SRC_DIR / script
         dst = dev_workflow_path / script
         dst.symlink_to(src)
