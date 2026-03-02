@@ -1,5 +1,41 @@
 # VSC CHANGELOG
 
+## v2.1.0 (2026-03-03)
+
+### ✨ New Feature: Directory Browse Mode
+
+Browse and navigate directories under `VSC_DIRECTORIES` in real-time, right from the `vsc` keyword — no cache rebuild needed.
+
+**How to use:** Type `/` after the `vsc` keyword to enter browse mode.
+
+| Input | Behavior |
+|-------|----------|
+| `vsc /` | List all top-level directories under `VSC_DIRECTORIES` |
+| `vsc /alfred/` | Drill into `alfred`, show its subdirectories |
+| `vsc /alfred/vsc/` | Keep drilling deeper (no depth limit) |
+| `vsc /alf` | Fuzzy search across all directories (up to 5 levels deep) |
+| `vsc /alfred/vs` | Fuzzy search within `alfred`'s subdirectories |
+
+- **Tab autocomplete**: Press Tab on any result to drill into that directory
+- **No more dead ends**: When a directory has no subdirectories, a helpful hint is shown; press Tab to go back up
+- **Smart filtering**: Automatically skips `node_modules`, `__pycache__`, `venv`, `dist`, `build`, `vendor`, `target`, `Pods`, and hidden directories
+- **Zero latency**: Real-time filesystem scanning (~10ms for the entire directory tree)
+
+### ⚙️ New Environment Variable
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VSC_TAB_TAIL_SLASH` | `1` | Controls Tab autocomplete behavior in browse mode. Set to `1` (default) to append trailing `/` — Tab drills into the directory immediately. Set to `0` to omit the trailing `/` — Tab fills the name for further typing/searching. |
+
+Configure in Alfred → Workflows → VSC → Environment Variables.
+
+### 🛠️ Fixes
+
+- Fixed `dev_install.py`: added missing `shared.py` symlink
+- Fixed `dev_install.py`: icon handling no longer crashes when `cairosvg` is unavailable
+
+---
+
 ## v2.0.0 (2026-01-18)
 
 ### 🎉 重大更新：Python 重构版
