@@ -34,6 +34,16 @@ Configure in Alfred → Workflows → VSC → Environment Variables.
 - Fixed `dev_install.py`: added missing `shared.py` symlink
 - Fixed `dev_install.py`: icon handling no longer crashes when `cairosvg` is unavailable
 
+### ⚠️ Troubleshooting
+
+**Tab key opens a Finder-like panel instead of drilling into directories?**
+
+This happens when Alfred's Universal Actions is set to trigger on Tab. To fix:
+
+1. Open **Alfred Preferences → Features → Universal Actions**
+2. Change the **"Show Actions"** shortcut from **Tab** to another key (e.g. `→`)
+3. Tab will now auto-complete as expected in browse mode
+
 ---
 
 ## v2.0.0 (2026-01-18)
