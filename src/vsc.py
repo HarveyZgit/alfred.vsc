@@ -15,6 +15,7 @@ from shared import (
     PATH_TYPE_REMOTE,
     get_cached_records,
     get_git_branch,
+    get_git_branch_for_browse,
     get_records_from_vscode_menu,
     get_vsc_directory_roots,
     ENV_TAB_TAIL_SLASH,
@@ -262,20 +263,25 @@ def format_browse_results(dir_entries: list, segments: list = None) -> dict:
     """
     segments = segments or []
     prefix = '/' + '/'.join(segments) + '/' if segments else '/'
+    roots = get_vsc_directory_roots()
 
     items = []
     for entry in dir_entries:
         dir_path = entry['path']
-        display_name = entry['rel']  # relative name for display
+        display_name = entry['name']
         full_path = str(dir_path)
+        current_path = '/'.join(segments + [entry['rel']]).strip('/')
+        current_path = f'{current_path}/' if current_path else '/'
+        branch = get_git_branch_for_browse(full_path, segments, roots)
         file_uri = f'file://{full_path}'
 
         # Tab autocomplete: drill into this directory
         suffix = '/' if ENV_TAB_TAIL_SLASH else ''
         autocomplete = f'{prefix}{entry["rel"]}{suffix}'
+        subtitle = f'⎇ {branch} | {current_path}' if branch else current_path
         items.append({
             'title': display_name,
-            'subtitle': full_path,
+            'subtitle': subtitle,
             'arg': file_uri,
             'autocomplete': autocomplete,
             'icon': {'path': './assets/folder.png'},

@@ -136,7 +136,6 @@ def get_git_branch(path: str) -> Optional[str]:
         return None
 
     git_head = Path(clean_path) / ".git" / "HEAD"
-
     if not git_head.exists():
         return None
 
@@ -155,6 +154,52 @@ def get_git_branch(path: str) -> Optional[str]:
         return None
     except Exception:
         return None
+
+
+def get_git_branch_for_browse(entry_path: str, segments: list, roots: list) -> Optional[str]:
+    """
+    Get git branch for directory browse mode.
+    Strategy:
+    1. First check if current entry has its own .git directory
+    2. If not, search parent directories based on segments (from back to front, ignoring last search term)
+
+    Args:
+        entry_path: Full path to the directory entry
+        segments: Current path segments from the query (e.g., ['alfred', 'server'] for '/alfred/server')
+        roots: VSC root directories from ENV
+
+    Returns:
+        Branch name or None
+    """
+    clean_path = remove_path_scheme(entry_path)
+    if not clean_path:
+        return None
+
+    # 1. Check if current directory has its own .git
+    branch = get_git_branch(clean_path)
+    if branch:
+        return branch
+
+    # 2. If not, search parent directories based on segments (from back to front)
+    # Include the last segment because segments represents the full path user has drilled into
+    if not segments or not roots:
+        return None
+
+    root = Path(roots[0]) if isinstance(roots[0], str) else roots[0]
+    root = Path(str(root))
+
+    # Search from the last segment to the first, then finally the root
+    for i in range(len(segments), 0, -1):
+        # Build path to check: root/segment[0]/segment[1]/.../segment[i-1]
+        check_path = root
+        for j in range(i):
+            check_path = check_path / segments[j]
+
+        branch = get_git_branch(str(check_path))
+        if branch:
+            return branch
+
+    return None
 
 
 def get_icon(path: str) -> dict:
@@ -489,8 +534,9 @@ def scan_subdirectories(
                         _add_dir(item, item.name)
             except (PermissionError, OSError):
                 pass
-
     elif search:
+        # Non-drill search only scans root-level direct children.
+        max_depth = 1
         # Flat recursive search mode: scan all roots up to max_depth
         for root in roots:
             _collect_recursive(root, '', 1)
