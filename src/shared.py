@@ -40,6 +40,7 @@ else:
 ENV_IDE_PATH = os.environ.get("VSC_IDE_PATH", str(HOME / "Library/Application Support/Code"))
 ENV_DIRECTORIES = os.environ.get("VSC_DIRECTORIES", "")
 ENV_TAB_TAIL_SLASH = os.environ.get("VSC_TAB_TAIL_SLASH", "1") == "1"
+ENV_SHRINK_PATH = os.environ.get("VSC_ENABLE_SHRINK_PATH", "1") == "1"
 
 # Derived paths
 GLOBAL_STORAGE_PATH = Path(ENV_IDE_PATH) / "User/globalStorage"
@@ -171,9 +172,10 @@ def get_git_branch(path: str) -> Optional[str]:
                 return _parse_git_head(git_head)
 
         # Check if .git is a file (worktree) - for subdirs of worktree
-        if git_file.exists() and git_file.is_file():
+        worktree_git_file = current / ".git"
+        if worktree_git_file.is_file():
             try:
-                with open(git_file, "r") as f:
+                with open(worktree_git_file, "r") as f:
                     worktree_content = f.read().strip()
                 if worktree_content.startswith("gitdir: "):
                     git_dir = Path(worktree_content[8:])
@@ -247,10 +249,22 @@ def get_path_prefixes() -> list:
 
 
 def shrink_path(path: str, n: int = 3) -> str:
-    """Shorten a path by replacing common prefixes and limiting path segments."""
+    """
+    Shorten a path by replacing common prefixes and limiting path segments.
+    When VSC_ENABLE_SHRINK_PATH=1: full shrinking with segment limit
+    When VSC_ENABLE_SHRINK_PATH=0: only replace $HOME with ~
+    """
     home = str(HOME)
 
-    # Build prefixes: user config first (higher priority), then defaults
+    # Simple mode: only replace $HOME with ~
+    if not ENV_SHRINK_PATH:
+        if path == home:
+            return "~"
+        if path.startswith(home + "/"):
+            return "~" + path[len(home):]
+        return path
+
+    # Full shrink mode: user config first (higher priority), then defaults
     prefixes = get_path_prefixes()
     prefixes.extend([
         (home, "~"),
