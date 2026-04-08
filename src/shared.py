@@ -128,18 +128,70 @@ def is_file_path(path: str) -> bool:
 def get_git_branch(path: str) -> Optional[str]:
     """
     Get git branch by reading .git/HEAD file directly.
-    This is much faster than executing `git branch` command.
+    Handles:
+    - Normal git repositories
+    - Git worktrees (where .git is a file)
+    - Subdirectories of git repositories
     Returns None if not a git repo or on error.
     """
     clean_path = remove_path_scheme(path)
     if not clean_path:
         return None
 
-    git_head = Path(clean_path) / ".git" / "HEAD"
+    path_obj = Path(clean_path)
 
-    if not git_head.exists():
-        return None
+    # Strategy 1: Direct check (for root or worktree)
+    git_head = path_obj / ".git" / "HEAD"
+    if git_head.exists():
+        return _parse_git_head(git_head)
 
+    # Check if it's a worktree (.git is a file)
+    git_file = path_obj / ".git"
+    if git_file.is_file():
+        # Worktree: .git contains "gitdir: /path/to/actual/.git/worktrees/name"
+        try:
+            with open(git_file, "r") as f:
+                content = f.read().strip()
+            if content.startswith("gitdir: "):
+                git_dir = Path(content[8:])  # Remove "gitdir: "
+                worktree_head = git_dir / "HEAD"
+                if worktree_head.exists():
+                    return _parse_git_head(worktree_head)
+        except Exception:
+            pass
+
+    # Strategy 2: Walk up the directory tree to find git root
+    current = path_obj
+    for _ in range(20):  # Increased depth limit for deep nested projects
+        # Check if .git is a directory (normal repo)
+        git_dir = current / ".git"
+        if git_dir.is_dir():
+            git_head = git_dir / "HEAD"
+            if git_head.exists():
+                return _parse_git_head(git_head)
+
+        # Check if .git is a file (worktree) - for subdirs of worktree
+        if git_file.exists() and git_file.is_file():
+            try:
+                with open(git_file, "r") as f:
+                    worktree_content = f.read().strip()
+                if worktree_content.startswith("gitdir: "):
+                    git_dir = Path(worktree_content[8:])
+                    worktree_head = git_dir / "HEAD"
+                    if worktree_head.exists():
+                        return _parse_git_head(worktree_head)
+            except Exception:
+                pass
+
+        current = current.parent
+        if current == current.parent:
+            break
+
+    return None
+
+
+def _parse_git_head(git_head: Path) -> Optional[str]:
+    """Parse .git/HEAD file and extract branch name."""
     try:
         with open(git_head, "r") as f:
             content = f.read().strip()
@@ -165,6 +217,62 @@ def get_icon(path: str) -> dict:
         return {"path": "./assets/folder.png"}
     else:
         return {"path": "./assets/file.png"}
+
+
+def get_path_prefixes() -> list:
+    """
+    Get configured path prefixes from environment variable.
+    VSC_PATH_PREFIXES is a JSON array of {path, alias} objects.
+    Path supports $HOME placeholder.
+    Example: [{"path": "$HOME/Code/Playground", "alias": "~Playground"}]
+    """
+    env_value = os.environ.get("VSC_PATH_PREFIXES", "")
+    if not env_value:
+        return []
+
+    try:
+        prefixes = json.loads(env_value)
+        result = []
+        for item in prefixes:
+            path = item.get("path", "")
+            alias = item.get("alias", "")
+            if path and alias:
+                # Replace $HOME with actual home path
+                if path.startswith("$HOME"):
+                    path = str(HOME) + path[5:]
+                result.append((path, alias))
+        return result
+    except Exception:
+        return []
+
+
+def shrink_path(path: str, n: int = 3) -> str:
+    """Shorten a path by replacing common prefixes and limiting path segments."""
+    home = str(HOME)
+
+    # Build prefixes: user config first (higher priority), then defaults
+    prefixes = get_path_prefixes()
+    prefixes.extend([
+        (home, "~"),
+    ])
+
+    prefix, rest = "", path
+    for match, alias in prefixes:
+        if path == match:
+            return alias
+        if path.startswith(match + "/"):
+            prefix = alias
+            rest = path[len(match):]
+            break
+
+    segs = [s for s in rest.split("/") if s]
+    if not segs:
+        return prefix or "/"
+
+    if len(segs) <= n:
+        return prefix + "/" + "/".join(segs)
+
+    return prefix + "/…/" + "/".join(segs[-n:])
 
 
 def get_project_name(path: str) -> str:
