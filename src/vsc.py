@@ -199,11 +199,12 @@ def format_for_alfred(records: list) -> dict:
         # Use cached branch info (updated on initial search)
         branch = get_cached_branch(record_id)
 
-        # Format subtitle: ⎇ branch | shrink_path or just shrink_path
+        # Format subtitle: path (possibly shrunk) with optional branch
+        display_path = shrink_path(clean_path)
         if branch:
-            subtitle = f"⎇ {branch} | {shrink_path(clean_path)}"
+            subtitle = f"⎇ {branch} | {display_path}"
         else:
-            subtitle = shrink_path(clean_path)
+            subtitle = display_path
 
         items.append({
             "title": record.get("name", "Unknown"),
@@ -376,6 +377,10 @@ def main():
     # Fallback to VSCode data sources if no cached records
     if not records:
         records = get_all_sources_records()
+        # Persist records to cache for future use
+        cache = read_cache()
+        cache["records"] = records
+        write_cache(cache)
 
     # On initial search (empty query), update branch cache
     # This ensures branches are fresh when user first opens vsc
