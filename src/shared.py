@@ -573,19 +573,6 @@ def scan_subdirectories(
                 'rel': rel_name,
             })
 
-    def _collect_recursive(base: Path, rel_prefix: str, depth: int):
-        """Recursively collect directories up to max_depth."""
-        if depth > max_depth:
-            return
-        try:
-            for item in sorted(base.iterdir()):
-                if _is_browsable(item):
-                    rel = f'{rel_prefix}/{item.name}' if rel_prefix else item.name
-                    _add_dir(item, rel)
-                    _collect_recursive(item, rel, depth + 1)
-        except (PermissionError, OSError):
-            pass
-
     if segments:
         # Drill-down mode: locate the target directory via segments
         # Start from all roots, narrow down segment by segment
@@ -602,30 +589,20 @@ def scan_subdirectories(
             current_dirs = next_dirs
             if not current_dirs:
                 return []  # Segment not found
-
-        # List direct children of the target directory(ies)
-        for target in current_dirs:
-            try:
-                for item in sorted(target.iterdir()):
-                    if _is_browsable(item):
-                        _add_dir(item, item.name)
-            except (PermissionError, OSError):
-                pass
-
-    elif search:
-        # Flat recursive search mode: scan all roots up to max_depth
-        for root in roots:
-            _collect_recursive(root, '', 1)
-
     else:
-        # Top-level listing: direct children of all roots
-        for root in roots:
-            try:
-                for item in sorted(root.iterdir()):
-                    if _is_browsable(item):
-                        _add_dir(item, item.name)
-            except (PermissionError, OSError):
-                pass
+        # No drill-down: use root directories as current directories
+        current_dirs = list(roots)
+
+    # List direct children of current directory(ies)
+    # The 'search' parameter is just a flag; actual fuzzy matching
+    # is done in browse_directories() after getting results
+    for target in current_dirs:
+        try:
+            for item in sorted(target.iterdir()):
+                if _is_browsable(item):
+                    _add_dir(item, item.name)
+        except (PermissionError, OSError):
+            pass
 
     return results
 
