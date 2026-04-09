@@ -11,6 +11,8 @@ from datetime import datetime
 from shared import (
     generate_record_id,
     get_records_from_directories,
+    get_records_from_vscode_db,
+    get_records_from_vscode_menu,
     log_error,
     log_info,
     read_cache,
@@ -19,6 +21,8 @@ from shared import (
 
 import os
 import signal
+import time
+from pathlib import Path
 
 # Result codes
 RESULT_SUCCESS = "rebuild_index_success"
@@ -31,16 +35,20 @@ def cmd_rebuild(drop_all: bool = False):
     log_info(f"Rebuild Mode: {'drop all' if drop_all else 'save trash'}")
 
     try:
-        # Get records from user-specified directories only
+        # Get records from all sources
         dir_records = get_records_from_directories()
+        vscode_db_records = get_records_from_vscode_db(limit=200)
+        menu_records = get_records_from_vscode_menu()
 
-        # Dedupe by path
+        # Dedupe by path - later sources override earlier ones
         seen_paths = set()
         unique_records = []
-        for record in dir_records:
-            if record["path"] not in seen_paths:
-                seen_paths.add(record["path"])
+        for record in reversed(dir_records + vscode_db_records + menu_records):
+            path = record.get("path", "")
+            if path and path not in seen_paths:
+                seen_paths.add(path)
                 unique_records.append(record)
+        unique_records.reverse()  # Restore original order priority
 
         # Handle trash
         cache = read_cache()
@@ -152,40 +160,67 @@ def cmd_selected(record_path: str):
 
 def cmd_serve(port=None, no_open=False):
     """Start the visual management web UI in the background."""
+    import subprocess
+
     # Check if already running
     if os.path.exists(PID_FILE):
         try:
             with open(PID_FILE) as f:
                 pid = int(f.read().strip())
             os.kill(pid, 0)
+            # Server is running, open browser if not --no-open
+            if not no_open:
+                actual_port = _get_actual_port()
+                subprocess.run(["open", f"http://localhost:{actual_port}"], check=False)
             print(f"Server is already running (PID {pid})")
-            print(f"URL: http://localhost:{port or 3847}")
+            print(f"URL: http://localhost:{actual_port or 3847}")
             return
         except (ProcessLookupError, ValueError):
             # Stale PID file
             os.remove(PID_FILE)
 
-    # Daemonize
-    pid = os.fork()
-    if pid == 0:
-        # Child — start server
-        os.setsid()
-        devnull = os.devnull
-        os.dup2(open(devnull, "rb").fileno(), 0)
-        os.dup2(open(devnull, "ab").fileno(), 1)
-        os.dup2(open(devnull, "ab").fileno(), 2)
+    # Get the script directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
 
-        from server import run_server
-        run_server(port=port, open_browser=(not no_open))
-        os._exit(0)
+    # Build command
+    cmd = [sys.executable, os.path.join(script_dir, "server.py")]
+    if port:
+        cmd.extend(["--port", str(port)])
+    if no_open:
+        cmd.append("--no-open")
 
-    # Parent
-    import time
-    time.sleep(1.5)
+    # Start server, redirect output to /dev/null, inherit environment
+    env = os.environ.copy()
+    # Ensure dev mode is enabled
+    env["VSC_DEV_MODE"] = "1"
+    env["VSC_DEV_CACHE_DIR"] = "/tmp/vsc-dev"
+    with open("/dev/null", "w") as devnull:
+        proc = subprocess.Popen(cmd, stdout=devnull, stderr=devnull, env=env)
+
+    # Wait a moment for server to start
+    time.sleep(2)
+
+    # Write PID
     with open(PID_FILE, "w") as f:
-        f.write(str(pid))
-    print(f"🍃 Server started (PID {pid})")
-    print(f"   URL: http://localhost:{port or 3847}")
+        f.write(str(proc.pid))
+
+    actual_port = _get_actual_port()
+    print(f"🍃 Server started (PID {proc.pid})")
+    print(f"   URL: http://localhost:{actual_port or port or 3847}")
+
+
+def _get_actual_port():
+    """Read the actual port from the lock file."""
+    # .serve.port is stored alongside the cache file
+    # In dev mode: /tmp/vsc-dev/.serve.port
+    cache_dir = os.environ.get("VSC_DEV_CACHE_DIR", "/tmp/vsc-dev")
+    port_file = Path(cache_dir) / ".serve.port"
+    try:
+        if port_file.exists():
+            return int(port_file.read_text().strip())
+    except Exception:
+        pass
+    return None
 
 
 def cmd_stop():
@@ -213,6 +248,12 @@ def cmd_stop():
 
 def main():
     parser = argparse.ArgumentParser(description="VSC CLI")
+
+    # Manage commands (Alfred passes as --manage-start / --manage-stop)
+    parser.add_argument("--manage-start", action="store_true", help="Start the web dashboard")
+    parser.add_argument("--manage-stop", action="store_true", help="Stop the web dashboard")
+
+    # Subcommands
     subparsers = parser.add_subparsers(dest="command")
 
     # rebuild command
@@ -227,16 +268,25 @@ def main():
     selected_parser = subparsers.add_parser("selected")
     selected_parser.add_argument("--record", required=True, help="Selected record path")
 
-    # serve command
+    # serve command (direct CLI usage)
     serve_parser = subparsers.add_parser("serve")
     serve_parser.add_argument("--port", type=int, default=None, help="Port to listen on")
     serve_parser.add_argument("--no-open", action="store_true", help="Don't open browser automatically")
 
-    # stop command
+    # stop command (direct CLI usage)
     subparsers.add_parser("stop")
 
     args = parser.parse_args()
 
+    # Handle manage commands first (Alfred integration)
+    if args.manage_start:
+        cmd_serve(port=None, no_open=False)
+        return
+    if args.manage_stop:
+        cmd_stop()
+        return
+
+    # Handle subcommands
     if args.command == "rebuild":
         cmd_rebuild(drop_all=args.drop_all)
     elif args.command == "delete":

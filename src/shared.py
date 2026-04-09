@@ -638,3 +638,35 @@ def get_cached_records() -> list:
     """Get cached records."""
     cache = read_cache()
     return cache.get("records", [])
+
+
+# ============================================================
+# Branch Cache (for vsc.py)
+# ============================================================
+
+def update_branches_cache() -> None:
+    """
+    Update git branch info for all cached records.
+    Called only on initial search (empty query) for performance.
+    """
+    cache = read_cache()
+    records = cache.get("records", [])
+
+    branches = {}
+    for record in records:
+        path = record.get("path", "")
+        branch = get_git_branch(path)
+        if branch:
+            branches[record.get("__vsc_id__", "")] = branch
+
+    cache["branches"] = branches
+    write_cache(cache)
+
+
+def get_git_branch_for_browse(full_path: str, segments: list, roots: list) -> Optional[str]:
+    """
+    Get git branch for a path in browse mode.
+    This is a wrapper around get_git_branch for compatibility with vsc.py.
+    The segments and roots parameters are not used but kept for API compatibility.
+    """
+    return get_git_branch(full_path)

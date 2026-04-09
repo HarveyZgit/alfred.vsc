@@ -153,7 +153,7 @@
 				<integer>102</integer>
 				<key>script</key>
 				<string>$VSC_OPEN_DEFAULT "$(echo "$1" | sed 's|^file://||')"
-/usr/bin/python3 cli.py selected --record="$1"</string>
+./cli.py selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -256,7 +256,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>/usr/bin/python3 cli.py delete --record="$1"</string>
+				<string>./cli.py delete --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -280,7 +280,7 @@
 				<integer>102</integer>
 				<key>script</key>
 				<string>$VSC_OPEN_WITH_CMD "$(echo "$1" | sed 's|^file://||')"
-/usr/bin/python3 cli.py selected --record="$1"</string>
+./cli.py selected --record="$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -305,7 +305,7 @@
 				<key>fixedorder</key>
 				<true/>
 				<key>items</key>
-				<string>[{"title": "rebuild index", "arg": "rebuild", "subtitle": "重建索引"}, {"title": "completely rebuild index", "arg": "rebuild --drop-all", "subtitle": "完全重建索引，同时会清空曾经的删除记录"}, {"title": "🌐 Visual Dashboard", "arg": "manage", "subtitle": "打开可视化项目管理界面"}]</string>
+				<string>[{"title": "rebuild index", "arg": "rebuild", "subtitle": "重建索引"}, {"title": "completely rebuild index", "arg": "rebuild --drop-all", "subtitle": "完全重建索引，同时会清空曾经的删除记录"}, {"title": "🚀 启动管理面板", "arg": "manage_start", "subtitle": "启动 Web 管理面板并打开浏览器"}, {"title": "⏹ 停止管理面板", "arg": "manage_stop", "subtitle": "停止 Web 管理面板"}]</string>
 				<key>keyword</key>
 				<string>vscli</string>
 				<key>matchmode</key>
@@ -334,7 +334,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>if [ "$1" = "manage" ]; then nohup /usr/bin/python3 cli.py manage &gt; /dev/null 2&gt;&amp;1 &amp; echo "Dashboard started at http://localhost:3847"; else /usr/bin/python3 cli.py "$1"; fi</string>
+				<string>if [ "$1" = "manage_start" ]; then nohup ./cli.py --manage-start &gt; /dev/null 2&gt;&amp;1 &amp; echo "Dashboard started at http://localhost:3847"; elif [ "$1" = "manage_stop" ]; then ./cli.py --manage-stop; else ./cli.py "$1"; fi</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>

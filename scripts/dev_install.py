@@ -180,12 +180,18 @@ def install_dev_workflow():
     print("   Creating symlinks to source files...")
     
     # Symlink Python scripts
-    for script in ["vsc.py", "cli.py", "shared.py"]:
+    for script in ["vsc.py", "cli.py", "shared.py", "server.py"]:
         src = SRC_DIR / script
         dst = dev_workflow_path / script
         dst.symlink_to(src)
         print(f"      {script} -> {src}")
-    
+
+    # Symlink web directory (for server static files)
+    web_src = SRC_DIR / "web"
+    web_dst = dev_workflow_path / "web"
+    web_dst.symlink_to(web_src)
+    print(f"      web/ -> {web_src}")
+
     # Symlink assets directory
     assets_src = SRC_DIR / "assets"
     assets_dst = dev_workflow_path / "assets"
@@ -233,7 +239,7 @@ def show_status():
     
     # Check symlinks
     print("   Symlinks:")
-    for name in ["vsc.py", "cli.py", "assets"]:
+    for name in ["vsc.py", "cli.py", "shared.py", "server.py", "web", "assets"]:
         link = dev_path / name
         if link.is_symlink():
             target = link.resolve()

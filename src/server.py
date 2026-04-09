@@ -516,7 +516,7 @@ def handle_add_directory(handler):
 # Request Handler
 # ============================================================
 
-WEB_DIR = Path(__file__).parent
+WEB_DIR = Path(__file__).parent / "web"
 INDEX_FILE = WEB_DIR / "index.html"
 
 
