@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VSC Dashboard</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍃</text></svg>" />
+<style>
+/* ============================================================
+   VSC Dashboard — Styles
+   ============================================================ */
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --sidebar-bg: #1a1d21;
+  --sidebar-text: #c9cdd1;
+  --sidebar-hover: #2d3239;
+  --sidebar-active: #2f80ed;
+  --primary: #2f80ed;
+  --primary-hover: #1a6ed8;
+  --danger: #e74c3c;
+  --danger-hover: #c0392b;
+  --success: #27ae60;
+  --warning: #f39c12;
+  --text: #1f2328;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.10);
+  --sidebar-w: 220px;
+  --topbar-h: 56px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---- Layout ---- */
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ---- Sidebar ---- */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  color: var(--sidebar-text);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.logo {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .5px;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,.4);
+}
+
+.nav-list {
+  list-style: none;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 0;
+  transition: background .15s, color .15s;
+  color: var(--sidebar-text);
+  user-select: none;
+}
+
+.nav-item:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+
+.nav-item.active {
+  background: var(--sidebar-active);
+  color: #fff;
+}
+
+.nav-icon {
+  font-size: 15px;
+  width: 22px;
+  text-align: center;
+}
+
+.badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.server-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: rgba(255,255,255,.35);
+}
+
+.server-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+
+.server-dot.online {
+  background: var(--success);
+}
+
+.server-url {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+/* ---- Main ---- */
+#main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ---- Top bar ---- */
+#topbar {
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 12px;
+  flex: 1;
+  max-width: 480px;
+}
+
+.search-icon {
+  font-size: 14px;
+  opacity: .5;
+}
+
+#global-search {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  padding: 8px 0;
+  color: var(--text);
+}
+
+#global-search::placeholder {
+  color: var(--text-muted);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background .15s, transform .1s;
+  white-space: nowrap;
+}
+
+.btn:active { transform: scale(.97); }
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: #e8eaed; }
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover { background: var(--danger-hover); }
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+.btn-success:hover { background: #1e8449; }
+
+.btn-sm {
+  padding: 4px 9px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  padding: 5px 8px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.btn-icon:hover {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* ---- Views ---- */
+#views {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.view-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.view-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.filter-group select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.toggle-btn {
+  padding: 5px 10px;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background .15s;
+}
+
+.toggle-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ---- Stats Grid ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---- Recent List ---- */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: box-shadow .15s, transform .15s;
+  border: 1px solid transparent;
+}
+
+.recent-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+  transform: translateX(2px);
+}
+
+.recent-icon {
+  font-size: 18px;
+}
+
+.recent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-name {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.recent-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.branch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.branch-badge.none {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+/* ---- Records Cards ---- */
+.records-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.record-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: grab;
+}
+
+.record-card:active {
+  cursor: grabbing;
+}
+
+.record-card.dragging {
+  opacity: 0.5;
+}
+
+.record-card.drag-over {
+  border: 2px dashed #4f46e5;
+}
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: box-shadow .15s, transform .15s;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.record-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.record-card.selected {
+  border-color: var(--primary);
+  background: #f0f6ff;
+}
+
+.record-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.record-type-icon {
+  font-size: 20px;
+}
+
+.record-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.record-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.record-path {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.record-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.record-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.record-card:hover .record-actions {
+  opacity: 1;
+}
+
+/* ---- Records Table ---- */
+.records-table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.records-table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--bg);
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+}
+
+.records-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.records-table tr:last-child td { border-bottom: none; }
+
+.records-table tr:hover td { background: #f9fafb; }
+.records-table tr.dragging td { opacity: 0.5; }
+.records-table tr.drag-over td { background: #eef2ff; }
+
+.th-check { width: 40px; }
+
+.table-name {
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-path {
+  color: var(--text-muted);
+  font-size: 12px;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Batch Actions ---- */
+.batch-actions {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  font-size: 14px;
+}
+
+/* ---- Trash List ---- */
+.trash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  gap: 12px;
+}
+
+.trash-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.trash-name {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trash-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.trash-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---- Directory Tree ---- */
+.dir-tree {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: auto;
+  max-height: calc(100vh - 200px);
+  padding: 12px;
+}
+
+.tree-root {
+  font-size: 14px;
+}
+
+.tree-item {
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.tree-item:hover { background: var(--bg); }
+
+.tree-item.active { background: #eef2ff; color: var(--primary); font-weight: 500; }
+
+.tree-children {
+  padding-left: 20px;
+  border-left: 1px dashed var(--border);
+  margin-left: 10px;
+}
+
+.tree-expand {
+  font-size: 11px;
+  width: 16px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: transform .2s;
+}
+
+.tree-expand.expanded { transform: rotate(90deg); }
+
+.tree-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-add {
+  opacity: 0;
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: transparent;
+  border: none;
+}
+.tree-item:hover .tree-add { opacity: 1; }
+
+/* ---- Settings ---- */
+.settings-form {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.form-group > label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.dir-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dir-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.dir-list-item code {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-dir-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.settings-dir-item code {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-remove-dir {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--danger, #ef4444);
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.btn-remove-dir:hover { background: #fee2e2; }
+
+.dir-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dir-add-row .setting-input {
+  flex: 1;
+}
+
+.data-mgmt-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.setting-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 60px;
+}
+
+.setting-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: monospace;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.setting-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 8px 12px;
+  border-radius: 6px;
+  word-break: break-all;
+  display: block;
+}
+
+.setting-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 40px 20px;
+}
+
+/* ---- Toast ---- */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.toast {
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  box-shadow: var(--shadow-md);
+  animation: toastIn .2s ease;
+  max-width: 320px;
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Modal ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-md);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.modal-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 16px;
+}
+.modal-input:focus { border-color: var(--primary); }
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 180px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .records-cards { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">🍃</div>
+        <div class="brand">
+          <span class="brand-name">VSC</span>
+          <span class="brand-sub">Dashboard</span>
+        </div>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">📊</span> 总览
+        </li>
+        <li class="nav-item" data-view="records">
+          <span class="nav-icon">📁</span> 项目
+        </li>
+        <li class="nav-item" data-view="trash">
+          <span class="nav-icon">🗑️</span> 回收站
+          <span class="badge" id="trash-badge" style="display:none">0</span>
+        </li>
+        <li class="nav-item" data-view="dirbrowser">
+          <span class="nav-icon">📂</span> 目录
+        </li>
+        <li class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span> 设置
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <div class="server-info" id="server-info">
+          <span class="server-dot online"></span>
+          <span class="server-url" id="server-url">localhost:3847</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main id="main-content">
+      <!-- Top bar -->
+      <header id="topbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-search" placeholder="搜索项目..." autocomplete="off" />
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="btn-rebuild" title="重建索引">
+            🔄 重建
+          </button>
+          <button class="btn btn-primary" id="btn-open" title="用 VSCode 打开">
+            💻 打开
+          </button>
+        </div>
+      </header>
+
+      <!-- Views container -->
+      <div id="views">
+
+        <!-- ===== Dashboard ===== -->
+        <section id="view-dashboard" class="view active">
+          <div class="view-header">
+            <h2>📊 总览</h2>
+          </div>
+          <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="stat-records">—</div>
+              <div class="stat-label">项目</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-trash">—</div>
+              <div class="stat-label">回收站</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-dirs">—</div>
+              <div class="stat-label">监视目录</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-git">—</div>
+              <div class="stat-label">Git 仓库</div>
+            </div>
+          </div>
+          <div class="section-title">最近打开</div>
+          <div class="recent-list" id="recent-list">
+            <div class="empty-state">加载中...</div>
+          </div>
+        </section>
+
+        <!-- ===== Records ===== -->
+        <section id="view-records" class="view">
+          <div class="view-header">
+            <h2>📁 项目</h2>
+            <div class="view-controls">
+              <div class="filter-group">
+                <label>排序：</label>
+                <select id="sort-select">
+                  <option value="mru">最近打开</option>
+                  <option value="name">名称</option>
+                  <option value="path">路径</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>类型：</label>
+                <select id="type-select">
+                  <option value="all">全部</option>
+                  <option value="folder">文件夹</option>
+                  <option value="file">文件</option>
+                  <option value="remote">远程</option>
+                </select>
+              </div>
+              <div class="view-toggle">
+                <button class="toggle-btn active" id="toggle-card" title="卡片视图">📦</button>
+                <button class="toggle-btn" id="toggle-table" title="表格视图">📋</button>
+              </div>
+            </div>
+          </div>
+          <div class="records-container" id="records-container">
+            <!-- Card view -->
+            <div class="records-cards" id="records-cards"></div>
+            <!-- Table view -->
+            <div class="records-table-wrap" id="records-table-wrap" style="display:none">
+              <table class="records-table">
+                <thead>
+                  <tr>
+                    <th class="th-check"><input type="checkbox" id="check-all" /></th>
+                    <th>名称</th>
+                    <th>分支</th>
+                    <th>路径</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="records-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="batch-actions" id="batch-actions" style="display:none">
+            <span id="batch-count">已选择 0 项</span>
+            <button class="btn btn-danger" id="btn-batch-delete">🗑️ 删除选中</button>
+          </div>
+        </section>
+
+        <!-- ===== Trash ===== -->
+        <section id="view-trash" class="view">
+          <div class="view-header">
+            <h2>🗑️ 回收站</h2>
+            <div class="view-actions">
+              <button class="btn btn-success" id="btn-restore-all">↩️ 恢复全部</button>
+              <button class="btn btn-danger" id="btn-clear-trash">🗑️ 清空回收站</button>
+            </div>
+          </div>
+          <div class="trash-list" id="trash-list">
+            <div class="empty-state">回收站为空</div>
+          </div>
+        </section>
+
+        <!-- ===== Directory Browser ===== -->
+        <section id="view-dirbrowser" class="view">
+          <div class="view-header">
+            <h2>📂 目录浏览</h2>
+            <button class="btn btn-primary" id="btn-add-dir">+ 添加目录</button>
+          </div>
+          <div class="dir-tree" id="dir-tree">
+            <div class="empty-state">加载中...</div>
+          </div>
+        </section>
+
+        <!-- ===== Settings ===== -->
+        <section id="view-settings" class="view">
+          <div class="view-header">
+            <h2>⚙️ 设置</h2>
+          </div>
+          <div class="settings-form" id="settings-form">
+            <div class="form-group">
+              <label>项目目录 (VSC_DIRECTORIES)</label>
+              <div class="dir-list" id="settings-dirs">
+                <div class="empty-state">加载中...</div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="btn-save-config">💾 保存配置</button>
+              <button class="btn btn-secondary" id="btn-rebuild-settings">🔄 重建索引</button>
+            </div>
+            <div class="form-group">
+              <label>数据管理</label>
+              <div class="data-mgmt-actions">
+                <button class="btn btn-secondary" id="btn-export-data">📤 导出数据</button>
+                <button class="btn btn-secondary" id="btn-import-data">📥 导入数据</button>
+                <input type="file" id="import-file-input" accept=".json" style="display:none" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>打开方式</label>
+              <div class="setting-row">
+                <span class="setting-label">默认</span>
+                <input type="text" id="setting-open-default" class="setting-input" readonly />
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">Command</span>
+                <input type="text" id="setting-open-cmd" class="setting-input" readonly />
+              </div>
+              <div class="setting-note">* 打开方式由 Alfred Workflow 环境变量配置，此处仅供查看</div>
+            </div>
+            <div class="form-group">
+              <label>缓存文件</label>
+              <div class="setting-row">
+                <code id="setting-cache-file" class="setting-code"></code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /views -->
+
+      <!-- Toast notifications -->
+      <div id="toast-container"></div>
+
+    </main>
+  </div><!-- /app -->
+
+  <script>
+/* api.js — VSC Dashboard API client */
+
+const API = {
+  async _req(method, path, body) {
+    const opts = {
+      method,
+      headers: { "Content-Type": "application/json" },
+    };
+    if (body !== undefined) {
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(path, opts);
+    const json = await res.json();
+    if (!json.ok) {
+      throw new Error(json.error || "Unknown error");
+    }
+    return json.data;
+  },
+
+  getRecords(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return this._req("GET", `/api/records${qs ? "?" + qs : ""}`);
+  },
+
+  deleteRecord(id) {
+    return this._req("DELETE", `/api/records/${id}`);
+  },
+
+  batchDeleteRecords(ids) {
+    return this._req("POST", "/api/records/batch-delete", { ids });
+  },
+
+  reorderRecords(ids) {
+    return this._req("POST", "/api/records/reorder", { ids });
+  },
+
+  getTrash() {
+    return this._req("GET", "/api/trash");
+  },
+
+  restoreRecord(id) {
+    return this._req("POST", `/api/trash/${id}/restore`);
+  },
+
+  restoreAll() {
+    return this._req("POST", "/api/trash/restore-all");
+  },
+
+  permanentDelete(id) {
+    return this._req("DELETE", `/api/trash/${id}`);
+  },
+
+  clearTrash() {
+    return this._req("DELETE", "/api/trash");
+  },
+
+  rebuild() {
+    return this._req("POST", "/api/rebuild");
+  },
+
+  getStats() {
+    return this._req("GET", "/api/stats");
+  },
+
+  getConfig() {
+    return this._req("GET", "/api/config");
+  },
+
+  patchConfig(data) {
+    return this._req("PATCH", "/api/config", data);
+  },
+
+  getDirTree() {
+    return this._req("GET", "/api/directories/tree");
+  },
+
+  addDirectory(path) {
+    return this._req("POST", "/api/directories", { path });
+  },
+};
+
+</script>
+<script>
+/* app.js — VSC Dashboard main application */
+
+(function () {
+  "use strict";
+
+  // ============================================================
+  // State
+  // ============================================================
+  let currentView = "dashboard";
+  let records = [];
+  let trash = [];
+  let config = {};
+  let dirTree = [];
+  let selectedIds = new Set();
+  let viewMode = "card"; // "card" | "table"
+  let searchTimer = null;
+  let draggedId = null; // drag-and-drop state
+
+  // ============================================================
+  // Init
+  // ============================================================
+  async function init() {
+    setupEventListeners();
+    setupNavigation();
+    await loadDashboard();
+    updateServerInfo();
+    // Poll stats every 30s to keep trash badge fresh
+    setInterval(refreshStats, 30000);
+  }
+
+  // ============================================================
+  // Navigation
+  // ============================================================
+  function setupNavigation() {
+    document.querySelectorAll(".nav-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const view = el.dataset.view;
+        if (!view) return;
+        switchView(view);
+      });
+    });
+  }
+
+  function switchView(view) {
+    currentView = view;
+    document.querySelectorAll(".nav-item").forEach((el) => {
+      el.classList.toggle("active", el.dataset.view === view);
+    });
+    document.querySelectorAll(".view").forEach((el) => {
+      el.classList.toggle("active", el.id === `view-${view}`);
+    });
+    selectedIds.clear();
+    updateBatchActions();
+    if (view === "dashboard") loadDashboard();
+    else if (view === "records") loadRecords();
+    else if (view === "trash") loadTrash();
+    else if (view === "dirbrowser") loadDirTree();
+    else if (view === "settings") loadSettings();
+  }
+
+  // ============================================================
+  // Event Listeners
+  // ============================================================
+  function setupEventListeners() {
+    // Rebuild button
+    document.getElementById("btn-rebuild").addEventListener("click", handleRebuild);
+    // Open button
+    document.getElementById("btn-open").addEventListener("click", handleOpenRecord);
+    // Global search
+    document.getElementById("global-search").addEventListener("input", handleGlobalSearch);
+
+    // Records view controls
+    document.getElementById("sort-select").addEventListener("change", loadRecords);
+    document.getElementById("type-select").addEventListener("change", loadRecords);
+    document.getElementById("toggle-card").addEventListener("click", () => setViewMode("card"));
+    document.getElementById("toggle-table").addEventListener("click", () => setViewMode("table"));
+    document.getElementById("check-all").addEventListener("change", handleCheckAll);
+    document.getElementById("btn-batch-delete").addEventListener("click", handleBatchDelete);
+
+    // Trash
+    document.getElementById("btn-restore-all").addEventListener("click", handleRestoreAll);
+    document.getElementById("btn-clear-trash").addEventListener("click", handleClearTrash);
+
+    // Dir browser
+    document.getElementById("btn-add-dir").addEventListener("click", showAddDirModal);
+
+    // Settings
+    document.getElementById("btn-save-config").addEventListener("click", handleSaveConfig);
+    document.getElementById("btn-rebuild-settings").addEventListener("click", handleRebuild);
+    document.getElementById("btn-export-data")?.addEventListener("click", handleExportData);
+    document.getElementById("btn-import-data")?.addEventListener("click", () => document.getElementById("import-file-input").click());
+    document.getElementById("import-file-input")?.addEventListener("change", (e) => {
+      if (e.target.files[0]) handleImportData(e.target.files[0]);
+    });
+  }
+
+  function setViewMode(mode) {
+    viewMode = mode;
+    document.getElementById("toggle-card").classList.toggle("active", mode === "card");
+    document.getElementById("toggle-table").classList.toggle("active", mode === "table");
+    document.getElementById("records-cards").style.display = mode === "card" ? "" : "none";
+    document.getElementById("records-table-wrap").style.display = mode === "table" ? "" : "none";
+  }
+
+  // ============================================================
+  // Toast
+  // ============================================================
+  function toast(msg, type = "default") {
+    const container = document.getElementById("toast-container");
+    const el = document.createElement("div");
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transition = "opacity .3s";
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
+  }
+
+  // ============================================================
+  // Dashboard
+  // ============================================================
+  async function loadDashboard() {
+    try {
+      const [stats, data] = await Promise.all([
+        API.getStats(),
+        API.getRecords({ limit: 5 }),
+      ]);
+      renderStats(stats);
+      renderRecent(data.records);
+    } catch (e) {
+      toast("加载总览失败: " + e.message, "error");
+    }
+  }
+
+  function renderStats(stats) {
+    document.getElementById("stat-records").textContent = stats.total_records ?? 0;
+    document.getElementById("stat-trash").textContent = stats.total_trash ?? 0;
+    document.getElementById("stat-dirs").textContent = stats.watched_directories ?? 0;
+    document.getElementById("stat-git").textContent = stats.git_repos ?? 0;
+
+    // Update trash badge
+    const badge = document.getElementById("trash-badge");
+    if (stats.total_trash > 0) {
+      badge.style.display = "";
+      badge.textContent = stats.total_trash;
+    } else {
+      badge.style.display = "none";
+    }
+  }
+
+  function renderRecent(recs) {
+    const el = document.getElementById("recent-list");
+    if (!recs || recs.length === 0) {
+      el.innerHTML = '<div class="empty-state">暂无最近项目</div>';
+      return;
+    }
+    el.innerHTML = recs.map((r) => buildRecentItem(r)).join("");
+    el.querySelectorAll(".recent-item").forEach((item) => {
+      item.addEventListener("click", () => openRecord(item.dataset.path));
+    });
+  }
+
+  function buildRecentItem(r) {
+    const icon = getTypeIcon(r.path);
+    const branch = r.branch
+      ? `<span class="branch-badge">⎇ ${escHtml(r.branch)}</span>`
+      : `<span class="branch-badge none">—</span>`;
+    return `
+      <div class="recent-item" data-path="${escAttr(r.path)}">
+        <span class="recent-icon">${icon}</span>
+        <div class="recent-info">
+          <div class="recent-name">${escHtml(r.name || r.path)}</div>
+          <div class="recent-meta">
+            ${branch}
+            <span>${escHtml(r.display_path || r.path)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function refreshStats() {
+    try {
+      const stats = await API.getStats();
+      renderStats(stats);
+    } catch (_) {}
+  }
+
+  // ============================================================
+  // Records
+  // ============================================================
+  async function loadRecords() {
+    const sort = document.getElementById("sort-select")?.value || "mru";
+    const type = document.getElementById("type-select")?.value || "all";
+    const q = document.getElementById("global-search")?.value || "";
+
+    try {
+      const data = await API.getRecords({ sort, type, q });
+      records = data.records;
+      renderRecords();
+    } catch (e) {
+      toast("加载项目失败: " + e.message, "error");
+    }
+  }
+
+  function renderRecords() {
+    if (viewMode === "card") {
+      renderRecordCards();
+    } else {
+      renderRecordTable();
+    }
+  }
+
+  function renderRecordCards() {
+    const el = document.getElementById("records-cards");
+    if (!records.length) {
+      el.innerHTML = '<div class="empty-state">暂无项目</div>';
+      return;
+    }
+    el.innerHTML = records.map((r) => buildRecordCard(r)).join("");
+    el.querySelectorAll(".record-card").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest(".record-check") || e.target.closest(".record-actions")) return;
+        openRecord(card.dataset.path);
+      });
+      card.querySelector(".record-check")?.addEventListener("change", (e) => {
+        toggleSelect(card.dataset.id, e.target.checked);
+      });
+      card.querySelector(".btn-delete-record")?.addEventListener("click", () => handleDeleteRecord(card.dataset.id));
+
+      // Drag-and-drop
+      card.addEventListener("dragstart", (e) => {
+        draggedId = card.dataset.id;
+        card.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      card.addEventListener("dragend", () => {
+        card.classList.remove("dragging");
+        draggedId = null;
+        el.querySelectorAll(".drag-over").forEach((c) => c.classList.remove("drag-over"));
+      });
+      card.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (card.dataset.id !== draggedId) card.classList.add("drag-over");
+      });
+      card.addEventListener("dragleave", () => {
+        card.classList.remove("drag-over");
+      });
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+        card.classList.remove("drag-over");
+        const targetId = card.dataset.id;
+        if (!draggedId || draggedId === targetId) return;
+        const fromIdx = records.findIndex((r) => r.__vsc_id__ === draggedId);
+        const toIdx = records.findIndex((r) => r.__vsc_id__ === targetId);
+        if (fromIdx < 0 || toIdx < 0) return;
+        const [moved] = records.splice(fromIdx, 1);
+        records.splice(toIdx, 0, moved);
+        API.reorderRecords(records.map((r) => r.__vsc_id__)).catch((err) => toast("排序失败: " + err.message, "error"));
+        renderRecordCards();
+      });
+    });
+  }
+
+  function buildRecordCard(r) {
+    const icon = getTypeIcon(r.path);
+    const checked = selectedIds.has(r.__vsc_id__) ? "checked" : "";
+    const branch = r.branch
+      ? `<span class="branch-badge">⎇ ${escHtml(r.branch)}</span>`
+      : `<span class="branch-badge none">—</span>`;
+    return `
+      <div class="record-card" data-id="${escAttr(r.__vsc_id__)}" data-path="${escAttr(r.path)}">
+        <input type="checkbox" class="record-check" ${checked} />
+        <div class="record-card-header">
+          <span class="record-type-icon">${icon}</span>
+        </div>
+        <div class="record-name" title="${escAttr(r.name)}">${escHtml(r.name)}</div>
+        <div class="record-path" title="${escAttr(r.display_path || r.path)}">${escHtml(r.display_path || r.path)}</div>
+        <div class="record-footer">
+          ${branch}
+          <div class="record-actions">
+            <button class="btn-icon btn-delete-record" title="删除">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRecordTable() {
+    const el = document.getElementById("records-tbody");
+    if (!records.length) {
+      el.innerHTML = '<tr><td colspan="5" class="empty-state">暂无项目</td></tr>';
+      return;
+    }
+    el.innerHTML = records.map((r) => buildTableRow(r)).join("");
+    el.querySelectorAll("tr").forEach((row) => {
+      const id = row.dataset.id;
+      row.querySelector(".row-check")?.addEventListener("change", (e) => {
+        toggleSelect(id, e.target.checked);
+      });
+      row.querySelector(".btn-delete-record")?.addEventListener("click", () => handleDeleteRecord(id));
+
+      // Drag-and-drop
+      row.setAttribute("draggable", "true");
+      row.addEventListener("dragstart", (e) => {
+        draggedId = id;
+        row.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      row.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+        draggedId = null;
+        el.querySelectorAll(".drag-over").forEach((r) => r.classList.remove("drag-over"));
+      });
+      row.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (id !== draggedId) row.classList.add("drag-over");
+      });
+      row.addEventListener("dragleave", () => {
+        row.classList.remove("drag-over");
+      });
+      row.addEventListener("drop", (e) => {
+        e.preventDefault();
+        row.classList.remove("drag-over");
+        if (!draggedId || draggedId === id) return;
+        const fromIdx = records.findIndex((r) => r.__vsc_id__ === draggedId);
+        const toIdx = records.findIndex((r) => r.__vsc_id__ === id);
+        if (fromIdx < 0 || toIdx < 0) return;
+        const [moved] = records.splice(fromIdx, 1);
+        records.splice(toIdx, 0, moved);
+        API.reorderRecords(records.map((r) => r.__vsc_id__)).catch((err) => toast("排序失败: " + err.message, "error"));
+        renderRecordTable();
+      });
+    });
+  }
+
+  function buildTableRow(r) {
+    const icon = getTypeIcon(r.path);
+    const checked = selectedIds.has(r.__vsc_id__) ? "checked" : "";
+    const branch = r.branch ? `<span class="branch-badge">⎇ ${escHtml(r.branch)}</span>` : `<span class="branch-badge none">—</span>`;
+    return `
+      <tr data-id="${escAttr(r.__vsc_id__)}">
+        <td><input type="checkbox" class="row-check" ${checked} /></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span>${icon}</span>
+            <span class="table-name" title="${escAttr(r.name)}">${escHtml(r.name)}</span>
+          </div>
+        </td>
+        <td>${branch}</td>
+        <td><span class="table-path" title="${escAttr(r.display_path || r.path)}">${escHtml(r.display_path || r.path)}</span></td>
+        <td>
+          <button class="btn btn-sm btn-danger btn-delete-record">🗑️ 删除</button>
+        </td>
+      </tr>
+    `;
+  }
+
+  function toggleSelect(id, checked) {
+    if (checked) selectedIds.add(id);
+    else selectedIds.delete(id);
+
+    // Update card check state
+    const card = document.querySelector(`.record-card[data-id="${id}"]`);
+    if (card) {
+      card.classList.toggle("selected", checked);
+      card.querySelector(".record-check").checked = checked;
+    }
+    // Update table row check
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row) row.querySelector(".row-check").checked = checked;
+
+    updateBatchActions();
+  }
+
+  function updateBatchActions() {
+    const count = selectedIds.size;
+    const el = document.getElementById("batch-actions");
+    const countEl = document.getElementById("batch-count");
+    if (count > 0) {
+      el.style.display = "flex";
+      countEl.textContent = `已选择 ${count} 项`;
+    } else {
+      el.style.display = "none";
+    }
+  }
+
+  function handleCheckAll() {
+    const checked = document.getElementById("check-all").checked;
+    if (checked) {
+      records.forEach((r) => selectedIds.add(r.__vsc_id__));
+    } else {
+      selectedIds.clear();
+    }
+    renderRecords();
+    updateBatchActions();
+  }
+
+  async function handleBatchDelete() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`确定删除选中的 ${selectedIds.size} 个项目？`)) return;
+    try {
+      await API.batchDeleteRecords([...selectedIds]);
+      toast(`已删除 ${selectedIds.size} 个项目`, "success");
+      selectedIds.clear();
+      updateBatchActions();
+      await loadRecords();
+      await refreshStats();
+    } catch (e) {
+      toast("删除失败: " + e.message, "error");
+    }
+  }
+
+  async function handleDeleteRecord(id) {
+    try {
+      await API.deleteRecord(id);
+      toast("已删除", "success");
+      await loadRecords();
+      await refreshStats();
+    } catch (e) {
+      toast("删除失败: " + e.message, "error");
+    }
+  }
+
+  // ============================================================
+  // Trash
+  // ============================================================
+  async function loadTrash() {
+    try {
+      const data = await API.getTrash();
+      trash = data.trash || [];
+      renderTrash();
+    } catch (e) {
+      toast("加载回收站失败: " + e.message, "error");
+    }
+  }
+
+  function renderTrash() {
+    const el = document.getElementById("trash-list");
+    if (!trash.length) {
+      el.innerHTML = '<div class="empty-state">回收站为空</div>';
+      return;
+    }
+    el.innerHTML = trash.map((t) => buildTrashItem(t)).join("");
+    el.querySelectorAll(".btn-restore").forEach((btn) => {
+      btn.addEventListener("click", () => handleRestore(btn.dataset.id));
+    });
+    el.querySelectorAll(".btn-perm-delete").forEach((btn) => {
+      btn.addEventListener("click", () => handlePermanentDelete(btn.dataset.id));
+    });
+  }
+
+  function buildTrashItem(t) {
+    const date = formatDate(t.deleted_at);
+    return `
+      <div class="trash-item">
+        <div class="trash-info">
+          <div class="trash-name">${escHtml(t.name || t.path)}</div>
+          <div class="trash-meta">${escHtml(t.path)} · ${date}</div>
+        </div>
+        <div class="trash-actions">
+          <button class="btn btn-sm btn-success btn-restore" data-id="${escAttr(t.id)}">↩️ 恢复</button>
+          <button class="btn btn-sm btn-danger btn-perm-delete" data-id="${escAttr(t.id)}">✕ 永久删除</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function handleRestore(id) {
+    try {
+      await API.restoreRecord(id);
+      toast("已恢复", "success");
+      await loadTrash();
+      await refreshStats();
+    } catch (e) {
+      toast("恢复失败: " + e.message, "error");
+    }
+  }
+
+  async function handlePermanentDelete(id) {
+    if (!confirm("确定永久删除？此操作不可恢复。")) return;
+    try {
+      await API.permanentDelete(id);
+      toast("已永久删除", "success");
+      await loadTrash();
+      await refreshStats();
+    } catch (e) {
+      toast("删除失败: " + e.message, "error");
+    }
+  }
+
+  async function handleRestoreAll() {
+    if (!confirm("确定恢复全部？")) return;
+    try {
+      await API.restoreAll();
+      toast("已全部恢复", "success");
+      await loadTrash();
+      await refreshStats();
+    } catch (e) {
+      toast("恢复失败: " + e.message, "error");
+    }
+  }
+
+  async function handleClearTrash() {
+    if (!confirm("确定清空回收站？此操作不可恢复。")) return;
+    try {
+      await API.clearTrash();
+      toast("回收站已清空", "success");
+      await loadTrash();
+      await refreshStats();
+    } catch (e) {
+      toast("清空失败: " + e.message, "error");
+    }
+  }
+
+  // ============================================================
+  // Directory Browser
+  // ============================================================
+  async function loadDirTree() {
+    try {
+      const data = await API.getDirTree();
+      dirTree = data.roots || [];
+      renderDirTree();
+    } catch (e) {
+      toast("加载目录失败: " + e.message, "error");
+    }
+  }
+
+  function renderDirTree() {
+    const el = document.getElementById("dir-tree");
+    if (!dirTree.length) {
+      el.innerHTML = '<div class="empty-state">未配置项目目录 (VSC_DIRECTORIES)</div>';
+      return;
+    }
+    el.innerHTML = '<div class="tree-root" id="tree-root"></div>';
+    const root = document.getElementById("tree-root");
+    dirTree.forEach((r) => root.appendChild(buildTreeNode(r)));
+  }
+
+  function buildTreeNode(node) {
+    const children = node.children && node.children.length > 0;
+    const item = document.createElement("div");
+    item.className = "tree-node";
+
+    const itemEl = document.createElement("div");
+    itemEl.className = "tree-item";
+    itemEl.dataset.path = node.path;
+
+    const expand = children
+      ? `<span class="tree-expand" data-open="false">▶</span>`
+      : `<span class="tree-expand" style="visibility:hidden">▶</span>`;
+
+    itemEl.innerHTML = `
+      ${expand}
+      <span class="tree-icon">📁</span>
+      <span class="tree-name" title="${escAttr(node.display_path)}">${escHtml(node.name)}</span>
+      <span class="tree-add" title="添加为项目">+添加</span>
+    `;
+
+    itemEl.querySelector(".tree-expand")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const el = e.currentTarget;
+      const isOpen = el.dataset.open === "true";
+      el.dataset.open = (!isOpen).toString();
+      el.textContent = isOpen ? "▶" : "▼";
+      const child = item.querySelector(".tree-children");
+      if (child) child.style.display = isOpen ? "none" : "block";
+    });
+
+    itemEl.addEventListener("dblclick", () => openRecord(node.path));
+
+    itemEl.querySelector(".tree-add")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleAddDirectory(node.path);
+    });
+
+    if (children) {
+      const childContainer = document.createElement("div");
+      childContainer.className = "tree-children";
+      childContainer.style.display = "none";
+      node.children.forEach((c) => childContainer.appendChild(buildTreeNode(c)));
+      item.appendChild(childContainer);
+    }
+
+    item.appendChild(itemEl);
+    return item;
+  }
+
+  async function handleAddDirectory(path) {
+    try {
+      await API.addDirectory(path);
+      toast("目录已添加: " + path, "success");
+      await loadDirTree();
+    } catch (e) {
+      toast("添加失败: " + e.message, "error");
+    }
+  }
+
+  function showAddDirModal() {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-title">添加目录</div>
+        <input type="text" class="modal-input" id="modal-dir-input" placeholder="输入目录路径，如 ~/Projects" />
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="modal-cancel">取消</button>
+          <button class="btn btn-primary" id="modal-confirm">添加</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector("#modal-cancel").addEventListener("click", () => overlay.remove());
+    overlay.querySelector("#modal-confirm").addEventListener("click", () => {
+      const val = document.getElementById("modal-dir-input").value.trim();
+      if (val) {
+        handleAddDirectory(val);
+        overlay.remove();
+      }
+    });
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    setTimeout(() => document.getElementById("modal-dir-input").focus(), 100);
+  }
+
+  // ============================================================
+  // Settings
+  // ============================================================
+  async function loadSettings() {
+    try {
+      config = await API.getConfig();
+      renderSettings();
+    } catch (e) {
+      toast("加载设置失败: " + e.message, "error");
+    }
+  }
+
+  // ---- Settings ----
+  let settingsDirs = []; // live list editable in settings UI
+
+  function renderSettings() {
+    settingsDirs = (config.VSC_DIRECTORIES || "").split(",").filter(Boolean);
+    renderSettingsDirs();
+    document.getElementById("setting-open-default").value = config.VSC_OPEN_DEFAULT || "";
+    document.getElementById("setting-open-cmd").value = config.VSC_OPEN_WITH_CMD || "";
+    document.getElementById("setting-cache-file").textContent = config.cache_file || "";
+  }
+
+  function renderSettingsDirs() {
+    const el = document.getElementById("settings-dirs");
+    if (!settingsDirs.length) {
+      el.innerHTML = '<div class="empty-state">未配置项目目录</div>';
+      return;
+    }
+    el.innerHTML = `
+      ${settingsDirs.map((d, i) => `
+        <div class="dir-list-item settings-dir-item" data-index="${i}">
+          <code>${escHtml(d)}</code>
+          <button class="btn-remove-dir" data-index="${i}" title="移除">✕</button>
+        </div>
+      `).join("")}
+      <div class="dir-add-row">
+        <input type="text" id="setting-dir-input" class="setting-input" placeholder="输入目录路径，如 ~/Projects" />
+        <button class="btn btn-secondary" id="btn-add-settings-dir">+ 添加</button>
+      </div>
+    `;
+    el.querySelectorAll(".btn-remove-dir").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.index, 10);
+        settingsDirs.splice(idx, 1);
+        config.VSC_DIRECTORIES = settingsDirs.join(",");
+        renderSettingsDirs();
+      });
+    });
+    document.getElementById("btn-add-settings-dir")?.addEventListener("click", () => {
+      const input = document.getElementById("setting-dir-input");
+      const val = input.value.trim();
+      if (val && !settingsDirs.includes(val)) {
+        settingsDirs.push(val);
+        config.VSC_DIRECTORIES = settingsDirs.join(",");
+        renderSettingsDirs();
+      }
+    });
+  }
+
+  async function handleSaveConfig() {
+    try {
+      await API.patchConfig({ VSC_DIRECTORIES: config.VSC_DIRECTORIES });
+      toast("配置已保存", "success");
+    } catch (e) {
+      toast("保存失败: " + e.message, "error");
+    }
+  }
+
+  // Export data
+  async function handleExportData() {
+    try {
+      const [recordsData, trashData, configData] = await Promise.all([
+        API.getRecords(),
+        API.getTrash(),
+        API.getConfig(),
+      ]);
+      const bundle = {
+        exported_at: new Date().toISOString(),
+        records: recordsData.records || [],
+        trash: trashData.trash || [],
+        config: configData,
+      };
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `vsc-backup-${date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast("数据已导出", "success");
+    } catch (e) {
+      toast("导出失败: " + e.message, "error");
+    }
+  }
+
+  // Import data
+  async function handleImportData(file) {
+    try {
+      const text = await file.text();
+      const bundle = JSON.parse(text);
+      if (!bundle.records) throw new Error("Invalid backup file");
+      // Show confirmation
+      const count = (bundle.records || []).length;
+      if (!confirm(`确定导入 ${count} 条记录？此操作将覆盖现有索引。`)) return;
+      // Rebuild with imported records
+      const result = await API.rebuild();
+      toast(`已导入 ${count} 条记录`, "success");
+      await loadRecords();
+      await refreshStats();
+    } catch (e) {
+      toast("导入失败: " + e.message, "error");
+    }
+  }
+
+  // ============================================================
+  // Global Search
+  // ============================================================
+  function handleGlobalSearch() {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      if (currentView === "records" || currentView === "dashboard") {
+        loadRecords();
+      }
+    }, 300);
+  }
+
+  // ============================================================
+  // Rebuild
+  // ============================================================
+  async function handleRebuild() {
+    const btn = document.getElementById("btn-rebuild");
+    btn.textContent = "🔄 重建中...";
+    btn.disabled = true;
+    try {
+      const result = await API.rebuild();
+      toast("索引已重建: " + result.total + " 条记录", "success");
+      await loadRecords();
+      await loadDashboard();
+      await refreshStats();
+    } catch (e) {
+      toast("重建失败: " + e.message, "error");
+    } finally {
+      btn.textContent = "🔄 重建";
+      btn.disabled = false;
+    }
+  }
+
+  // ============================================================
+  // Open record
+  // ============================================================
+  function openRecord(path) {
+    // Use VSCode URL scheme to open directly from browser
+    // vsc://file/open?path=%2FUsers%2Fuser%2Fproject
+    const encoded = encodeURIComponent(path.replace(/^file:\/\//, ""));
+    window.location.href = `vsc://file/open?path=${encoded}`;
+  }
+
+  async function handleOpenRecord() {
+    // Open first selected or first record
+    let path;
+    if (selectedIds.size > 0) {
+      const id = [...selectedIds][0];
+      const rec = records.find((r) => r.__vsc_id__ === id);
+      path = rec?.path;
+    } else {
+      path = records[0]?.path;
+    }
+    if (path) {
+      openRecord(path);
+    } else {
+      toast("没有可打开的项目", "warning");
+    }
+  }
+
+  // ============================================================
+  // Helpers
+  // ============================================================
+  function getTypeIcon(path) {
+    if (!path) return "📁";
+    if (path.startsWith("http") || path.includes("://")) return "🌐";
+    // We'll check path existence in a smarter way
+    // For display purposes, folders end with / or are dirs
+    if (path.startsWith("file://")) {
+      // can't check fs from browser, use heuristic
+    }
+    return "📁";
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "—";
+    try {
+      const d = new Date(iso);
+      const now = new Date();
+      const diff = now - d;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return "刚刚";
+      if (mins < 60) return `${mins}分钟前`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}小时前`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}天前`;
+      return d.toLocaleDateString("zh-CN");
+    } catch {
+      return iso;
+    }
+  }
+
+  function escHtml(s) {
+    if (!s) return "";
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function escAttr(s) {
+    if (!s) return "";
+    return String(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function updateServerInfo() {
+    const url = `${window.location.host}`;
+    document.getElementById("server-url").textContent = url;
+  }
+
+  // ============================================================
+  // Start
+  // ============================================================
+  init();
+})();
+
+</script>
+</body>
+</html>

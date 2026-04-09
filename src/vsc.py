@@ -15,7 +15,7 @@ from shared import (
     PATH_TYPE_REMOTE,
     get_cached_records,
     get_git_branch,
-    get_records_from_vscode_db,
+    get_git_branch_for_browse,
     get_records_from_vscode_menu,
     get_vsc_directory_roots,
     ENV_TAB_TAIL_SLASH,
@@ -25,32 +25,13 @@ from shared import (
     read_cache,
     remove_path_scheme,
     scan_subdirectories,
-    shrink_path,
     write_cache,
+    update_branches_cache,
 )
 
 # ============================================================
 # Branch Cache
 # ============================================================
-
-def update_branches_cache() -> None:
-    """
-    Update git branch info for all cached records.
-    Called only on initial search (empty query) for performance.
-    """
-    cache = read_cache()
-    records = cache.get("records", [])
-
-    branches = {}
-    for record in records:
-        path = record.get("path", "")
-        branch = get_git_branch(path)
-        if branch:
-            branches[record.get("__vsc_id__", "")] = branch
-
-    cache["branches"] = branches
-    write_cache(cache)
-
 
 def get_cached_branch(record_id: str) -> Optional[str]:
     """Get cached branch for a record."""
@@ -190,17 +171,27 @@ def filter_records(records: list, input_info: dict) -> list:
 
 def format_for_alfred(records: list) -> dict:
     """Format records for Alfred output."""
+    from pathlib import Path
+    HOME = str(Path.home())
+    
     items = []
     for record in records:
         path = record.get("path", "")
         clean_path = remove_path_scheme(path)
         record_id = record.get("__vsc_id__", "")
 
-        # Use cached branch info (updated on initial search)
-        branch = get_cached_branch(record_id)
+        # 替换HOME为~
+        display_path = clean_path.replace(HOME, "~", 1) if clean_path.startswith(HOME) else clean_path
 
-        # Format subtitle: path (possibly shrunk) with optional branch
-        display_path = shrink_path(clean_path)
+        # Use cached branch info (updated on initial search), fallback to record's pre-fetched branch
+        branch = get_cached_branch(record_id) or record.get("branch")
+        
+        # 兜底：如果还是没有分支，实时获取一次（只对git仓库生效）
+        if not branch:
+            from shared import get_git_branch
+            branch = get_git_branch(path)
+
+        # Format subtitle: ⎇ branch | path or just path
         if branch:
             subtitle = f"⎇ {branch} | {display_path}"
         else:
@@ -263,22 +254,32 @@ def format_browse_results(dir_entries: list, segments: list = None) -> dict:
     Returns:
         Alfred Script Filter JSON dict
     """
+    from pathlib import Path
+    HOME = str(Path.home())
+    
     segments = segments or []
     prefix = '/' + '/'.join(segments) + '/' if segments else '/'
+    roots = get_vsc_directory_roots()
 
     items = []
     for entry in dir_entries:
         dir_path = entry['path']
-        display_name = entry['rel']  # relative name for display
+        display_name = entry['name']
         full_path = str(dir_path)
+        # 替换HOME为~
+        display_path = full_path.replace(HOME, "~", 1) if full_path.startswith(HOME) else full_path
+        current_path = '/'.join(segments + [entry['rel']]).strip('/')
+        current_path = f'{current_path}/' if current_path else '/'
+        branch = get_git_branch_for_browse(full_path, segments, roots)
         file_uri = f'file://{full_path}'
 
         # Tab autocomplete: drill into this directory
         suffix = '/' if ENV_TAB_TAIL_SLASH else ''
         autocomplete = f'{prefix}{entry["rel"]}{suffix}'
+        subtitle = f'⎇ {branch} | {display_path}' if branch else display_path
         items.append({
             'title': display_name,
-            'subtitle': full_path,
+            'subtitle': subtitle,
             'arg': file_uri,
             'autocomplete': autocomplete,
             'icon': {'path': './assets/folder.png'},
@@ -339,25 +340,6 @@ def browse_directories(query: str) -> dict:
 # Main Entry Point
 # ============================================================
 
-def get_all_sources_records() -> list:
-    """
-    Get records from all available sources.
-    Used when cache is empty to build initial records from VSCode's data.
-    """
-    # Try VSCode DB first (most comprehensive, up to 200 entries)
-    records = get_records_from_vscode_db(limit=200)
-
-    # Also try menu data (may have entries DB doesn't have)
-    menu_records = get_records_from_vscode_menu()
-    if menu_records:
-        seen = {r.get("path", "") for r in records}
-        for record in menu_records:
-            if record.get("path", "") not in seen:
-                records.append(record)
-
-    return records
-
-
 def main():
     """Main entry point for search."""
     query = sys.argv[1] if len(sys.argv) > 1 else ""
@@ -374,13 +356,9 @@ def main():
     # Get records from cache
     records = get_cached_records()
 
-    # Fallback to VSCode data sources if no cached records
+    # Fallback to menu if no cached records
     if not records:
-        records = get_all_sources_records()
-        # Persist records to cache for future use
-        cache = read_cache()
-        cache["records"] = records
-        write_cache(cache)
+        records = get_records_from_vscode_menu()
 
     # On initial search (empty query), update branch cache
     # This ensures branches are fresh when user first opens vsc

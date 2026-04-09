@@ -305,7 +305,7 @@
 				<key>fixedorder</key>
 				<true/>
 				<key>items</key>
-				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"}]</string>
+				<string>[{"title": "rebuild index", "arg": "rebuild", "subtitle": "重建索引"}, {"title": "completely rebuild index", "arg": "rebuild --drop-all", "subtitle": "完全重建索引，同时会清空曾经的删除记录"}, {"title": "🌐 Visual Dashboard", "arg": "manage", "subtitle": "打开可视化项目管理界面"}]</string>
 				<key>keyword</key>
 				<string>vscli</string>
 				<key>matchmode</key>
@@ -334,7 +334,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>/usr/bin/python3 cli.py $1</string>
+				<string>if [ "$1" = "manage" ]; then nohup /usr/bin/python3 cli.py manage &gt; /dev/null 2&gt;&amp;1 &amp; echo "Dashboard started at http://localhost:3847"; else /usr/bin/python3 cli.py "$1"; fi</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -468,79 +468,79 @@
 		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
 		<dict>
 			<key>xpos</key>
-			<real>345</real>
+			<real>345.0</real>
 			<key>ypos</key>
-			<real>515</real>
+			<real>515.0</real>
 		</dict>
 		<key>1DB7B2E5-9BD3-4652-819B-293D4F03C795</key>
 		<dict>
 			<key>xpos</key>
-			<real>615</real>
+			<real>615.0</real>
 			<key>ypos</key>
-			<real>30</real>
+			<real>30.0</real>
 		</dict>
 		<key>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</key>
 		<dict>
 			<key>xpos</key>
-			<real>615</real>
+			<real>615.0</real>
 			<key>ypos</key>
-			<real>170</real>
+			<real>170.0</real>
 		</dict>
 		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>745.0</real>
 			<key>ypos</key>
-			<real>535</real>
+			<real>535.0</real>
 		</dict>
 		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
 		<dict>
 			<key>xpos</key>
-			<real>875</real>
+			<real>875.0</real>
 			<key>ypos</key>
-			<real>530</real>
+			<real>530.0</real>
 		</dict>
 		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
 		<dict>
 			<key>xpos</key>
-			<real>1090</real>
+			<real>1090.0</real>
 			<key>ypos</key>
-			<real>520</real>
+			<real>520.0</real>
 		</dict>
 		<key>E31A4D5C-24E1-477A-9DFB-266646FADB99</key>
 		<dict>
 			<key>xpos</key>
-			<real>620</real>
+			<real>620.0</real>
 			<key>ypos</key>
-			<real>325</real>
+			<real>325.0</real>
 		</dict>
 		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
 		<dict>
 			<key>xpos</key>
-			<real>970</real>
+			<real>970.0</real>
 			<key>ypos</key>
-			<real>560</real>
+			<real>560.0</real>
 		</dict>
 		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
 		<dict>
 			<key>xpos</key>
-			<real>580</real>
+			<real>580.0</real>
 			<key>ypos</key>
-			<real>515</real>
+			<real>515.0</real>
 		</dict>
 		<key>FB22746E-5A56-4316-999C-68D172F71639</key>
 		<dict>
 			<key>xpos</key>
-			<real>340</real>
+			<real>340.0</real>
 			<key>ypos</key>
-			<real>130</real>
+			<real>130.0</real>
 		</dict>
 		<key>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</key>
 		<dict>
 			<key>xpos</key>
-			<real>80</real>
+			<real>80.0</real>
 			<key>ypos</key>
-			<real>130</real>
+			<real>130.0</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
@@ -548,11 +548,11 @@
 	<key>variables</key>
 	<dict>
 		<key>VSC_DIRECTORIES</key>
-		<string>~/Code</string>
+		<string></string>
 		<key>VSC_DIR_BAK____</key>
 		<string></string>
 		<key>VSC_OPEN_DEFAULT</key>
-		<string>/Users/harvey/.antigravity/antigravity/bin/agy</string>
+		<string>open -a "Visual Studio Code"</string>
 		<key>VSC_OPEN_WITH_CMD</key>
 		<string></string>
 	</dict>

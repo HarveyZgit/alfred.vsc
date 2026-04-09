@@ -40,12 +40,19 @@ WORKFLOW_FILES = {
     "shared.py": SRC_DIR / "shared.py",
     "vsc.py": SRC_DIR / "vsc.py",
     "cli.py": SRC_DIR / "cli.py",
-    
+    "server.py": SRC_DIR / "server.py",
+
+    # Web UI (served by server.py, at workflow root)
+    "api.js": SRC_DIR / "web" / "api.js",
+    "app.js": SRC_DIR / "web" / "app.js",
+    "index.html": SRC_DIR / "web" / "index.html",
+    "styles.css": SRC_DIR / "web" / "styles.css",
+
     # Assets (from src/assets/)
     "assets/folder.png": SRC_DIR / "assets" / "folder.png",
     "assets/file.png": SRC_DIR / "assets" / "file.png",
     "assets/remote.png": SRC_DIR / "assets" / "remote.png",
-    
+
     # Workflow configuration (from public/)
     "info.plist": PUBLIC_DIR / "info.plist",
     "icon.png": PUBLIC_DIR / "icon.png",
