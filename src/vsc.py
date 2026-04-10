@@ -15,6 +15,7 @@ from shared import (
     PATH_TYPE_REMOTE,
     get_cached_records,
     get_git_branch,
+    get_records_from_vscode_db,
     get_records_from_vscode_menu,
     get_vsc_directory_roots,
     ENV_TAB_TAIL_SLASH,
@@ -24,6 +25,7 @@ from shared import (
     read_cache,
     remove_path_scheme,
     scan_subdirectories,
+    shrink_path,
     write_cache,
 )
 
@@ -197,11 +199,12 @@ def format_for_alfred(records: list) -> dict:
         # Use cached branch info (updated on initial search)
         branch = get_cached_branch(record_id)
 
-        # Format subtitle: ⎇ branch | path or just path
+        # Format subtitle: path (possibly shrunk) with optional branch
+        display_path = shrink_path(clean_path)
         if branch:
-            subtitle = f"⎇ {branch} | {clean_path}"
+            subtitle = f"⎇ {branch} | {display_path}"
         else:
-            subtitle = clean_path
+            subtitle = display_path
 
         items.append({
             "title": record.get("name", "Unknown"),
@@ -336,6 +339,25 @@ def browse_directories(query: str) -> dict:
 # Main Entry Point
 # ============================================================
 
+def get_all_sources_records() -> list:
+    """
+    Get records from all available sources.
+    Used when cache is empty to build initial records from VSCode's data.
+    """
+    # Try VSCode DB first (most comprehensive, up to 200 entries)
+    records = get_records_from_vscode_db(limit=200)
+
+    # Also try menu data (may have entries DB doesn't have)
+    menu_records = get_records_from_vscode_menu()
+    if menu_records:
+        seen = {r.get("path", "") for r in records}
+        for record in menu_records:
+            if record.get("path", "") not in seen:
+                records.append(record)
+
+    return records
+
+
 def main():
     """Main entry point for search."""
     query = sys.argv[1] if len(sys.argv) > 1 else ""
@@ -352,9 +374,13 @@ def main():
     # Get records from cache
     records = get_cached_records()
 
-    # Fallback to menu if no cached records
+    # Fallback to VSCode data sources if no cached records
     if not records:
-        records = get_records_from_vscode_menu()
+        records = get_all_sources_records()
+        # Persist records to cache for future use
+        cache = read_cache()
+        cache["records"] = records
+        write_cache(cache)
 
     # On initial search (empty query), update branch cache
     # This ensures branches are fresh when user first opens vsc

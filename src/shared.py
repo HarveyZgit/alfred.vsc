@@ -40,6 +40,7 @@ else:
 ENV_IDE_PATH = os.environ.get("VSC_IDE_PATH", str(HOME / "Library/Application Support/Code"))
 ENV_DIRECTORIES = os.environ.get("VSC_DIRECTORIES", "")
 ENV_TAB_TAIL_SLASH = os.environ.get("VSC_TAB_TAIL_SLASH", "1") == "1"
+ENV_SHRINK_PATH = os.environ.get("VSC_ENABLE_SHRINK_PATH", "1") == "1"
 
 # Derived paths
 GLOBAL_STORAGE_PATH = Path(ENV_IDE_PATH) / "User/globalStorage"
@@ -128,18 +129,71 @@ def is_file_path(path: str) -> bool:
 def get_git_branch(path: str) -> Optional[str]:
     """
     Get git branch by reading .git/HEAD file directly.
-    This is much faster than executing `git branch` command.
+    Handles:
+    - Normal git repositories
+    - Git worktrees (where .git is a file)
+    - Subdirectories of git repositories
     Returns None if not a git repo or on error.
     """
     clean_path = remove_path_scheme(path)
     if not clean_path:
         return None
 
-    git_head = Path(clean_path) / ".git" / "HEAD"
+    path_obj = Path(clean_path)
 
-    if not git_head.exists():
-        return None
+    # Strategy 1: Direct check (for root or worktree)
+    git_head = path_obj / ".git" / "HEAD"
+    if git_head.exists():
+        return _parse_git_head(git_head)
 
+    # Check if it's a worktree (.git is a file)
+    git_file = path_obj / ".git"
+    if git_file.is_file():
+        # Worktree: .git contains "gitdir: /path/to/actual/.git/worktrees/name"
+        try:
+            with open(git_file, "r") as f:
+                content = f.read().strip()
+            if content.startswith("gitdir: "):
+                git_dir = Path(content[8:])  # Remove "gitdir: "
+                worktree_head = git_dir / "HEAD"
+                if worktree_head.exists():
+                    return _parse_git_head(worktree_head)
+        except Exception:
+            pass
+
+    # Strategy 2: Walk up the directory tree to find git root
+    current = path_obj
+    for _ in range(20):  # Increased depth limit for deep nested projects
+        # Check if .git is a directory (normal repo)
+        git_dir = current / ".git"
+        if git_dir.is_dir():
+            git_head = git_dir / "HEAD"
+            if git_head.exists():
+                return _parse_git_head(git_head)
+
+        # Check if .git is a file (worktree) - for subdirs of worktree
+        worktree_git_file = current / ".git"
+        if worktree_git_file.is_file():
+            try:
+                with open(worktree_git_file, "r") as f:
+                    worktree_content = f.read().strip()
+                if worktree_content.startswith("gitdir: "):
+                    git_dir = Path(worktree_content[8:])
+                    worktree_head = git_dir / "HEAD"
+                    if worktree_head.exists():
+                        return _parse_git_head(worktree_head)
+            except Exception:
+                pass
+
+        current = current.parent
+        if current == current.parent:
+            break
+
+    return None
+
+
+def _parse_git_head(git_head: Path) -> Optional[str]:
+    """Parse .git/HEAD file and extract branch name."""
     try:
         with open(git_head, "r") as f:
             content = f.read().strip()
@@ -165,6 +219,74 @@ def get_icon(path: str) -> dict:
         return {"path": "./assets/folder.png"}
     else:
         return {"path": "./assets/file.png"}
+
+
+def get_path_prefixes() -> list:
+    """
+    Get configured path prefixes from environment variable.
+    VSC_PATH_PREFIXES is a JSON array of {path, alias} objects.
+    Path supports $HOME placeholder.
+    Example: [{"path": "$HOME/Code/Playground", "alias": "~Playground"}]
+    """
+    env_value = os.environ.get("VSC_PATH_PREFIXES", "")
+    if not env_value:
+        return []
+
+    try:
+        prefixes = json.loads(env_value)
+        result = []
+        for item in prefixes:
+            path = item.get("path", "")
+            alias = item.get("alias", "")
+            if path and alias:
+                # Replace $HOME with actual home path
+                if path.startswith("$HOME"):
+                    path = str(HOME) + path[5:]
+                result.append((path, alias))
+        return result
+    except Exception:
+        return []
+
+
+def shrink_path(path: str, n: int = 3) -> str:
+    """
+    Shorten a path by replacing common prefixes and limiting path segments.
+    When VSC_ENABLE_SHRINK_PATH=1: full shrinking with segment limit
+    When VSC_ENABLE_SHRINK_PATH=0: only replace $HOME with ~
+    """
+    home = str(HOME)
+
+    # Simple mode: only replace $HOME with ~
+    if not ENV_SHRINK_PATH:
+        if path == home:
+            return "~"
+        if path.startswith(home + "/"):
+            return "~" + path[len(home):]
+        return path
+
+    # Full shrink mode: user config first (higher priority), then defaults
+    prefixes = get_path_prefixes()
+    prefixes.extend([
+        (home, "~"),
+    ])
+
+    prefix, rest = "", path
+    for match, alias in prefixes:
+        if path == match:
+            return alias
+        if path.startswith(match + "/"):
+            prefix = alias
+            rest = path[len(match):]
+            break
+
+    segs = [s for s in rest.split("/") if s]
+    if not segs:
+        return prefix or "/"
+
+    if len(segs) <= n:
+        return prefix + "/" + "/".join(segs)
+
+    return prefix + "/…/" + "/".join(segs[-n:])
 
 
 def get_project_name(path: str) -> str:
@@ -451,19 +573,6 @@ def scan_subdirectories(
                 'rel': rel_name,
             })
 
-    def _collect_recursive(base: Path, rel_prefix: str, depth: int):
-        """Recursively collect directories up to max_depth."""
-        if depth > max_depth:
-            return
-        try:
-            for item in sorted(base.iterdir()):
-                if _is_browsable(item):
-                    rel = f'{rel_prefix}/{item.name}' if rel_prefix else item.name
-                    _add_dir(item, rel)
-                    _collect_recursive(item, rel, depth + 1)
-        except (PermissionError, OSError):
-            pass
-
     if segments:
         # Drill-down mode: locate the target directory via segments
         # Start from all roots, narrow down segment by segment
@@ -480,30 +589,20 @@ def scan_subdirectories(
             current_dirs = next_dirs
             if not current_dirs:
                 return []  # Segment not found
-
-        # List direct children of the target directory(ies)
-        for target in current_dirs:
-            try:
-                for item in sorted(target.iterdir()):
-                    if _is_browsable(item):
-                        _add_dir(item, item.name)
-            except (PermissionError, OSError):
-                pass
-
-    elif search:
-        # Flat recursive search mode: scan all roots up to max_depth
-        for root in roots:
-            _collect_recursive(root, '', 1)
-
     else:
-        # Top-level listing: direct children of all roots
-        for root in roots:
-            try:
-                for item in sorted(root.iterdir()):
-                    if _is_browsable(item):
-                        _add_dir(item, item.name)
-            except (PermissionError, OSError):
-                pass
+        # No drill-down: use root directories as current directories
+        current_dirs = list(roots)
+
+    # List direct children of current directory(ies)
+    # The 'search' parameter is just a flag; actual fuzzy matching
+    # is done in browse_directories() after getting results
+    for target in current_dirs:
+        try:
+            for item in sorted(target.iterdir()):
+                if _is_browsable(item):
+                    _add_dir(item, item.name)
+        except (PermissionError, OSError):
+            pass
 
     return results
 
