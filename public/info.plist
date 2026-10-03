@@ -4,561 +4,718 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.harvey.alfredapp.vsc</string>
-	<key>connections</key>
-	<dict>
-		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>E9765F2F-E1E3-494C-81A5-3A4F41707A72</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>sourceoutputuid</key>
-				<string>2682452D-CE3B-4244-8F38-447B6050507B</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>sourceoutputuid</key>
-				<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
-		<array/>
-		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>8834DFC3-808C-4423-A9EC-8D7B94F61590</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>FB22746E-5A56-4316-999C-68D172F71639</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>1DB7B2E5-9BD3-4652-819B-293D4F03C795</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</string>
-				<key>modifiers</key>
-				<integer>262144</integer>
-				<key>modifiersubtext</key>
-				<string>Delete this item in records.</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>E31A4D5C-24E1-477A-9DFB-266646FADB99</string>
-				<key>modifiers</key>
-				<integer>1048576</integer>
-				<key>modifiersubtext</key>
-				<string>Open with Trae</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>FB22746E-5A56-4316-999C-68D172F71639</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-	</dict>
+	<key>name</key>
+	<string>vsc</string>
 	<key>createdby</key>
 	<string>Harvey Zhang</string>
 	<key>description</key>
-	<string>Open the most recently used project with vscode</string>
+	<string>VS Code 目录与 Git 仓库的快速入口</string>
+	<key>version</key>
+	<string>3.0.0</string>
+	<key>webaddress</key>
+	<string>https://github.com/HarveyZgit/alfred.vsc</string>
 	<key>disabled</key>
 	<false/>
-	<key>name</key>
-	<string>vsc</string>
+	<key>readme</key>
+	<string>无需安装 Python、Node 或 Go。Enter 打开；Cmd 选择 IDE；Shift 新窗口；Ctrl 隐藏；Alt 固定。远程不查询分支。</string>
 	<key>objects</key>
 	<array>
 		<dict>
+			<key>uid</key>
+			<string>SEARCH</string>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>version</key>
+			<integer>3</integer>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
+				<key>keyword</key>
+				<string>vsc</string>
 				<key>script</key>
-				<string>$VSC_OPEN_DEFAULT "$(echo "$1" | sed 's|^file://||')"
-/usr/bin/python3 cli.py selected --record="$1"</string>
+				<string>./vsc query "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>type</key>
 				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>1DB7B2E5-9BD3-4652-819B-293D4F03C795</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>action</key>
+				<key>escaping</key>
+				<integer>127</integer>
+				<key>title</key>
+				<string>打开项目</string>
+				<key>subtext</key>
+				<string>搜索目录和远程项目</string>
+				<key>runningsubtext</key>
+				<string>搜索中…</string>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>argumenttrimmode</key>
 				<integer>0</integer>
-				<key>argument</key>
-				<integer>0</integer>
-				<key>focusedappvariable</key>
-				<false/>
-				<key>focusedappvariablename</key>
-				<string></string>
-				<key>hotkey</key>
-				<integer>9</integer>
-				<key>hotmod</key>
-				<integer>1179648</integer>
-				<key>hotstring</key>
-				<string>V</string>
-				<key>leftcursor</key>
-				<false/>
-				<key>modsmode</key>
-				<integer>0</integer>
-				<key>relatedAppsMode</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.hotkey</string>
-			<key>uid</key>
-			<string>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>withspace</key>
+				<true/>
 				<key>alfredfiltersresults</key>
 				<false/>
 				<key>alfredfiltersresultsmatchmode</key>
 				<integer>2</integer>
-				<key>argumenttreatemptyqueryasnil</key>
-				<true/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>127</integer>
-				<key>keyword</key>
-				<string>vsc</string>
 				<key>queuedelaycustom</key>
-				<integer>3</integer>
+				<integer>0</integer>
 				<key>queuedelayimmediatelyinitially</key>
 				<true/>
 				<key>queuedelaymode</key>
 				<integer>0</integer>
 				<key>queuemode</key>
 				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string>searching...</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>OPEN</string>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>version</key>
+			<integer>2</integer>
+			<key>config</key>
+			<dict>
 				<key>script</key>
-				<string>/usr/bin/python3 vsc.py "$1"</string>
+				<string>message=$(./vsc open --request "$1" 2&gt;&amp;1)
+status=$?
+if [ "$status" -ne 0 ]; then printf "%s" "$message"; fi
+exit "$status"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
-				<key>subtext</key>
-				<string>Update available: 1.1.0 → 0.1.10. Run `npm install -g vsc`</string>
-				<key>title</key>
-				<string>打开最近项目</string>
 				<key>type</key>
 				<integer>0</integer>
-				<key>withspace</key>
-				<true/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>concurrently</key>
+				<false/>
 			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>CLEAR</string>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>version</key>
+			<integer>1</integer>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string></string>
+				<key>passthroughargument</key>
+				<false/>
+				<key>variables</key>
+				<dict/>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>EDITORS</string>
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
-			<key>uid</key>
-			<string>FB22746E-5A56-4316-999C-68D172F71639</string>
 			<key>version</key>
 			<integer>3</integer>
-		</dict>
-		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
+				<key>keyword</key>
+				<string></string>
 				<key>script</key>
-				<string>/usr/bin/python3 cli.py delete --record="$1"</string>
+				<string>./vsc editors --target "$vsc_target" --query "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>type</key>
 				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
 				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>$VSC_OPEN_WITH_CMD "$(echo "$1" | sed 's|^file://||')"
-/usr/bin/python3 cli.py selected --record="$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>E31A4D5C-24E1-477A-9DFB-266646FADB99</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
+				<integer>127</integer>
+				<key>title</key>
+				<string>选择 IDE</string>
+				<key>subtext</key>
+				<string>搜索目录和远程项目</string>
+				<key>runningsubtext</key>
+				<string>搜索中…</string>
 				<key>argumenttype</key>
 				<integer>1</integer>
-				<key>fixedorder</key>
-				<true/>
-				<key>items</key>
-				<string>[{"title":"rebuild index","arg":"rebuild","subtitle":"重建索引"},{"title":"completely rebuild index","arg":"rebuild --drop-all","subtitle":"完全重建索引，同时会清空曾经的删除记录"}]</string>
-				<key>keyword</key>
-				<string>vscli</string>
-				<key>matchmode</key>
+				<key>argumenttrimmode</key>
 				<integer>0</integer>
-				<key>runningsubtext</key>
-				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string></string>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
 				<key>withspace</key>
+				<true/>
+				<key>alfredfiltersresults</key>
 				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>2</integer>
+				<key>queuedelaycustom</key>
+				<integer>0</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
 			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.listfilter</string>
-			<key>uid</key>
-			<string>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</string>
-			<key>version</key>
-			<integer>1</integer>
 		</dict>
 		<dict>
+			<key>uid</key>
+			<string>REMEMBER</string>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>version</key>
+			<integer>2</integer>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
 				<key>script</key>
-				<string>/usr/bin/python3 cli.py $1</string>
+				<string>message=$(./vsc open --remember --request "$1" 2&gt;&amp;1)
+status=$?
+if [ "$status" -ne 0 ]; then printf "%s" "$message"; fi
+exit "$status"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>type</key>
 				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>concurrently</key>
+				<false/>
 			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>HIDE</string>
 			<key>type</key>
 			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>E9765F2F-E1E3-494C-81A5-3A4F41707A72</string>
 			<key>version</key>
 			<integer>2</integer>
-		</dict>
-		<dict>
 			<key>config</key>
 			<dict>
-				<key>lastpathcomponent</key>
-				<true/>
-				<key>onlyshowifquerypopulated</key>
-				<true/>
-				<key>removeextension</key>
-				<false/>
-				<key>text</key>
+				<key>script</key>
+				<string>./vsc hide --target "$vsc_target"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
 				<string></string>
-				<key>title</key>
-				<string>{var:notice_title}</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>concurrently</key>
+				<false/>
 			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>PIN</string>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>version</key>
+			<integer>2</integer>
+			<key>config</key>
+			<dict>
+				<key>script</key>
+				<string>./vsc pin --target "$vsc_target"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>concurrently</key>
+				<false/>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>MANAGE</string>
+			<key>type</key>
+			<string>alfred.workflow.input.listfilter</string>
+			<key>version</key>
+			<integer>1</integer>
+			<key>config</key>
+			<dict>
+				<key>keyword</key>
+				<string>vscli</string>
+				<key>withspace</key>
+				<true/>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>fixedorder</key>
+				<true/>
+				<key>matchmode</key>
+				<integer>0</integer>
+				<key>title</key>
+				<string>管理项目</string>
+				<key>subtext</key>
+				<string></string>
+				<key>items</key>
+				<string>[{"title": "刷新 Git 仓库索引", "subtitle": "VS Code 历史自动读取，无需重建", "arg": "rebuild"}, {"title": "恢复所有隐藏项目", "subtitle": "不修改 VS Code 历史或磁盘文件", "arg": "restore-all"}, {"title": "检查环境", "subtitle": "输出 IDE、历史来源和索引诊断", "arg": "doctor"}, {"title": "生成高级配置", "subtitle": "输出配置文件位置，不覆盖已有配置", "arg": "config-init"}]</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>MANAGE_ACTION</string>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>version</key>
+			<integer>2</integer>
+			<key>config</key>
+			<dict>
+				<key>script</key>
+				<string>./vsc "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>concurrently</key>
+				<false/>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>NOTICE</string>
 			<key>type</key>
 			<string>alfred.workflow.output.notification</string>
-			<key>uid</key>
-			<string>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</string>
 			<key>version</key>
 			<integer>1</integer>
-		</dict>
-		<dict>
 			<key>config</key>
 			<dict>
-				<key>argument</key>
+				<key>title</key>
+				<string>VSC</string>
+				<key>text</key>
 				<string>{query}</string>
-				<key>passthroughargument</key>
+				<key>onlyshowifquerypopulated</key>
 				<true/>
-				<key>variables</key>
-				<dict>
-					<key>notice_title</key>
-					<string>索引重建成功</string>
-					<key>notive_id</key>
-					<string>rebuild_index_success</string>
-				</dict>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>885A5091-9940-4437-8192-C6754A2CE10B</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>conditions</key>
-				<array>
-					<dict>
-						<key>inputstring</key>
-						<string>{query}</string>
-						<key>matchcasesensitive</key>
-						<false/>
-						<key>matchmode</key>
-						<integer>4</integer>
-						<key>matchstring</key>
-						<string>rebuild_index_success</string>
-						<key>outputlabel</key>
-						<string>索引重建成功</string>
-						<key>uid</key>
-						<string>2682452D-CE3B-4244-8F38-447B6050507B</string>
-					</dict>
-					<dict>
-						<key>inputstring</key>
-						<string>{query}</string>
-						<key>matchcasesensitive</key>
-						<false/>
-						<key>matchmode</key>
-						<integer>4</integer>
-						<key>matchstring</key>
-						<string>rebuild_index_fail</string>
-						<key>outputlabel</key>
-						<string>索引重建失败</string>
-						<key>uid</key>
-						<string>83B4A586-5F36-4D05-906F-3F1DA46C0428</string>
-					</dict>
-				</array>
-				<key>elselabel</key>
-				<string>else</string>
-				<key>hideelse</key>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>removeextension</key>
 				<false/>
 			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.conditional</string>
-			<key>uid</key>
-			<string>8834DFC3-808C-4423-A9EC-8D7B94F61590</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argument</key>
-				<string>{query}</string>
-				<key>passthroughargument</key>
-				<true/>
-				<key>variables</key>
-				<dict>
-					<key>notice_id</key>
-					<string>rebuild_index_fail</string>
-					<key>notice_title</key>
-					<string>索引重建失败，请根据日志进行排查</string>
-				</dict>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</string>
-			<key>version</key>
-			<integer>1</integer>
 		</dict>
 	</array>
-	<key>readme</key>
-	<string>python 重构版</string>
+	<key>connections</key>
+	<dict>
+		<key>SEARCH</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>OPEN</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>OPEN</string>
+				<key>modifiers</key>
+				<integer>131072</integer>
+				<key>modifiersubtext</key>
+				<string>新窗口打开</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>CLEAR</string>
+				<key>modifiers</key>
+				<integer>1048576</integer>
+				<key>modifiersubtext</key>
+				<string>选择 IDE</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>HIDE</string>
+				<key>modifiers</key>
+				<integer>262144</integer>
+				<key>modifiersubtext</key>
+				<string>隐藏项目</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>PIN</string>
+				<key>modifiers</key>
+				<integer>524288</integer>
+				<key>modifiersubtext</key>
+				<string>固定 / 取消固定</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>CLEAR</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>EDITORS</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>EDITORS</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>OPEN</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>REMEMBER</string>
+				<key>modifiers</key>
+				<integer>1048576</integer>
+				<key>modifiersubtext</key>
+				<string>记住此项目的 IDE</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>MANAGE</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>MANAGE_ACTION</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>OPEN</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>NOTICE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>REMEMBER</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>NOTICE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>HIDE</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>NOTICE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>PIN</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>NOTICE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>MANAGE_ACTION</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>NOTICE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
 	<key>uidata</key>
 	<dict>
-		<key>093E8D8D-AA10-46AC-BE78-76A5D4A82B48</key>
+		<key>SEARCH</key>
 		<dict>
 			<key>xpos</key>
-			<real>345</real>
+			<real>340.0</real>
 			<key>ypos</key>
-			<real>515</real>
+			<real>100.0</real>
 		</dict>
-		<key>1DB7B2E5-9BD3-4652-819B-293D4F03C795</key>
+		<key>OPEN</key>
 		<dict>
 			<key>xpos</key>
-			<real>615</real>
+			<real>580.0</real>
 			<key>ypos</key>
-			<real>30</real>
+			<real>100.0</real>
 		</dict>
-		<key>214442BD-7743-47DD-9FFC-F4C8F4D4CB36</key>
+		<key>CLEAR</key>
 		<dict>
 			<key>xpos</key>
-			<real>615</real>
+			<real>820.0</real>
 			<key>ypos</key>
-			<real>170</real>
+			<real>100.0</real>
 		</dict>
-		<key>8834DFC3-808C-4423-A9EC-8D7B94F61590</key>
+		<key>EDITORS</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>100.0</real>
 			<key>ypos</key>
-			<real>535</real>
+			<real>260.0</real>
 		</dict>
-		<key>885A5091-9940-4437-8192-C6754A2CE10B</key>
+		<key>REMEMBER</key>
 		<dict>
 			<key>xpos</key>
-			<real>875</real>
+			<real>340.0</real>
 			<key>ypos</key>
-			<real>530</real>
+			<real>260.0</real>
 		</dict>
-		<key>9E6F4EEA-B7FA-45FE-9062-3779680F6F74</key>
+		<key>HIDE</key>
 		<dict>
 			<key>xpos</key>
-			<real>1090</real>
+			<real>580.0</real>
 			<key>ypos</key>
-			<real>520</real>
+			<real>260.0</real>
 		</dict>
-		<key>E31A4D5C-24E1-477A-9DFB-266646FADB99</key>
+		<key>PIN</key>
 		<dict>
 			<key>xpos</key>
-			<real>620</real>
+			<real>820.0</real>
 			<key>ypos</key>
-			<real>325</real>
+			<real>260.0</real>
 		</dict>
-		<key>E6641F6B-7713-42E4-B1E7-15C7BBF0651F</key>
+		<key>MANAGE</key>
 		<dict>
 			<key>xpos</key>
-			<real>970</real>
+			<real>100.0</real>
 			<key>ypos</key>
-			<real>560</real>
+			<real>420.0</real>
 		</dict>
-		<key>E9765F2F-E1E3-494C-81A5-3A4F41707A72</key>
+		<key>MANAGE_ACTION</key>
 		<dict>
 			<key>xpos</key>
-			<real>580</real>
+			<real>340.0</real>
 			<key>ypos</key>
-			<real>515</real>
+			<real>420.0</real>
 		</dict>
-		<key>FB22746E-5A56-4316-999C-68D172F71639</key>
+		<key>NOTICE</key>
 		<dict>
 			<key>xpos</key>
-			<real>340</real>
+			<real>580.0</real>
 			<key>ypos</key>
-			<real>130</real>
-		</dict>
-		<key>FCBD53E6-AA6A-4F61-AF65-BF28FCEDC15A</key>
-		<dict>
-			<key>xpos</key>
-			<real>80</real>
-			<key>ypos</key>
-			<real>130</real>
+			<real>420.0</real>
 		</dict>
 	</dict>
-	<key>userconfigurationconfig</key>
-	<array/>
 	<key>variables</key>
 	<dict>
 		<key>VSC_DIRECTORIES</key>
 		<string>~/Code</string>
-		<key>VSC_DIR_BAK____</key>
+		<key>VSC_DEFAULT_EDITOR</key>
+		<string>vscode</string>
+		<key>VSC_IDE_PATH</key>
 		<string></string>
-		<key>VSC_OPEN_DEFAULT</key>
-		<string>/Users/harvey/.antigravity/antigravity/bin/agy</string>
-		<key>VSC_OPEN_WITH_CMD</key>
+		<key>VSC_EDITOR_VSCODE</key>
+		<string></string>
+		<key>VSC_EDITOR_ZED</key>
+		<string></string>
+		<key>VSC_EDITOR_TRAE</key>
+		<string></string>
+		<key>VSC_EDITOR_CURSOR</key>
 		<string></string>
 	</dict>
-	<key>version</key>
-	<string>v2.1.0</string>
-	<key>webaddress</key>
-	<string></string>
+	<key>userconfigurationconfig</key>
+	<array>
+		<dict>
+			<key>variable</key>
+			<string>VSC_DIRECTORIES</string>
+			<key>label</key>
+			<string>Git 项目根目录</string>
+			<key>description</key>
+			<string>逗号或换行分隔；路径包含逗号时使用 JSON 数组</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>~/Code</string>
+				<key>placeholder</key>
+				<string>~/Code</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_DEFAULT_EDITOR</string>
+			<key>label</key>
+			<string>默认 IDE</string>
+			<key>description</key>
+			<string>vscode / zed / trae / cursor</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>vscode</string>
+				<key>placeholder</key>
+				<string>vscode</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_IDE_PATH</string>
+			<key>label</key>
+			<string>VS Code 数据目录（可选）</string>
+			<key>description</key>
+			<string>默认自动寻找 VS Code 数据；不是应用程序路径</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_EDITOR_VSCODE</string>
+			<key>label</key>
+			<string>VSCODE CLI（可选）</string>
+			<key>description</key>
+			<string>可执行文件的完整路径；不填写参数或 shell 命令</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_EDITOR_ZED</string>
+			<key>label</key>
+			<string>ZED CLI（可选）</string>
+			<key>description</key>
+			<string>可执行文件的完整路径；不填写参数或 shell 命令</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_EDITOR_TRAE</string>
+			<key>label</key>
+			<string>TRAE CLI（可选）</string>
+			<key>description</key>
+			<string>可执行文件的完整路径；不填写参数或 shell 命令</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VSC_EDITOR_CURSOR</string>
+			<key>label</key>
+			<string>CURSOR CLI（可选）</string>
+			<key>description</key>
+			<string>可执行文件的完整路径；不填写参数或 shell 命令</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

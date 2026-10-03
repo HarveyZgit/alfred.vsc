@@ -1,0 +1,48 @@
+name: native workflow
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: go mod verify
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: go build -trimpath -o build/vsc-host ./cmd/vsc
+      - run: python3 scripts/acceptance.py --binary build/vsc-host
+      - if: runner.os == 'Linux'
+        run: |
+          python3 scripts/build_workflow.py
+          python3 scripts/build_workflow.py --target macos --skip-build --dev
+          python3 scripts/verify_package.py build/vsc.alfredworkflow build/vsc-dev.alfredworkflow
+          python3 scripts/acceptance.py --benchmark --output build/acceptance-linux.json
+      - if: runner.os == 'macOS'
+        run: |
+          python3 scripts/build_workflow.py --target macos
+          lipo -archs build/vsc
+          codesign --verify build/vsc
+          build/vsc version
+      - if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsc-native
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            build/*.alfredworkflow
+            build/vsc-linux-amd64
+            build/SHA256SUMS
+            build/acceptance-linux.json
+            docs/MACOS-ACCEPTANCE.zh-CN.md
