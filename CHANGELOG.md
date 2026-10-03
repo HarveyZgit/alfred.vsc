@@ -1,5 +1,16 @@
 # VSC CHANGELOG
 
+## v3.0.0
+
+- 使用 Go 单二进制重写，支持 macOS Apple Silicon / Intel 通用包，运行不再需要 Python 或 Node。
+- 来源收敛为 VS Code 目录历史与配置根目录下 Git 仓库的并集；移除文件与 workspace 文件。
+- SQLite 只读实时同步、可丢弃快照、后台仓库发现，查询不递归扫描。
+- 可见本地结果每次读取最新分支，支持 worktree；远程不查询或显示分支。
+- VS Code / Zed / Trae / Cursor 选择器、项目默认 IDE、新窗口、固定、隐藏与恢复。
+- 原子持久化与并发写锁、旧隐藏记录迁移、隔离开发安装包。
+- 添加 Go 单元与竞态测试、真实 Linux 二进制验收、性能测试及跨平台 CI。
+- 目录浏览明确区分多个根目录，按当前层级搜索；不再宣称旧版未实现的全树递归模糊浏览。
+
 ## v2.1.0 (2026-03-03)
 
 ### ✨ New Feature: Directory Browse Mode
