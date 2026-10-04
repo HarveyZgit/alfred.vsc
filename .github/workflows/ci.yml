@@ -33,8 +33,13 @@ jobs:
         run: |
           python3 scripts/build_workflow.py --target macos
           lipo -archs build/vsc
-          codesign --verify build/vsc
-          build/vsc version
+      - if: runner.os == 'macOS'
+        name: Verify Go arm64 ad-hoc signature
+        # Go internally signs arm64, while its amd64 output is intentionally unsigned.
+        run: codesign --verify --verbose=2 build/vsc-darwin-arm64
+      - if: runner.os == 'macOS'
+        name: Run universal macOS binary
+        run: build/vsc version
       - if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
