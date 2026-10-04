@@ -29,7 +29,8 @@ type Config struct {
 	Background     bool              `json:"-"`
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig() (Config, error) { return loadConfigAt("") }
+func loadConfigAt(destination string) (Config, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return Config{}, err
@@ -56,6 +57,9 @@ func LoadConfig() (Config, error) {
 		if c.DataDir == "" {
 			c.DataDir = filepath.Join(os.TempDir(), "vsc-dev")
 		}
+	}
+	if destination != "" {
+		c.DataDir = destination
 	}
 	c.DataDir = expand(c.DataDir, home)
 	if b, e := os.ReadFile(filepath.Join(c.DataDir, "config.json")); e == nil {

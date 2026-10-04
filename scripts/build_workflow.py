@@ -48,13 +48,14 @@ def package(binary, output, development=False):
                 c['keyword'] = {'vsc': 'vscd', 'vscli': 'vscdli'}[c['keyword']]
     output.parent.mkdir(parents=True, exist_ok=True)
     files = {'vsc': binary, 'icon.png': ROOT/'public/icon.png', 'README.md': ROOT/'README.md', 'LICENSE': ROOT/'LICENSE', 'THIRD_PARTY_NOTICES.txt': ROOT/'THIRD_PARTY_NOTICES.txt'}
-    files.update({f'docs/{name}.zh-CN.md': ROOT/f'docs/{name}.zh-CN.md' for name in ('ARCHITECTURE', 'VALIDATION', 'MACOS-ACCEPTANCE')})
+    files['scripts/migrate-v2.sh'] = ROOT/'scripts/migrate-v2.sh'
+    files.update({f'docs/{name}.zh-CN.md': ROOT/f'docs/{name}.zh-CN.md' for name in ('ARCHITECTURE', 'VALIDATION', 'MACOS-ACCEPTANCE', 'MIGRATION')})
     files.update({f'assets/{name}.png': ROOT/f'src/assets/{name}.png' for name in ('folder', 'remote')})
     with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
         archive.writestr('info.plist', plistlib.dumps(config, sort_keys=False))
         for name, path in files.items():
             info = zipfile.ZipInfo(name); info.create_system = 3
-            info.external_attr = (0o100755 if name == 'vsc' else 0o100644) << 16
+            info.external_attr = (0o100755 if name in ('vsc', 'scripts/migrate-v2.sh') else 0o100644) << 16
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, path.read_bytes())
     with zipfile.ZipFile(output) as archive:

@@ -13,7 +13,9 @@ def verify(package):
     with zipfile.ZipFile(package) as archive:
         assert archive.testzip() is None
         expected={'vsc','info.plist','icon.png','assets/folder.png','assets/remote.png','README.md','LICENSE','THIRD_PARTY_NOTICES.txt'}
-        expected.update(f'docs/{name}.zh-CN.md' for name in ('ARCHITECTURE','VALIDATION','MACOS-ACCEPTANCE'))
+        expected.update(f'docs/{name}.zh-CN.md' for name in ('ARCHITECTURE','VALIDATION','MACOS-ACCEPTANCE','MIGRATION'))
+        expected.add('scripts/migrate-v2.sh')
+        assert archive.getinfo('scripts/migrate-v2.sh').external_attr >> 16 & 0o777 == 0o755
         assert set(archive.namelist())==expected, archive.namelist()
         assert archive.getinfo('vsc').external_attr >> 16 & 0o777 == 0o755
         binary=archive.read('vsc')
