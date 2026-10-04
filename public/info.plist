@@ -259,7 +259,7 @@ exit "$status"</string>
 				<key>subtext</key>
 				<string></string>
 				<key>items</key>
-				<string>[{"title": "刷新 Git 仓库索引", "subtitle": "VS Code 历史自动读取，无需重建", "arg": "rebuild"}, {"title": "恢复所有隐藏项目", "subtitle": "不修改 VS Code 历史或磁盘文件", "arg": "restore-all"}, {"title": "检查环境", "subtitle": "输出 IDE、历史来源和索引诊断", "arg": "doctor"}, {"title": "生成高级配置", "subtitle": "输出配置文件位置，不覆盖已有配置", "arg": "config-init"}]</string>
+				<string>[{"title": "打开记录管理面板", "subtitle": "管理隐藏、固定、IDE、Git 根目录与迁移结果", "arg": "manage"}, {"title": "刷新 Git 仓库索引", "subtitle": "VS Code 历史自动读取，无需重建", "arg": "rebuild"}, {"title": "恢复所有隐藏项目", "subtitle": "不修改 VS Code 历史或磁盘文件", "arg": "restore-all"}, {"title": "检查环境", "subtitle": "输出 IDE、历史来源和索引诊断", "arg": "doctor"}, {"title": "生成高级配置", "subtitle": "输出配置文件位置，不覆盖已有配置", "arg": "config-init"}]</string>
 			</dict>
 		</dict>
 		<dict>
@@ -575,7 +575,7 @@ exit "$status"</string>
 			<key>label</key>
 			<string>Git 项目根目录</string>
 			<key>description</key>
-			<string>逗号或换行分隔；路径包含逗号时使用 JSON 数组</string>
+			<string>逗号或换行分隔；在管理面板保存设置后，以面板为准</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>config</key>

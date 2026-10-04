@@ -39,6 +39,7 @@ def verify(package):
             for edge in connections: assert edge['destinationuid'] in objects
         routes={e['modifiers']:e['destinationuid'] for e in config['connections']['SEARCH']}
         assert routes=={0:'OPEN',131072:'OPEN',1048576:'CLEAR',262144:'HIDE',524288:'PIN'}
+        assert json.loads(objects['MANAGE']['config']['items'])[0]['arg']=='manage'
         assert objects['SEARCH']['config']['script']=='./vsc query "$1"'
         assert '--target "$vsc_target"' in objects['EDITORS']['config']['script']
         for obj in objects.values():

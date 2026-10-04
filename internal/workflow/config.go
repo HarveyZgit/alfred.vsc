@@ -13,7 +13,15 @@ import (
 
 const Version = "3.0.0"
 
+// ManagedSettings are explicit panel overrides, applied after Alfred variables.
+type ManagedSettings struct {
+	Roots   []string          `json:"roots"`
+	Editor  string            `json:"editor"`
+	Editors map[string]string `json:"editors"`
+}
+
 type Config struct {
+	Managed        *ManagedSettings  `json:"managed,omitempty"`
 	Roots          []string          `json:"roots"`
 	VSCodeDir      string            `json:"vscode_dir"`
 	Database       string            `json:"database,omitempty"`
@@ -108,6 +116,17 @@ func loadConfigAt(destination string) (Config, error) {
 			*dst = n
 		}
 	}
+	if c.Managed != nil {
+		if err := validateManaged(*c.Managed); err != nil {
+			return c, err
+		}
+		c.Roots = c.Managed.Roots
+		c.Editor = c.Managed.Editor
+		c.Editors = make(map[string]string, len(c.Managed.Editors))
+		for editor, path := range c.Managed.Editors {
+			c.Editors[editor] = expand(path, home)
+		}
+	}
 	if c.Limit < 1 || c.Limit > 200 {
 		return c, fmt.Errorf("limit must be between 1 and 200")
 	}
@@ -158,3 +177,23 @@ func expand(s, home string) string {
 }
 func validEditor(s string) bool         { return s == "vscode" || s == "zed" || s == "trae" || s == "cursor" }
 func (c Config) refresh() time.Duration { return time.Duration(c.RefreshSeconds) * time.Second }
+
+func validateManaged(s ManagedSettings) error {
+	if !validEditor(s.Editor) {
+		return fmt.Errorf("请选择 vscode、zed、trae 或 cursor")
+	}
+	if len(s.Roots) > 200 {
+		return fmt.Errorf("最多配置 200 个扫描根目录")
+	}
+	for _, root := range s.Roots {
+		if strings.TrimSpace(root) == "" || strings.ContainsRune(root, 0) || !(filepath.IsAbs(root) || root == "~" || strings.HasPrefix(root, "~/")) {
+			return fmt.Errorf("根目录必须是绝对路径或 ~/ 路径：%q", root)
+		}
+	}
+	for editor, path := range s.Editors {
+		if !validEditor(editor) || strings.ContainsRune(path, 0) {
+			return fmt.Errorf("无效的 IDE 配置")
+		}
+	}
+	return nil
+}

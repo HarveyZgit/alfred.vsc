@@ -22,7 +22,7 @@ func errorFeedback(err error) Feedback {
 }
 func Run(args []string, out, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" {
-		fmt.Fprintln(out, "vsc query [text] | index | open --target URI [--editor NAME] [--dry-run] | editors --target URI | hide/unhide/pin --target URI | migrate-legacy --source PATH [--data-dir PATH] [--apply] | restore-all | doctor | config-init | version")
+		fmt.Fprintln(out, "vsc query [text] | index | open --target URI [--editor NAME] [--dry-run] | editors --target URI | hide/unhide/pin --target URI | migrate-legacy --source PATH [--data-dir PATH] [--apply] | manage [--serve] | restore-all | doctor | config-init | version")
 		return 0
 	}
 	if args[0] == "version" || args[0] == "--version" {
@@ -41,6 +41,20 @@ func Run(args []string, out, stderr io.Writer) int {
 	args = args[1:]
 	fail := func(e error) int { fmt.Fprintln(stderr, e); return 1 }
 	switch command {
+	case "manage":
+		if len(args) == 1 && args[0] == "--serve" {
+			if err := servePanel(c, out); err != nil {
+				return fail(err)
+			}
+		} else if len(args) == 0 {
+			if err := launchPanel(c); err != nil {
+				return fail(err)
+			}
+			fmt.Fprintln(out, "记录管理面板已打开")
+		} else {
+			return fail(fmt.Errorf("用法：vsc manage [--serve]"))
+		}
+
 	case "migrate-legacy":
 		flags := flag.NewFlagSet(command, flag.ContinueOnError)
 		flags.SetOutput(stderr)

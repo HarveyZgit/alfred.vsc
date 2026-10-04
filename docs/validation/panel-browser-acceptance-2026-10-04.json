@@ -1,0 +1,10 @@
+{
+  "binary_sha256": "739e9510d561bce31a7fb0e89b40ac0bae1ead5e3a8f674a2497ee0be8cb863a",
+  "browser": "151.0.7922.173",
+  "checks": [
+    "pagination, debounced search, hide/restore, pin, IDE persistence",
+    "browser reload keeps session",
+    "save settings, migration preview/apply and saved result",
+    "embedded CSS/JS, responsive width, no page errors, close service"
+  ]
+}

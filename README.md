@@ -20,7 +20,7 @@ V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node
 | Cmd + Enter | 选择其他 IDE；在 IDE 列表中 Cmd + Enter 可记住此项目的选择 |
 | Ctrl + Enter | 隐藏项目，不删除文件、不修改 VS Code 历史 |
 | Alt + Enter | 固定 / 取消固定，同等匹配程度下优先排列 |
-| `vscli` | 刷新仓库索引、恢复隐藏项目、诊断、生成高级配置 |
+| `vscli` | 打开记录管理面板、刷新索引、恢复隐藏、诊断 |
 
 列表默认返回前 50 项。名称匹配优先，同等匹配时固定项目优先，之后沿用 VS Code 历史顺序。目录浏览可以打开非 Git 子目录，但不会自行把它加入项目历史。
 
@@ -34,7 +34,21 @@ V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node
 - 数据库被锁、短暂缺失或内容损坏时退回同一来源的上次快照；数据库返回空历史时会立即清空历史来源。仓库扫描不完整时保留上次结果，避免临时挂载故障导致列表消失。
 - 隐藏、固定、项目 IDE 偏好独立持久化，文件锁防止并发丢失更新，原子替换防止半写入。
 
-默认用户数据：Alfred 提供的 `alfred_workflow_data`；独立 CLI 使用系统配置目录下的 `alfred-vsc`。`preferences.json` 是用户偏好，`cache/` 是可重建缓存。程序不进行网络请求，无常驻服务。
+默认用户数据：Alfred 提供的 `alfred_workflow_data`；独立 CLI 使用系统配置目录下的 `alfred-vsc`。`preferences.json` 是用户偏好，`cache/` 是可重建缓存。搜索不进行网络请求，也不依赖常驻服务。管理面板仅在打开时监听本机回环地址，20 分钟无操作自动退出。
+
+## 记录管理面板
+
+![记录管理面板](docs/images/management-panel.png)
+
+输入 `vscli` → **打开记录管理面板**；开发包使用 `vscdli`。也可以在工作流目录运行 `./vsc manage`。页面和本地 HTTP 服务都编入同一个二进制，不需要额外安装环境。
+
+- **项目记录**：搜索、分页，筛选隐藏 / 固定 / 本地 / 远程；逐条隐藏或恢复、固定、设置项目默认 IDE。本地每页即时读取分支与目录状态，明确提示目录不存在、权限不足、路径不是目录或读取超时。
+- **目录与 IDE**：每行一个 Git 扫描根目录、默认 IDE、各 IDE 的 CLI 路径。保存后下次 Alfred 查询生效；改根目录后点击「刷新 Git 索引」。隐藏不删除目录，也不修改 VS Code 的历史。
+- **旧版迁移**：选择已保存的迁移来源或输入旧数据路径，先预览，再执行补迁移；逐条列出未迁移项及处理方法。旧版本留下的首次迁移报告会明确标为历史快照，重新预览可看到当前范围。
+
+面板保存的根目录 / IDE 设置放在 `config.json` 的 `managed` 中，**优先于 Alfred 变量和顶层配置**，避免 Alfred 默认值覆盖已保存的设置。点击「恢复使用 Alfred / 高级配置」移除这些覆盖，保留其他高级配置与项目偏好。面板只管理当前来源中的目录；不再属于当前来源的偏好保留在文件中，供目录以后重新出现时使用。
+
+面板仅监听 `127.0.0.1` 随机端口，使用随机会话令牌、来源校验和浏览器隔离策略。关闭浏览器标签不会立即停止服务；可点击「关闭面板服务」，或等待 20 分钟无操作自动退出。可用 `./vsc manage --serve` 在终端启动并手动打开打印的网址；该网址包含本次会话凭证，请勿分享。
 
 ## 配置
 
@@ -54,7 +68,7 @@ Alfred 的工作流配置提供根目录、默认 IDE 和四个 CLI 路径。CLI
 | `VSC_NO_BACKGROUND=1` | 禁止后台扫描，适合可重复测试 |
 | `VSC_LEGACY_CACHE` | 迁移命令的默认源缓存路径；查询不自动迁移 |
 
-`vsc config-init` 生成不覆盖已有文件的 `config.json`；环境变量优先于配置文件。配置示例：
+`vsc config-init` 生成不覆盖已有文件的 `config.json`；通常环境变量优先于配置文件；面板保存的 `managed` 根目录和 IDE 设置优先级最高。配置示例：
 
 ```json
 {
@@ -77,6 +91,7 @@ go vet ./...
 go mod verify
 python3 scripts/build_workflow.py             # Linux + macOS 双架构 + 通用工作流
 python3 scripts/acceptance.py --benchmark     # Linux 实际二进制验收与性能数据
+python3 scripts/panel_acceptance.py           # 原生管理服务、偏好、配置和迁移集成验收
 python3 scripts/verify_package.py             # ZIP、权限、Alfred 接线、Mach-O slices
 python3 scripts/build_workflow.py --target macos --skip-build --dev
 ```
@@ -96,7 +111,7 @@ Linux 验收覆盖真实 SQLite / WAL、真实 Git 仓库与 worktree、分支�
 
 它会先备份，再迁移新版来源范围内目录的隐藏状态与旧使用顺序。范围外记录不导入，输出 `unmigrated` 列表和逐条补迁移方法；先用 VS Code 打开这些目录或配置 Git 根目录，再重跑即可补齐。重复执行保留迁移后用户的取消隐藏操作。普通查询不会偷偷执行迁移或扫描旧数据。
 
-终端不会自动继承 Alfred 配置；先在管理菜单生成高级配置，确认迁移目标目录和根目录，详见 [迁移步骤、未迁移列表与恢复方法](docs/MIGRATION.zh-CN.md)。原文件、用户配置和未知字段完整备份，旧分支缓存与文件条目不用于新版搜索。
+终端不会自动继承 Alfred 配置；建议从面板配置根目录并执行迁移，或先在管理菜单生成高级配置，确认迁移目标目录和根目录，详见 [迁移步骤、未迁移列表与恢复方法](docs/MIGRATION.zh-CN.md)。原文件、用户配置和未知字段完整备份，旧分支缓存与文件条目不用于新版搜索。
 
 旧 `VSC_OPEN_DEFAULT` 仅作为默认编辑器可执行路径兼容；旧 `VSC_OPEN_WITH_CMD` 改为 IDE 选择菜单，请使用 `VSC_EDITOR_*` 配置。
 
