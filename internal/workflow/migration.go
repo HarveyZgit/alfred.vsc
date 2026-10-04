@@ -241,7 +241,7 @@ func ImportLegacy(c Config, source string, apply bool) (MigrationReport, error) 
 				item.Resolution = "新版不收录文件；若实际是目录，先用 VS Code 打开该目录后重新运行。远程仅凭旧记录无法确认文件/目录，不会主动连接。"
 			} else {
 				item.Status = "outside_current_sources"
-				item.Resolution = "先用 VS Code 打开该目录；若是本地 Git 仓库，也可把其上级目录加入新版 VSC_DIRECTORIES（或 config.json 的 roots）。之后重新预览并执行迁移。"
+				item.Resolution = "先用 VS Code 打开该目录；若是本地 Git 仓库，也可把其上级目录加入管理面板的 Git 扫描根目录（未使用面板时也可配置 VSC_DIRECTORIES 或 config.json 的 roots）。之后重新预览并执行迁移。"
 			}
 		}
 		if item.Status != "eligible" {
@@ -298,6 +298,7 @@ func ImportLegacy(c Config, source string, apply bool) (MigrationReport, error) 
 	if !pending(prefs) {
 		report.AlreadyApplied = true
 		report.Applied = true
+		persistMigrationReport(&report)
 		return report, nil
 	}
 	parent := filepath.Dir(report.Backup)
@@ -378,5 +379,13 @@ func ImportLegacy(c Config, source string, apply bool) (MigrationReport, error) 
 		return report, e
 	}
 	report.Applied = true
+	persistMigrationReport(&report)
 	return report, nil
+}
+
+// Keep the original backup plan immutable, but expose the latest incremental result.
+func persistMigrationReport(report *MigrationReport) {
+	if err := atomicJSON(filepath.Join(report.Backup, "latest-report.json"), report); err != nil {
+		report.Notes = append(report.Notes, "迁移偏好已写入，但保存最新报告失败："+err.Error())
+	}
 }

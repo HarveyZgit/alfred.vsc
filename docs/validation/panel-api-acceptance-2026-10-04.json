@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "739e9510d561bce31a7fb0e89b40ac0bae1ead5e3a8f674a2497ee0be8cb863a",
+  "checks": [
+    "embedded UI without language runtimes; token, origin and Host guards",
+    "panel overrides Alfred variables; explicit Git indexing",
+    "fresh local branch; explicit missing-directory reason; remote without branch",
+    "hide/restore changes actual CLI results; pin and per-project IDE persist",
+    "read-only preview, scoped apply, saved latest result and idempotent retry",
+    "reset settings and clean server shutdown",
+    "Alfred launcher exits promptly; detached panel URL reaches fake OS browser opener"
+  ]
+}

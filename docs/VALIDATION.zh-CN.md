@@ -49,3 +49,21 @@ Alfred UI 的快速输入取消、第二级 IDE 菜单和修饰键；真实 macO
 本轮一万项目连续输入出现了延迟尖峰，未达到每次都在 30ms 内完成；不能沿用首版基线的“0 次超时”结论。保留原始数据供 CI 与 Mac 实机对比，暂不把云端调度波动或代码开销中的任一个认定为唯一原因。
 
 GitHub macOS runner 已通过该提交的 26 个 Go 测试、race、vet 和原生集成验收。首次后续检查把 Go 默认无签名的 amd64 slice 当成已签名产物，现将检查明确限定为 Go 自带 ad-hoc 签名的 arm64，并单独执行 universal binary；新 CI 状态以 PR 检查为准。
+
+
+## 2026-10-04 管理面板验收
+
+新增 4 个 Go 场景测试，总计 30 个功能测试及 race、vet、模块校验通过；Linux 实际二进制通过原有 9 组验收和新增 7 组面板集成验收。后者包含空 PATH 下启动内嵌页面 / API、会话与来源校验、配置覆盖、分支与目录状态、隐藏恢复影响实际 query、迁移预览与最新结果、服务关闭，以及替身浏览器验证 Alfred 启动命令及时退出。macOS 双架构交叉编译和包结构验证通过。
+
+另外使用 Linux Chromium 151.0.7922.173 + Playwright 执行真实页面交互：分页、输入搜索、隐藏恢复、固定、项目 IDE、浏览器刷新保持会话、配置保存、迁移预览/执行、390px 宽度布局和关闭服务；无页面异常。浏览器验收为开发机可选测试，需预装 Playwright / Chromium，可用 `node scripts/panel_browser_acceptance.cjs [binary]` 重跑，`CHROMIUM_PATH` 指定浏览器；这些不是工作流运行依赖。截图见 README。
+
+最终测量二进制 SHA-256：`739e9510d561bce31a7fb0e89b40ac0bae1ead5e3a8f674a2497ee0be8cb863a`。
+
+| 项目数 | 首次导入 | 热查询 P95 | 连续输入 P95 | 连续输入最大值 | 超过 30ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1000 | 12.896ms | 7.303ms | 10.012ms | 32.060ms | 1 / 40 |
+| 10000 | 88.794ms | 28.667ms | 29.353ms | 54.283ms | 2 / 40 |
+
+面板服务不在搜索调用路径内；本次云端仍出现尾部延迟，不能承诺任何环境都低于 30ms。关闭服务响应收尾修正后重新构建并测量，以上对应最终本地二进制，不沿用前一轮结果。真实 Alfred、Mac 默认浏览器和 IDE / 远程连接仍按 Mac 清单验收。
+
+原始报告：[查询及性能](validation/linux-panel-acceptance-2026-10-04.json)、[原生面板](validation/panel-api-acceptance-2026-10-04.json)、[浏览器交互](validation/panel-browser-acceptance-2026-10-04.json)。

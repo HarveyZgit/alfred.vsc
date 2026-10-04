@@ -58,3 +58,14 @@ Alfred 负责输入变化时终止前一查询并显示当前查询结果。每�
 性能样本包含进程启动、SQLite 获取历史、缓存读取、匹配、可见 HEAD、JSON 输出和测试端接收解析。每规模 36 次顺序查询，随后 40 次、间隔 30ms 的连续输入；返回上限 50。记录首次导入和缓存已存在两种情况。首次大量历史导入涉及所有目录的规范化，不应以热查询延迟宣传。具体成品结果见 [验收记录](VALIDATION.zh-CN.md) 和 `build/acceptance.json`。
 
 打包从 Linux 交叉编译 macOS arm64 / amd64，将两份不改动的 Mach-O slice 合并为 universal binary。验证架构、偏移对齐、内容一致、ZIP 权限、CRC、Alfred 动作图和版本。没有在 Linux 假执行 macOS 二进制；真实 Alfred UI / IDE / SSH / Container 由 [macOS 清单](MACOS-ACCEPTANCE.zh-CN.md) 验收。
+
+
+## 按需记录管理面板
+
+`vsc manage` 启动独立的本机 HTTP 子进程并打开默认浏览器；`manage --serve` 用于前台运行和验收。页面通过 Go embed 随二进制分发，无前端运行时或外部资源。仅绑定 127.0.0.1 随机端口，API 要求 256 位随机令牌，同时校验 Host 与 Origin；页面禁止嵌入和执行内联脚本，用户路径全部通过 textContent 渲染。20 分钟没有 API 操作自动退出，也支持手动关闭。
+
+管理列表读取同一 VS Code 历史 / 索引和偏好，每页最多 50 条本地状态探测，远程不探测。隐藏、固定和 IDE 更新继续使用 preferences.lock 与原子替换。递归扫描及迁移由显式按钮触发，在管理服务内部串行执行，不加入 query 流程。搜索不依赖面板服务。
+
+config.json 新增可选 managed 对象，仅承载面板根目录、默认 IDE 与 CLI 路径，在 Alfred 环境变量之后应用；未使用面板时沿用原有优先级。配置写入使用单独文件锁，保留不认识的高级字段，可一键移除 managed 恢复原有配置。每个请求重新读取配置，使其他窗口和 CLI 修改可见。
+
+迁移保留最初 report.json 不变，成功执行后另写 latest-report.json 记录最新补迁移结果。预览不落盘；旧版只有首次报告时标注历史快照。报告保存失败不会假称已提交的偏好迁移失败，而是在结果 notes 中说明。

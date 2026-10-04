@@ -50,6 +50,7 @@ func gitBranch(directory string) string {
 type localStatus struct {
 	branch   string
 	missing  bool
+	reason   string
 	timedOut bool
 }
 
@@ -84,6 +85,16 @@ func visibleBranches(projects []Project) map[string]localStatus {
 				}
 				info, e := os.Stat(p.Path)
 				status := localStatus{missing: e != nil || !info.IsDir()}
+				switch {
+				case os.IsNotExist(e):
+					status.reason = "目录不存在"
+				case os.IsPermission(e):
+					status.reason = "无权访问目录"
+				case e != nil:
+					status.reason = "目录读取失败：" + e.Error()
+				case !info.IsDir():
+					status.reason = "路径不是目录"
+				}
 				if !status.missing {
 					status.branch = gitBranch(p.Path)
 				}

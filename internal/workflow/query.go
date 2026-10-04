@@ -166,7 +166,7 @@ func render(c Config, projects []Project, prefs Preferences) []Item {
 				label = "~" + strings.TrimPrefix(label, c.Home)
 			}
 			if status.missing {
-				label = "目录不可用 · " + label
+				label = status.reason + " · " + label
 				valid = false
 			} else if status.timedOut {
 				label = "分支读取超时 · " + label

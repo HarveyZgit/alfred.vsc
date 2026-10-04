@@ -32,6 +32,7 @@ def workflow():
     add('MANAGE', 'input.listfilter', {'keyword': 'vscli', 'withspace': True, 'argumenttype': 1,
         'argumenttrimmode': 0, 'fixedorder': True, 'matchmode': 0, 'title': '管理项目', 'subtext': '',
         'items': json.dumps([
+            {'title': '打开记录管理面板', 'subtitle': '管理隐藏、固定、IDE、Git 根目录与迁移结果', 'arg': 'manage'},
             {'title': '刷新 Git 仓库索引', 'subtitle': 'VS Code 历史自动读取，无需重建', 'arg': 'rebuild'},
             {'title': '恢复所有隐藏项目', 'subtitle': '不修改 VS Code 历史或磁盘文件', 'arg': 'restore-all'},
             {'title': '检查环境', 'subtitle': '输出 IDE、历史来源和索引诊断', 'arg': 'doctor'},
@@ -46,7 +47,7 @@ def workflow():
     link('MANAGE', 'MANAGE_ACTION')
     for source in ('OPEN', 'REMEMBER', 'HIDE', 'PIN', 'MANAGE_ACTION'):
         link(source, 'NOTICE')
-    settings = [('VSC_DIRECTORIES', 'Git 项目根目录', '~/Code', '逗号或换行分隔；路径包含逗号时使用 JSON 数组'),
+    settings = [('VSC_DIRECTORIES', 'Git 项目根目录', '~/Code', '逗号或换行分隔；在管理面板保存设置后，以面板为准'),
                 ('VSC_DEFAULT_EDITOR', '默认 IDE', 'vscode', 'vscode / zed / trae / cursor'),
                 ('VSC_IDE_PATH', 'VS Code 数据目录（可选）', '', '默认自动寻找 VS Code 数据；不是应用程序路径')]
     for name in ('VSCODE', 'ZED', 'TRAE', 'CURSOR'):
