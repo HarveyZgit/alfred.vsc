@@ -1,6 +1,6 @@
 # V3 成品验收记录
 
-2026-10-03，Linux x86_64 云环境，AMD EPYC 9V74，Go 1.27.1，`CGO_ENABLED=0`。以下是当前二进制的实测，不能直接推断 macOS / Alfred 或慢网络盘的延迟。
+2026-10-03，Linux x86_64 云环境，AMD EPYC 9V74，Go 1.27.1，`CGO_ENABLED=0`。以下首版基线对应下方明确标注 SHA-256 的二进制；迁移更新后的验收见文末。基线实测，不能直接推断 macOS / Alfred 或慢网络盘的延迟。
 
 ## 已完成
 
@@ -34,3 +34,16 @@
 Alfred UI 的快速输入取消、第二级 IDE 菜单和修饰键；真实 macOS 应用启动及新窗口；真实 SSH / Dev Container / Zed 连接；Intel / Apple Silicon 上的系统兼容性与签名验证。CI 已配置 Linux 和 macOS 作业，但本地新增 CI 尚未在 GitHub 执行，不计入已通过项。
 
 请使用隔离包 `build/vsc-dev.alfredworkflow`（关键词 `vscd`），按 [macOS 清单](MACOS-ACCEPTANCE.zh-CN.md) 验收。正式包和开发包均未做 Developer ID 公证。
+
+## 2026-10-04 迁移更新验收
+
+新增 6 个迁移测试，总计 26 个 Go 功能测试通过，race detector 和 go vet 通过。新版实际二进制通过 9 组集成验收，新增脚本预览不落盘、仅迁移当前范围、未迁移清单、逐字节备份、重跑补迁移和用户取消隐藏不被重置。
+
+原始结果：[linux-migration-acceptance-2026-10-04.json](validation/linux-migration-acceptance-2026-10-04.json)。本次 SHA-256：`5746d345f4695f504ea42bf00e501cbe259553a721b7b6b05382b7dd8a03ec04`。
+
+| 项目数 | 首次导入 | 热查询 P95 | 连续输入 P95 | 连续输入最大值 | 超过 30ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1000 | 11.398ms | 5.819ms | 6.141ms | 10.047ms | 0 / 40 |
+| 10000 | 82.751ms | 25.45ms | 55.661ms | 71.561ms | 8 / 40 |
+
+本轮一万项目连续输入出现了延迟尖峰，未达到每次都在 30ms 内完成；不能沿用首版基线的“0 次超时”结论。保留原始数据供 CI 与 Mac 实机对比，暂不把云端调度波动或代码开销中的任一个认定为唯一原因。

@@ -22,7 +22,7 @@ func errorFeedback(err error) Feedback {
 }
 func Run(args []string, out, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" {
-		fmt.Fprintln(out, "vsc query [text] | index | open --target URI [--editor NAME] [--dry-run] | editors --target URI | hide/unhide/pin --target URI | restore-all | doctor | config-init | version")
+		fmt.Fprintln(out, "vsc query [text] | index | open --target URI [--editor NAME] [--dry-run] | editors --target URI | hide/unhide/pin --target URI | migrate-legacy --source PATH [--data-dir PATH] [--apply] | restore-all | doctor | config-init | version")
 		return 0
 	}
 	if args[0] == "version" || args[0] == "--version" {
@@ -41,6 +41,32 @@ func Run(args []string, out, stderr io.Writer) int {
 	args = args[1:]
 	fail := func(e error) int { fmt.Fprintln(stderr, e); return 1 }
 	switch command {
+	case "migrate-legacy":
+		flags := flag.NewFlagSet(command, flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		source := flags.String("source", os.Getenv("VSC_LEGACY_CACHE"), "旧工作流目录或 .records.cache.json")
+		destination := flags.String("data-dir", "", "新版工作流用户数据目录")
+		apply := flags.Bool("apply", false, "实际迁移；默认仅预览")
+		dry := flags.Bool("dry-run", false, "仅预览")
+		if flags.Parse(args) != nil {
+			return 2
+		}
+		if *source == "" || flags.NArg() != 0 || *apply && *dry {
+			return fail(fmt.Errorf("需要 --source；--apply 与 --dry-run 不能同时使用"))
+		}
+		if *destination != "" {
+			c, e = loadConfigAt(*destination)
+			if e != nil {
+				return fail(e)
+			}
+		}
+		report, err := ImportLegacy(c, expand(*source, c.Home), *apply)
+		if err != nil {
+			return fail(err)
+		}
+		if err = encode(out, report); err != nil {
+			return fail(err)
+		}
 	case "query":
 		query := strings.Join(args, " ")
 		feedback, e := Query(c, query)

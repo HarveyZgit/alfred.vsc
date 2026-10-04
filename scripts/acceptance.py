@@ -24,7 +24,7 @@ def main():
     binary = str(args.binary.resolve())
     report = {'binary_sha256': hashlib.sha256(Path(binary).read_bytes()).hexdigest(), 'checks': [], 'benchmarks': []}
     with tempfile.TemporaryDirectory(prefix='vsc-acceptance-') as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         root = base/'projects'; root.mkdir()
         env = {k: v for k, v in os.environ.items() if not k.startswith(('VSC_', 'alfred_'))}
         env.update(VSC_DATA_DIR=str(base/'data'), VSC_CACHE_DIR=str(base/'cache'), VSC_DB_PATH=str(base/'state.vscdb'), VSC_DIRECTORIES=str(root), VSC_NO_BACKGROUND='1')
@@ -117,6 +117,36 @@ def main():
         isolated = dict(env, PATH='/nonexistent')
         assert json.loads(run('query', 'literal', environment=isolated).stdout)['items'][0]['uid']
         report['checks'].append('query runs without Python, Node, Go, sqlite3 or git on PATH')
+        # Exercise the distributed shell entry point and actual native importer.
+        legacy = base/'old workflow'; legacy.mkdir()
+        outscope = base/'outside'; outscope.mkdir()
+        git(outscope, 'init', '-b', 'main')
+        source = legacy/'.records.cache.json'
+        source.write_text(json.dumps({'records':[{'path':'file://'+str(local),'type':'folder'}, {'path':outscope.as_uri(),'type':'folder'}], 'trash':{'old':{'path':'file://'+str(local)}, 'later':{'path':outscope.as_uri()}}, 'legacy_extra':'retained'}))
+        before = source.read_bytes()
+        script = Path(__file__).resolve().parent/'migrate-v2.sh'
+        migration_env = dict(env, VSC_BINARY=binary)
+        def migrate(apply=False):
+            words = ['sh',str(script),'--source',str(legacy),'--data-dir',env['VSC_DATA_DIR']]
+            if apply: words.append('--apply')
+            result = subprocess.run(words,env=migration_env,capture_output=True,text=True,check=True,timeout=10)
+            return json.loads(result.stdout)
+        preview=migrate()
+        assert not preview['applied'] and len(preview['unmigrated'])==2
+        assert not Path(preview['backup']).exists()
+        migrated=migrate(True)
+        assert migrated['applied'] and migrated['hidden_imported']==1
+        assert (Path(migrated['backup'])/'legacy-records.json').read_bytes()==before==source.read_bytes()
+        assert local.as_uri() not in records(query())
+        run('unhide','--target',local.as_uri())
+        assert migrate(True)['already_applied'] and local.as_uri() in records(query())
+        history([{'folderUri':outscope.as_uri()}])
+        assert not migrate()['already_applied']
+        assert not migrate(True)['unmigrated']
+        assert outscope.as_uri() not in records(query())
+        assert local.as_uri() in records(query())
+        report['checks'].append('migration shell: preview, scope exclusions and guidance, exact backup, rerun, user unhide preservation and incremental import')
+
         if args.benchmark:
             def stats(samples):
                 ordered = sorted(samples)

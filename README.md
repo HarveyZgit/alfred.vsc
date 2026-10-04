@@ -52,7 +52,7 @@ Alfred 的工作流配置提供根目录、默认 IDE 和四个 CLI 路径。CLI
 | `VSC_REFRESH_SECONDS` | 仓库刷新间隔，默认 300 |
 | `VSC_DATA_DIR` / `VSC_CACHE_DIR` | 覆盖偏好 / 缓存目录 |
 | `VSC_NO_BACKGROUND=1` | 禁止后台扫描，适合可重复测试 |
-| `VSC_LEGACY_CACHE` | 首次启动时从指定 V2 缓存迁移隐藏记录 |
+| `VSC_LEGACY_CACHE` | 迁移命令的默认源缓存路径；查询不自动迁移 |
 
 `vsc config-init` 生成不覆盖已有文件的 `config.json`；环境变量优先于配置文件。配置示例：
 
@@ -87,8 +87,17 @@ Linux 验收覆盖真实 SQLite / WAL、真实 Git 仓库与 worktree、分支�
 
 ## 从 V2 升级
 
-先安装隔离测试包，确认后再替换正式版。首次启动会尝试从 `VSC_LEGACY_CACHE`、用户数据目录及旧工作流目录中的 `.records.cache.json` 迁移隐藏记录，原文件不会修改。正式升级前建议备份旧工作流及缓存，避免 Alfred 替换工作流文件时丢失旧缓存。
+先安装隔离测试包，确认后再替换正式版。使用随包提供的迁移脚本：
 
-V3 不迁移自维护 MRU、文件条目或分支缓存；目录历史以 VS Code 为准。旧 `VSC_OPEN_DEFAULT` 仅作为默认编辑器可执行路径兼容；旧 `VSC_OPEN_WITH_CMD` 改为 IDE 选择菜单，请使用 `VSC_EDITOR_*` 配置。
+```sh
+./scripts/migrate-v2.sh --source "/旧版工作流目录" --data-dir "/tmp/vsc-dev-v3" --dry-run
+./scripts/migrate-v2.sh --source "/旧版工作流目录" --data-dir "/tmp/vsc-dev-v3" --apply
+```
+
+它会先备份，再迁移新版来源范围内目录的隐藏状态与旧使用顺序。范围外记录不导入，输出 `unmigrated` 列表和逐条补迁移方法；先用 VS Code 打开这些目录或配置 Git 根目录，再重跑即可补齐。重复执行保留迁移后用户的取消隐藏操作。普通查询不会偷偷执行迁移或扫描旧数据。
+
+终端不会自动继承 Alfred 配置；先在管理菜单生成高级配置，确认迁移目标目录和根目录，详见 [迁移步骤、未迁移列表与恢复方法](docs/MIGRATION.zh-CN.md)。原文件、用户配置和未知字段完整备份，旧分支缓存与文件条目不用于新版搜索。
+
+旧 `VSC_OPEN_DEFAULT` 仅作为默认编辑器可执行路径兼容；旧 `VSC_OPEN_WITH_CMD` 改为 IDE 选择菜单，请使用 `VSC_EDITOR_*` 配置。
 
 MIT License.

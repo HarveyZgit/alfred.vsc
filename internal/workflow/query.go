@@ -91,6 +91,10 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		position int
 		pinned   bool
 	}
+	legacy := make(map[string]int, len(prefs.LegacyOrder))
+	for i, id := range prefs.LegacyOrder {
+		legacy[id] = i + 1
+	}
 	matches := make([]match, 0, len(projects))
 	for i, p := range projects {
 		if prefs.Hidden[p.ID] || kind != "" && p.Kind != kind {
@@ -122,6 +126,13 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		}
 		if a.pinned != b.pinned {
 			return a.pinned
+		}
+		ar, br := legacy[projects[a.position].ID], legacy[projects[b.position].ID]
+		if ar != 0 && br != 0 && ar != br {
+			return ar < br
+		}
+		if (ar != 0) != (br != 0) {
+			return ar != 0
 		}
 		return a.position < b.position
 	})
@@ -177,9 +188,6 @@ func render(c Config, projects []Project, prefs Preferences) []Item {
 	return items
 }
 func Query(c Config, query string) (Feedback, error) {
-	if e := migrate(c); e != nil {
-		return Feedback{}, e
-	}
 	prefs, e := loadPreferences(c)
 	if e != nil {
 		return Feedback{}, e
@@ -188,6 +196,9 @@ func Query(c Config, query string) (Feedback, error) {
 		return browse(c, strings.TrimSpace(query), prefs)
 	}
 	history, warnings := loadHistory(c)
+	if len(prefs.LegacyOrder) > 0 && historyOrderKey(history) != prefs.LegacyHistory {
+		prefs.LegacyOrder = nil
+	}
 	index, stale := loadIndex(c)
 	pending := false
 	if stale {

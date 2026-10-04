@@ -11,11 +11,14 @@ import (
 )
 
 type Preferences struct {
-	Version  int               `json:"version"`
-	Hidden   map[string]bool   `json:"hidden"`
-	Pinned   map[string]bool   `json:"pinned"`
-	Editors  map[string]string `json:"editors"`
-	Migrated bool              `json:"legacy_migrated"`
+	Version       int               `json:"version"`
+	Hidden        map[string]bool   `json:"hidden"`
+	Pinned        map[string]bool   `json:"pinned"`
+	Editors       map[string]string `json:"editors"`
+	Migrated      bool              `json:"legacy_migrated"`
+	LegacyImports map[string]bool   `json:"legacy_imports,omitempty"`
+	LegacyOrder   []string          `json:"legacy_order,omitempty"`
+	LegacyHistory string            `json:"legacy_history,omitempty"`
 }
 
 func emptyPreferences() Preferences {
@@ -137,42 +140,4 @@ func changePreferences(c Config, fn func(*Preferences) error) error {
 		return e
 	}
 	return atomicJSON(filepath.Join(c.DataDir, "preferences.json"), p)
-}
-func migrate(c Config) error {
-	p, e := loadPreferences(c)
-	if e != nil || p.Migrated {
-		return e
-	}
-	paths := []string{os.Getenv("VSC_LEGACY_CACHE"), filepath.Join(c.DataDir, ".records.cache.json"), ".records.cache.json", "src/.records.cache.json"}
-	if os.Getenv("VSC_DEV_MODE") == "1" {
-		paths = nil
-	}
-	return changePreferences(c, func(p *Preferences) error {
-		if p.Migrated {
-			return nil
-		}
-		for _, name := range paths {
-			if name == "" {
-				continue
-			}
-			var legacy struct {
-				Trash map[string]struct {
-					Path string `json:"path"`
-				} `json:"trash"`
-			}
-			if e := readJSON(name, &legacy); e != nil {
-				if os.IsNotExist(e) {
-					continue
-				}
-				return fmt.Errorf("legacy cache %s: %w", name, e)
-			}
-			for _, entry := range legacy.Trash {
-				if item, e := project(entry.Path, ""); e == nil {
-					p.Hidden[item.ID] = true
-				}
-			}
-		}
-		p.Migrated = true
-		return nil
-	})
 }

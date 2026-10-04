@@ -6,6 +6,7 @@ VSC 3 is an Alfred 5 workflow with a Go native CLI. Read README.md and docs/ARCH
 - internal/workflow: configuration, read-only VS Code SQLite history, disposable snapshots, background repository scan, Unicode ranking, live visible Git branches, persisted preferences and IDE adapters.
 - public/info.plist: generated Alfred wiring; edit scripts/generate_workflow.py and regenerate it.
 - scripts/build_workflow.py: CGO_ENABLED=0 builds, universal Mach-O creation, workflow packaging. Python is build-only.
+- scripts/migrate-v2.sh: native-backed preview/apply migration; source scope filtering, original backups, per-record retry markers. See docs/MIGRATION.zh-CN.md.
 - scripts/acceptance.py: real compiled CLI acceptance, SQLite WAL, real Git/worktrees, subprocess IDE adapters and optional benchmark.
 - scripts/verify_package.py: package and Mach-O structural checks.
 

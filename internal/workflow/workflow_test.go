@@ -224,7 +224,8 @@ func TestLegacyTrashMigration(t *testing.T) {
 	p := repo(t, filepath.Join(c.Home, "p"), "main")
 	b, _ := json.Marshal(map[string]any{"trash": map[string]any{"old-md5": map[string]string{"path": p.URI}}})
 	write(t, filepath.Join(c.DataDir, ".records.cache.json"), string(b))
-	if e := migrate(c); e != nil {
+	c.Roots = []string{c.Home}
+	if _, e := ImportLegacy(c, filepath.Join(c.DataDir, ".records.cache.json"), true); e != nil {
 		t.Fatal(e)
 	}
 	prefs, _ := loadPreferences(c)

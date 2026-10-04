@@ -1,0 +1,46 @@
+{
+  "binary_sha256": "5746d345f4695f504ea42bf00e501cbe259553a721b7b6b05382b7dd8a03ec04",
+  "checks": [
+    "source union, exclusions, real Git worktree, remote without branches",
+    "branch changes and committed WAL history visible on next invocation",
+    "hide, restore and 30 concurrent preference writers without lost updates",
+    "four editor adapters, exact argv, Unicode/spaces, remembered editor, failure propagation",
+    "SQLite read-only committed view, empty source removes stale history",
+    "directory browsing",
+    "real detached background scanner and completed index",
+    "query runs without Python, Node, Go, sqlite3 or git on PATH",
+    "migration shell: preview, scope exclusions and guidance, exact backup, rerun, user unhide preservation and incremental import"
+  ],
+  "benchmarks": [
+    {
+      "projects": 1000,
+      "first_source_import_ms": 11.398,
+      "warm_queries": {
+        "p50_ms": 4.818,
+        "p95_ms": 5.819,
+        "max_ms": 5.86
+      },
+      "typing_30ms_interval": {
+        "p50_ms": 5.243,
+        "p95_ms": 6.141,
+        "max_ms": 10.047
+      },
+      "queries_over_30ms": 0
+    },
+    {
+      "projects": 10000,
+      "first_source_import_ms": 82.751,
+      "warm_queries": {
+        "p50_ms": 20.845,
+        "p95_ms": 25.45,
+        "max_ms": 26.473
+      },
+      "typing_30ms_interval": {
+        "p50_ms": 22.449,
+        "p95_ms": 55.661,
+        "max_ms": 71.561
+      },
+      "queries_over_30ms": 8
+    }
+  ]
+}
