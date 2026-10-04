@@ -13,6 +13,6 @@ Linux 的二进制与参数验收已自动化。以下测试需要真实 Alfred 
 9. Ctrl + Enter 隐藏，刷新仓库后仍隐藏；管理菜单恢复；Alt + Enter 固定后排序生效。确认 Cmd、Ctrl、Alt、Shift 的修饰键连接与提示一致。
 10. `vscd /` 用 Tab 选择根目录 / 子目录、返回上级；相同子目录名不会跨根目录串线。
 11. 首次无缓存、增加仓库、临时拔掉外置盘时观察后台索引和提示；确认输入不等待全盘扫描。慢挂载属于需实机验证的性能场景。
-12. 对 Apple Silicon 和 Intel 的可用机器分别检查二进制；可执行 `lipo -archs vsc`、`codesign --verify vsc`。包未做 Developer ID 公证，若系统阻止，按系统的可信软件允许流程处理。
+12. 对 Apple Silicon 和 Intel 的可用机器分别检查二进制；可执行 `lipo -archs vsc`、`codesign --verify vsc-darwin-arm64`（Go 自动对 arm64 做 ad-hoc 签名，amd64 默认无签名，不能把整个 universal 当成所有架构都签名的产物）。包未做 Developer ID 公证，若系统阻止，按系统的可信软件允许流程处理。
 
 出现问题时保存：系统 / Alfred / IDE 版本、脱敏后的 `doctor`、Alfred Debugger 输出、输入文本与按键。请勿提交包含真实主机名、私人路径的数据库或完整偏好文件。
