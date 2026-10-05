@@ -10,6 +10,7 @@ import selectors
 import sqlite3
 import subprocess
 import tempfile
+import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -264,4 +265,17 @@ printf '%s' "$1" > "$VSC_TEST_BROWSER_CAPTURE"
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:
+        # Keep CI failures actionable in the Checks API, including bare asserts.
+        # Do not include request headers or the local server session token.
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            frames = traceback.extract_tb(error.__traceback__)
+            frame = next(
+                (frame for frame in reversed(frames) if frame.filename == __file__), frames[-1]
+            )
+            message = f"{type(error).__name__}: {error} | {frame.line}"
+            message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+            print(f"::error file=scripts/panel_acceptance.py,line={frame.lineno}::{message}")
+        raise
