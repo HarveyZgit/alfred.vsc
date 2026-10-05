@@ -31,6 +31,7 @@ func historyPaths(c Config) []string {
 	paths = append(paths, filepath.Join(c.Home, ".vscode-shared/sharedStorage/state.vscdb"), filepath.Join(c.VSCodeDir, "User/globalStorage/state.vscdb"))
 	return paths
 }
+
 func parseHistory(b []byte) ([]Project, error) {
 	var data struct {
 		Entries []json.RawMessage `json:"entries"`
@@ -54,6 +55,7 @@ func parseHistory(b []byte) ([]Project, error) {
 	}
 	return merge(out), nil
 }
+
 func readHistoryDB(name string) ([]byte, error) {
 	abs, e := filepath.Abs(name)
 	if e != nil {

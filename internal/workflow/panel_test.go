@@ -26,6 +26,7 @@ func panelFixture(t *testing.T) (Config, *panel) {
 	}
 	return c, &panel{dataDir: c.DataDir, token: "test-token", host: "127.0.0.1:12345", stop: func() {}}
 }
+
 func panelRequest(t *testing.T, p *panel, method, path string, body any) *httptest.ResponseRecorder {
 	t.Helper()
 	data, _ := json.Marshal(body)
@@ -36,6 +37,7 @@ func panelRequest(t *testing.T, p *panel, method, path string, body any) *httpte
 	p.ServeHTTP(w, r)
 	return w
 }
+
 func TestPanelProtectsPreferencesAndServesEmbeddedUI(t *testing.T) {
 	c, p := panelFixture(t)
 	for _, test := range []struct{ host, origin, auth string }{{p.host, "", ""}, {"evil.test:12345", "", "Bearer " + p.token}, {p.host, "http://evil.test", "Bearer " + p.token}} {
@@ -63,6 +65,7 @@ func TestPanelProtectsPreferencesAndServesEmbeddedUI(t *testing.T) {
 		t.Fatal("served arbitrary path")
 	}
 }
+
 func TestPanelSettingsOverrideAlfredAndPreserveAdvancedConfig(t *testing.T) {
 	c, p := panelFixture(t)
 	t.Setenv("VSC_DIRECTORIES", filepath.Join(c.Home, "old-root"))
@@ -104,6 +107,7 @@ func TestPanelSettingsOverrideAlfredAndPreserveAdvancedConfig(t *testing.T) {
 		t.Fatalf("reset failed: %+v %v", cfg, err)
 	}
 }
+
 func TestPanelHiddenRecordsRestoreAndFreshStatus(t *testing.T) {
 	c, p := panelFixture(t)
 	db := database(t, c)
@@ -173,6 +177,7 @@ func TestPanelHiddenRecordsRestoreAndFreshStatus(t *testing.T) {
 		t.Fatal("accepted unknown source")
 	}
 }
+
 func TestPanelMigrationShowsLatestIncrementalReport(t *testing.T) {
 	c, p := panelFixture(t)
 	a := repo(t, filepath.Join(c.Home, "root/a"), "main")
@@ -223,5 +228,35 @@ func TestPanelMigrationShowsLatestIncrementalReport(t *testing.T) {
 	_, _ = io.Copy(io.Discard, resp.Body)
 	if resp.StatusCode != 200 {
 		t.Fatal(resp.Status)
+	}
+}
+
+func TestPanelStaticRoutesRestrictPathsAndTypes(t *testing.T) {
+	_, p := panelFixture(t)
+	entries, err := panelAssets.ReadDir("panel")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(name, ".js") && !strings.HasSuffix(name, ".css") {
+			continue
+		}
+		w := panelRequest(t, p, http.MethodGet, "/"+name, nil)
+		wantType := "text/javascript; charset=utf-8"
+		if strings.HasSuffix(name, ".css") {
+			wantType = "text/css; charset=utf-8"
+		}
+		if w.Code != http.StatusOK || w.Header().Get("Content-Type") != wantType {
+			t.Fatalf("asset %s: status=%d type=%q", name, w.Code, w.Header().Get("Content-Type"))
+		}
+	}
+	for _, path := range []string{"/missing.js", "/index.html", "/nested/app.js", "/../app.js", "/%2e%2e/app.js", "/panel/app.js", "/config.json"} {
+		if w := panelRequest(t, p, http.MethodGet, path, nil); w.Code != http.StatusNotFound {
+			t.Fatalf("unexpected static route %s: %d", path, w.Code)
+		}
+	}
+	if w := panelRequest(t, p, http.MethodPost, "/app.js", nil); w.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("static mutation: %d", w.Code)
 	}
 }

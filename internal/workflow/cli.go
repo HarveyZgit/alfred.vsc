@@ -17,9 +17,11 @@ func encode(w io.Writer, v any) error {
 	e.SetEscapeHTML(false)
 	return e.Encode(v)
 }
+
 func errorFeedback(err error) Feedback {
 	return Feedback{Items: []Item{{Title: "VSC 需要处理一个问题", Subtitle: err.Error(), Valid: false}}}
 }
+
 func Run(args []string, out, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" {
 		fmt.Fprintln(out, "vsc query [text] | index | open --target URI [--editor NAME] [--dry-run] | editors --target URI | hide/unhide/pin --target URI | migrate-legacy --source PATH [--data-dir PATH] [--apply] | manage [--serve] | restore-all | doctor | config-init | version")

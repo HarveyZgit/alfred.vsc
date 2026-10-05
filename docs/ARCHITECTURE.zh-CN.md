@@ -69,3 +69,28 @@ Alfred 负责输入变化时终止前一查询并显示当前查询结果。每�
 config.json 新增可选 managed 对象，仅承载面板根目录、默认 IDE 与 CLI 路径，在 Alfred 环境变量之后应用；未使用面板时沿用原有优先级。配置写入使用单独文件锁，保留不认识的高级字段，可一键移除 managed 恢复原有配置。每个请求重新读取配置，使其他窗口和 CLI 修改可见。
 
 迁移保留最初 report.json 不变，成功执行后另写 latest-report.json 记录最新补迁移结果。预览不落盘；旧版只有首次报告时标注历史快照。报告保存失败不会假称已提交的偏好迁移失败，而是在结果 notes 中说明。
+
+
+## 源码职责与文件组织
+
+Go 核心保留 `internal/workflow` 包，按职责分文件，跨文件仍使用未导出函数；这次整理不改变数据格式、锁、来源范围和查询流程。
+
+| 位置 | 职责 |
+| --- | --- |
+| `cmd/vsc/main.go` | 进程入口 |
+| `internal/workflow/cli.go`、`config.go` | CLI 分派与配置优先级 |
+| `model.go`、`history.go`、`index.go`、`git.go` | 项目模型、VS Code 历史、Git 索引与分支 |
+| `query.go`、`search.go`、`feedback.go`、`browse.go` | 查询编排、排名、Alfred JSON 和目录浏览 |
+| `open.go` | IDE 解析、打开计划与执行 |
+| `preferences.go`、`storage.go` | 用户偏好、文件锁、原子写入和缓存编码 |
+| `migration.go`、`migration_source.go` | 迁移事务、旧数据解析与来源判断 |
+| `panel.go`、`panel_routes.go`、`panel_records.go`、`panel_settings.go`、`panel_migration.go` | 面板进程生命周期、HTTP 路由和各业务接口 |
+| `internal/workflow/panel/` | HTML/CSS，以及 `api` / `dom` / `records` / `settings` / `migration` 原生 JS 模块；`app.js` 只负责初始化 |
+| `*_test.go`、`test_helpers_test.go` | 按领域命名的测试和共享 fixture |
+| `public/`、`public/assets/` | Alfred 模板、工作流图标和结果图标 |
+| `scripts/` | 生成、打包、CLI / 面板 / 浏览器验收与包验证；旧版迁移 shell 入口 |
+| `docs/validation/` | 与二进制 SHA-256 对应的原始验收报告 |
+
+JS 模块直接由二进制内嵌服务返回，无打包器、CDN 或新增运行依赖。静态 HTTP 路由使用明确文件白名单，并检查 MIME 类型和非法路径。
+
+正式包 ID 固定为 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；正式包不携带开发模式变量或临时数据路径。默认 Hotkey 使用 Alfred 已有导出协议（V 键码 9，⌘⇧ 修饰掩码 1179648），连接项目 Script Filter，输入参数为空；开发包不包含该热键。

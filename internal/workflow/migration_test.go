@@ -19,6 +19,7 @@ func legacyFixture(t *testing.T, c Config, records any, trash any) string {
 	write(t, name, string(b))
 	return name
 }
+
 func TestMigrationPreviewScopeAndRawBackup(t *testing.T) {
 	c := fixture(t)
 	root := filepath.Join(c.Home, "root")
@@ -63,6 +64,7 @@ func TestMigrationPreviewScopeAndRawBackup(t *testing.T) {
 		t.Fatal(e)
 	}
 }
+
 func TestMigrationRetryAfterAddingSourcePreservesUserEdits(t *testing.T) {
 	c := fixture(t)
 	root := filepath.Join(c.Home, "root")
@@ -97,6 +99,7 @@ func TestMigrationRetryAfterAddingSourcePreservesUserEdits(t *testing.T) {
 		t.Fatal(p.LegacyOrder)
 	}
 }
+
 func TestMigrationHistoryOrderYieldsToVSCodeChange(t *testing.T) {
 	c := fixture(t)
 	a := repo(t, filepath.Join(c.Home, "a"), "main")
@@ -118,6 +121,7 @@ func TestMigrationHistoryOrderYieldsToVSCodeChange(t *testing.T) {
 		t.Fatalf("history did not take over: %v %v", targets(f), e)
 	}
 }
+
 func TestMigrationRemoteFilesNotImportedAndMenuURIs(t *testing.T) {
 	c := fixture(t)
 	db := database(t, c)
@@ -137,6 +141,7 @@ func TestMigrationRemoteFilesNotImportedAndMenuURIs(t *testing.T) {
 		t.Fatal(r.Items[0])
 	}
 }
+
 func TestMigrationRejectsMalformedSourceAndCorruptDestination(t *testing.T) {
 	c := fixture(t)
 	source := filepath.Join(c.Home, "old.json")
@@ -159,6 +164,7 @@ func TestMigrationRejectsMalformedSourceAndCorruptDestination(t *testing.T) {
 		t.Fatal("corrupt preferences overwritten")
 	}
 }
+
 func TestMigrationDestinationConfig(t *testing.T) {
 	c := fixture(t)
 	root := filepath.Join(c.Home, "configured-root")
@@ -180,5 +186,20 @@ func TestMigrationDestinationConfig(t *testing.T) {
 	}
 	if !strings.HasPrefix(r.Backup, c.DataDir) {
 		t.Fatal(r.Backup)
+	}
+}
+
+func TestLegacyTrashMigration(t *testing.T) {
+	c := fixture(t)
+	p := repo(t, filepath.Join(c.Home, "p"), "main")
+	b, _ := json.Marshal(map[string]any{"trash": map[string]any{"old-md5": map[string]string{"path": p.URI}}})
+	write(t, filepath.Join(c.DataDir, ".records.cache.json"), string(b))
+	c.Roots = []string{c.Home}
+	if _, e := ImportLegacy(c, filepath.Join(c.DataDir, ".records.cache.json"), true); e != nil {
+		t.Fatal(e)
+	}
+	prefs, _ := loadPreferences(c)
+	if !prefs.Hidden[p.ID] || !prefs.Migrated {
+		t.Fatal("legacy hidden record lost")
 	}
 }

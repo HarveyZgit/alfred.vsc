@@ -60,6 +60,7 @@ func project(raw, label string) (Project, error) {
 	p.ID = hex.EncodeToString(sum[:16])
 	return p, nil
 }
+
 func localProject(dir string) (Project, error) {
 	abs, e := filepath.Abs(dir)
 	if e != nil {
@@ -67,6 +68,7 @@ func localProject(dir string) (Project, error) {
 	}
 	return project((&url.URL{Scheme: "file", Path: abs}).String(), "")
 }
+
 func merge(groups ...[]Project) []Project {
 	total := 0
 	for _, group := range groups {
@@ -84,6 +86,7 @@ func merge(groups ...[]Project) []Project {
 	}
 	return out
 }
+
 func remoteLabel(p Project) string {
 	if strings.HasPrefix(p.Authority, "ssh-remote+") {
 		return "SSH: " + strings.TrimPrefix(p.Authority, "ssh-remote+")

@@ -6,7 +6,9 @@
 
 ## 1. 找到旧缓存并配置新版
 
-替换旧正式工作流前，在 Alfred Workflows 里右键旧 VSC，选择 Open in Finder，复制整个目录作为备份。通常 `.records.cache.json` 位于该目录，源码开发版可能位于 `src/`。不要先删除旧工作流，Alfred 升级时可能清理旧目录。迁移源可传目录或这个缓存文件的完整路径。
+先备份旧工作流目录和用户数据。旧版本的 `.records.cache.json` 可能在工作流目录 / `src/`，也可能在 `~/Library/Application Support/Alfred/Workflow Data/com.harvey.alfredapp.vsc`。迁移源传实际数据目录或缓存文件完整路径。
+
+V3 正式包使用 `com.harvey.alfredapp.vsc.v3`，与旧版的 `com.harvey.alfredapp.vsc` 分开。要保留旧版，把旧名称改为 `vsc-old`、关键词改为 `vsco` / `vscoli`，保留旧 Bundle ID；导入 V3 正式包即可让新版接管 `vsc` / `vscli`。已经在 V3 正式 ID 下完成迁移的用户，后续直接安装新正式包更新，不重复迁移。
 
 先导入隔离开发包并配置根目录。在 `vscdli` 中执行“生成高级配置”，把当前 Alfred 配置写入开发数据目录的 `config.json`。若该文件已存在，工具不会覆盖；请确认其中 `roots` 与工作流配置一致。终端并不会自动继承 Alfred 工作流变量，必要时在迁移命令前显式设置 `VSC_DIRECTORIES` / `VSC_DB_PATH`。
 
@@ -48,7 +50,7 @@
 确认后可对正式版数据目录再次执行。Alfred 默认正式数据目录通常是：
 
 ```text
-~/Library/Application Support/Alfred/Workflow Data/com.harvey.alfredapp.vsc
+~/Library/Application Support/Alfred/Workflow Data/com.harvey.alfredapp.vsc.v3
 ```
 
 以正式工作流 `vscli` 的“生成高级配置”或 `doctor` 输出为准。显式指定 `--data-dir`，避免终端默认目录与 Alfred 数据目录不同。测试包和正式包迁移互相隔离。
@@ -82,7 +84,8 @@
 - `legacy-records.json`：旧缓存逐字节副本，包括所有范围外记录、原排序和未知字段，仅供备份。
 - `legacy-user-config.json`：同目录旧用户配置的逐字节副本（若存在），不覆盖新版配置。
 - `preferences-before.json`：第一次迁移前的新版偏好。
-- `report.json`：第一次执行的迁移计划；补迁移后的最新状态以命令输出 `migration-result.json` 为准。
+- `report.json`：第一次执行的迁移计划，保持不变。
+- `latest-report.json`：最近一次成功执行报告，补迁移后更新；当前来源范围以重新预览为准。
 
 完整备份落盘后才原子提交新版偏好；输入损坏或目标偏好损坏会报错，不覆盖原文件。重复执行不会覆盖第一次备份。一次迁移中断后可用同一命令重试。
 

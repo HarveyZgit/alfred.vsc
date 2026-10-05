@@ -2,6 +2,10 @@
 
 ## v3.0.0
 
+- 正式包固定使用 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；已迁移的正式版安装可直接更新。
+- 正式包默认 Command + Shift + V 唤醒项目搜索，开发包不注册此热键。
+- 提供内嵌记录管理面板；按职责整理 Go 核心、前端模块、测试与图标，统一源码格式。
+
 - 使用 Go 单二进制重写，支持 macOS Apple Silicon / Intel 通用包，运行不再需要 Python 或 Node。
 - 来源收敛为 VS Code 目录历史与配置根目录下 Git 仓库的并集；移除文件与 workspace 文件。
 - SQLite 只读实时同步、可丢弃快照、后台仓库发现，查询不递归扫描。
