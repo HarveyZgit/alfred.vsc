@@ -4,22 +4,22 @@
 
 ## 本地重跑
 
-需要 Go 1.26+、Node.js 22+、Python 3.9+、Git。成品使用者无需这些工具。
+需要 Go 1.26+、Node.js 22+、pnpm 11.19.0、Python 3.9+、Git。成品使用者无需这些工具。
 
 ```sh
-npm ci --prefix web
-npm run build --prefix web
+pnpm --dir web install --frozen-lockfile
+pnpm --dir web run build
 go mod verify
 go test -race ./...
 go vet ./...
 python3 scripts/build_workflow.py
 python3 scripts/build_workflow.py --target macos --skip-build --dev
 python3 scripts/verify_package.py build/vsc.alfredworkflow build/vsc-dev.alfredworkflow
-python3 scripts/acceptance.py --benchmark --output build/acceptance-linux.json
-python3 scripts/panel_acceptance.py
+python3 tests/e2e/acceptance.py --benchmark --output build/acceptance-linux.json
+python3 tests/e2e/panel_acceptance.py
 ```
 
-Go embed 依赖前端产物，所以干净检出必须先构建页面，再执行 Go 测试。打包脚本也会按锁文件安装并构建页面。配置 JSON 与 npm 锁文件属于必要源码，和自动生成的验收 JSON 用途不同。
+Go embed 依赖前端产物，所以干净检出必须先构建页面，再执行 Go 测试。打包脚本也会按锁文件安装并构建页面。配置 JSON 与 pnpm 锁文件属于必要源码，和自动生成的验收 JSON 用途不同。
 
 ## 各层检查的用途
 
@@ -32,7 +32,7 @@ Go embed 依赖前端产物，所以干净检出必须先构建页面，再执�
 浏览器检查需要开发机预装 Playwright 与 Chromium，不随工作流分发，也不属于 Go 测试。执行：
 
 ```sh
-CHROMIUM_PATH=/path/to/chromium node scripts/panel_browser_acceptance.cjs build/vsc-linux-amd64
+CHROMIUM_PATH=/path/to/chromium node tests/e2e/panel_browser_acceptance.cjs build/vsc-linux-amd64
 ```
 
 当前 CI 在 Linux/macOS 运行 Go、CLI、API 和打包检查；真实浏览器检查由开发环境运行。诊断日志在检查失败时也上传，方便定位，不通过删除断言绕过失败。

@@ -286,5 +286,5 @@ if __name__ == "__main__":
             )
             message = f"{type(error).__name__}: {error} | {frame.line}"
             message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-            print(f"::error file=scripts/panel_acceptance.py,line={frame.lineno}::{message}")
+            print(f"::error file=tests/e2e/panel_acceptance.py,line={frame.lineno}::{message}")
         raise

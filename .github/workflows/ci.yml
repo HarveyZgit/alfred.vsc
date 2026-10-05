@@ -21,18 +21,22 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: web/package.json
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
       - name: Build embedded React panel
         shell: bash
         run: |
           set -o pipefail
           mkdir -p build
-          npm ci --prefix web 2>&1 | tee build/frontend-install.log
-          npm run build --prefix web 2>&1 | tee build/frontend-build.log
+          pnpm --dir web install --frozen-lockfile 2>&1 | tee build/frontend-install.log
+          pnpm --dir web run build 2>&1 | tee build/frontend-build.log
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -59,16 +63,16 @@ jobs:
         run: |
           set -o pipefail
           go build -trimpath -o build/vsc-host ./cmd/vsc 2>&1 | tee build/go-build-host.log
-          python3 scripts/acceptance.py --binary build/vsc-host 2>&1 | tee build/acceptance-host.log
-          python3 scripts/panel_acceptance.py --binary build/vsc-host 2>&1 | tee build/panel-acceptance-host.log
+          python3 tests/e2e/acceptance.py --binary build/vsc-host 2>&1 | tee build/acceptance-host.log
+          python3 tests/e2e/panel_acceptance.py --binary build/vsc-host 2>&1 | tee build/panel-acceptance-host.log
       - if: runner.os == 'Linux'
         run: |
           set -o pipefail
           python3 scripts/build_workflow.py 2>&1 | tee build/package-build.log
           python3 scripts/build_workflow.py --target macos --skip-build --dev 2>&1 | tee build/package-dev.log
           python3 scripts/verify_package.py build/vsc.alfredworkflow build/vsc-dev.alfredworkflow 2>&1 | tee build/package-verify.log
-          python3 scripts/acceptance.py --benchmark --output build/acceptance-linux.json 2>&1 | tee build/acceptance-linux.log
-          python3 scripts/panel_acceptance.py 2>&1 | tee build/panel-acceptance-linux.log
+          python3 tests/e2e/acceptance.py --benchmark --output build/acceptance-linux.json 2>&1 | tee build/acceptance-linux.log
+          python3 tests/e2e/panel_acceptance.py 2>&1 | tee build/panel-acceptance-linux.log
       - if: runner.os == 'macOS'
         run: |
           set -o pipefail

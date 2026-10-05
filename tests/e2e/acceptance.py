@@ -221,7 +221,7 @@ def main():
             )
         )
         before = source.read_bytes()
-        script = Path(__file__).resolve().parent / "migrate-v2.sh"
+        script = Path(__file__).resolve().parents[2] / "scripts" / "migrate-v2.sh"
         migration_env = dict(env, VSC_BINARY=binary)
 
         def migrate(apply=False):
