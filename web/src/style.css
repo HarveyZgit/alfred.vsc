@@ -39,15 +39,11 @@ header {
   gap: 14px;
 }
 .logo {
-  display: grid;
-  place-items: center;
+  display: block;
+  flex-shrink: 0;
   width: 42px;
   height: 42px;
-  background: #171717;
-  color: white;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 24px;
+  object-fit: contain;
 }
 h1 {
   font-size: 19px;

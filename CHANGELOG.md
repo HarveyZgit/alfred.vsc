@@ -2,6 +2,7 @@
 
 ## v3.0.0
 
+- 工作流与管理面板统一使用紫色编辑器文件夹图标。
 - 前端依赖统一使用固定版本 pnpm 与冻结锁文件；CLI、面板 API、浏览器成品验收统一放到 `tests/e2e/`。
 
 - 管理面板改用 React + TypeScript、Rspack 与 shadcn UI；构建产物仍内嵌于单二进制，Node 仅用于开发构建。

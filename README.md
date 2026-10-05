@@ -1,5 +1,7 @@
 # VSC · Alfred 项目入口
 
+<img src="public/icon.png" width="96" height="96" alt="VSC 图标" />
+
 搜索 **VS Code 最近打开的目录 ∪ 配置根目录下的 Git 仓库**，用 VS Code、Zed、Trae 或 Cursor 打开。只收录本地目录和远程目录，不收录文件或 `.code-workspace` 文件。
 
 V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node.js、Go 或 sqlite3**。SQLite 已编入程序；读取分支也不调用 Git 命令。打开项目仍需安装对应 IDE，SSH / 容器连接由 IDE 自己处理。
