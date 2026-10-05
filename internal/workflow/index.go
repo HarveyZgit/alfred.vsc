@@ -31,6 +31,7 @@ func indexKey(c Config) string {
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:])
 }
+
 func scan(c Config) ([]Project, []string) {
 	projects := []Project{}
 	warnings := []string{}
@@ -87,6 +88,7 @@ func scan(c Config) ([]Project, []string) {
 	}
 	return projects, warnings
 }
+
 func BuildIndex(c Config, nonblocking bool) (Index, error) {
 	lock, e := lockFile(filepath.Join(c.CacheDir, "index.lock"), nonblocking)
 	if e != nil {
@@ -103,6 +105,7 @@ func BuildIndex(c Config, nonblocking bool) (Index, error) {
 	e = atomicCache(filepath.Join(c.CacheDir, "index.cache"), index)
 	return index, e
 }
+
 func loadIndex(c Config) (Index, bool) {
 	var index Index
 	e := readCache(filepath.Join(c.CacheDir, "index.cache"), &index)
@@ -112,6 +115,7 @@ func loadIndex(c Config) (Index, bool) {
 	}
 	return index, !valid || time.Since(time.Unix(index.Updated, 0)) > c.refresh()
 }
+
 func refreshIndex(c Config) bool {
 	if !c.Background || len(c.Roots) == 0 {
 		return false

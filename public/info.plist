@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.harvey.alfredapp.vsc</string>
+	<string>com.harvey.alfredapp.vsc.v3</string>
 	<key>name</key>
 	<string>vsc</string>
 	<key>createdby</key>
@@ -67,6 +67,37 @@
 				<integer>0</integer>
 				<key>queuemode</key>
 				<integer>1</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>uid</key>
+			<string>HOTKEY</string>
+			<key>type</key>
+			<string>alfred.workflow.trigger.hotkey</string>
+			<key>version</key>
+			<integer>2</integer>
+			<key>config</key>
+			<dict>
+				<key>action</key>
+				<integer>0</integer>
+				<key>argument</key>
+				<integer>0</integer>
+				<key>focusedappvariable</key>
+				<false/>
+				<key>focusedappvariablename</key>
+				<string></string>
+				<key>hotkey</key>
+				<integer>9</integer>
+				<key>hotmod</key>
+				<integer>1179648</integer>
+				<key>hotstring</key>
+				<string>V</string>
+				<key>leftcursor</key>
+				<false/>
+				<key>modsmode</key>
+				<integer>0</integer>
+				<key>relatedAppsMode</key>
+				<integer>0</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -309,6 +340,19 @@ exit "$status"</string>
 	</array>
 	<key>connections</key>
 	<dict>
+		<key>HOTKEY</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>SEARCH</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>SEARCH</key>
 		<array>
 			<dict>
@@ -486,66 +530,73 @@ exit "$status"</string>
 			<key>ypos</key>
 			<real>100.0</real>
 		</dict>
-		<key>OPEN</key>
+		<key>HOTKEY</key>
 		<dict>
 			<key>xpos</key>
 			<real>580.0</real>
+			<key>ypos</key>
+			<real>100.0</real>
+		</dict>
+		<key>OPEN</key>
+		<dict>
+			<key>xpos</key>
+			<real>820.0</real>
 			<key>ypos</key>
 			<real>100.0</real>
 		</dict>
 		<key>CLEAR</key>
 		<dict>
 			<key>xpos</key>
-			<real>820.0</real>
-			<key>ypos</key>
 			<real>100.0</real>
+			<key>ypos</key>
+			<real>260.0</real>
 		</dict>
 		<key>EDITORS</key>
 		<dict>
 			<key>xpos</key>
-			<real>100.0</real>
+			<real>340.0</real>
 			<key>ypos</key>
 			<real>260.0</real>
 		</dict>
 		<key>REMEMBER</key>
 		<dict>
 			<key>xpos</key>
-			<real>340.0</real>
+			<real>580.0</real>
 			<key>ypos</key>
 			<real>260.0</real>
 		</dict>
 		<key>HIDE</key>
 		<dict>
 			<key>xpos</key>
-			<real>580.0</real>
+			<real>820.0</real>
 			<key>ypos</key>
 			<real>260.0</real>
 		</dict>
 		<key>PIN</key>
 		<dict>
 			<key>xpos</key>
-			<real>820.0</real>
-			<key>ypos</key>
-			<real>260.0</real>
-		</dict>
-		<key>MANAGE</key>
-		<dict>
-			<key>xpos</key>
 			<real>100.0</real>
 			<key>ypos</key>
 			<real>420.0</real>
 		</dict>
-		<key>MANAGE_ACTION</key>
+		<key>MANAGE</key>
 		<dict>
 			<key>xpos</key>
 			<real>340.0</real>
 			<key>ypos</key>
 			<real>420.0</real>
 		</dict>
-		<key>NOTICE</key>
+		<key>MANAGE_ACTION</key>
 		<dict>
 			<key>xpos</key>
 			<real>580.0</real>
+			<key>ypos</key>
+			<real>420.0</real>
+		</dict>
+		<key>NOTICE</key>
+		<dict>
+			<key>xpos</key>
+			<real>820.0</real>
 			<key>ypos</key>
 			<real>420.0</real>
 		</dict>

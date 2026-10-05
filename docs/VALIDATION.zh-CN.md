@@ -67,3 +67,23 @@ GitHub macOS runner 已通过该提交的 26 个 Go 测试、race、vet 和原�
 面板服务不在搜索调用路径内；本次云端仍出现尾部延迟，不能承诺任何环境都低于 30ms。关闭服务响应收尾修正后重新构建并测量，以上对应最终本地二进制，不沿用前一轮结果。真实 Alfred、Mac 默认浏览器和 IDE / 远程连接仍按 Mac 清单验收。
 
 原始报告：[查询及性能](validation/linux-panel-acceptance-2026-10-04.json)、[原生面板](validation/panel-api-acceptance-2026-10-04.json)、[浏览器交互](validation/panel-browser-acceptance-2026-10-04.json)。
+
+
+## 2026-10-05 快捷键、安装身份与结构整理验收
+
+正式包固定 `com.harvey.alfredapp.vsc.v3`、入口 `vsc` / `vscli`，开发包固定 `.v3.dev`、入口 `vscd` / `vscdli`。包验证检查正式热键 Cmd+Shift+V 精确连接 SEARCH、开发包无热键、正式包无开发变量 / 临时数据路径，并继续验证 Mach-O 切片、ZIP 权限与图标资源。旧 ID、错误关键词、热键误连 OPEN、开发变量或临时路径污染的篡改包均被验证器拒绝。
+
+整理后本地通过 31 个 Go 测试及 race、vet、模块校验；原有 9 组 CLI 集成验收通过，面板集成扩展为 8 组，新增通过 Alfred 正式版数据目录直接复用配置 / 项目 IDE 偏好且不修改配置偏好文件的验证。Chromium 真实页面交互继续通过，原生 ES 模块的路由、类型与拒绝非法路径另有 Go 测试。Go / Ruff / Prettier 格式检查通过。
+
+测量二进制 SHA-256：`ed6fda3eb7776836468a90ababcc0b8f1484f8c5b95ee2c62505efef23ef281f`。
+
+| 项目数 | 首次导入 | 热查询 P95 | 连续输入 P95 | 连续输入最大值 | 超过 30ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1000 | 13.551ms | 10.453ms | 9.651ms | 13.202ms | 0 / 40 |
+| 10000 | 87.055ms | 29.638ms | 22.995ms | 23.236ms | 0 / 40 |
+
+这是当前二进制的一轮云端样本，不作为结构整理改善性能的因果结论，也不保证所有机器和负载都低于 30ms。真实 Mac 导入升级、热键注册 / 冲突和 Alfred 唤醒仍按实机清单验证。
+
+原始报告：[CLI / 性能](validation/linux-upgrade-acceptance-2026-10-05.json)、[正式目录与面板](validation/panel-upgrade-acceptance-2026-10-05.json)、[浏览器交互](validation/browser-refactor-acceptance-2026-10-05.json)。
+
+本轮开始时 PR 最新提交的 Linux / macOS 检查均已通过；历史红色运行对应早期 Mac 临时目录规范化和签名检查问题，已有修复。CI 本轮新增 Go 格式和生成 plist 一致性检查，PR 只运行一轮，取消已被新提交替代的运行，保留历史失败供追溯。人工 Review 要求属于合并规则，不等同于 CI 失败。

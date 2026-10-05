@@ -166,6 +166,7 @@ func loadConfigAt(destination string) (Config, error) {
 	c.CacheDir = expand(c.CacheDir, home)
 	return c, nil
 }
+
 func expand(s, home string) string {
 	if s == "~" {
 		return home
@@ -175,6 +176,7 @@ func expand(s, home string) string {
 	}
 	return s
 }
+
 func validEditor(s string) bool         { return s == "vscode" || s == "zed" || s == "trae" || s == "cursor" }
 func (c Config) refresh() time.Duration { return time.Duration(c.RefreshSeconds) * time.Second }
 

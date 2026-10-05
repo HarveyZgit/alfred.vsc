@@ -1,8 +1,11 @@
 package main
 
 import (
-	"github.com/HarveyZgit/alfred.vsc/internal/workflow"
 	"os"
+
+	"github.com/HarveyZgit/alfred.vsc/internal/workflow"
 )
 
-func main() { os.Exit(workflow.Run(os.Args[1:], os.Stdout, os.Stderr)) }
+func main() {
+	os.Exit(workflow.Run(os.Args[1:], os.Stdout, os.Stderr))
+}

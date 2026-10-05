@@ -15,6 +15,7 @@ type OpenRequest struct {
 	Editor    string `json:"editor,omitempty"`
 	NewWindow bool   `json:"new_window,omitempty"`
 }
+
 type OpenPlan struct {
 	Executable string   `json:"executable"`
 	Args       []string `json:"args"`
@@ -28,6 +29,7 @@ func executable(name string) bool {
 	info, e := os.Stat(name)
 	return e == nil && !info.IsDir() && info.Mode()&0111 != 0
 }
+
 func resolveEditor(c Config, editor string) (string, bool, error) {
 	if !validEditor(editor) {
 		return "", false, fmt.Errorf("unknown editor %q", editor)
@@ -58,6 +60,7 @@ func resolveEditor(c Config, editor string) (string, bool, error) {
 	}
 	return "", false, fmt.Errorf("未找到 %s；请安装应用或设置 VSC_EDITOR_%s", appNames[editor], strings.ToUpper(editor))
 }
+
 func PlanOpen(c Config, request OpenRequest) (OpenPlan, error) {
 	p, e := project(request.Target, "")
 	if e != nil {
@@ -148,6 +151,7 @@ func PlanOpen(c Config, request OpenRequest) (OpenPlan, error) {
 	plan.Args = append(plan.Args, "--folder-uri", p.URI)
 	return plan, nil
 }
+
 func ExecuteOpen(plan OpenPlan) error {
 	cmd := exec.Command(plan.Executable, plan.Args...)
 	output, e := cmd.CombinedOutput()
@@ -156,6 +160,7 @@ func ExecuteOpen(plan OpenPlan) error {
 	}
 	return nil
 }
+
 func EditorChoices(c Config, target, query string) Feedback {
 	items := []Item{}
 	for _, editor := range []string{"vscode", "zed", "trae", "cursor"} {
@@ -169,7 +174,16 @@ func EditorChoices(c Config, target, query string) Feedback {
 			subtitle = e.Error()
 		}
 		b, _ := json.Marshal(request)
-		items = append(items, Item{Title: appNames[editor], Subtitle: subtitle, Arg: string(b), Valid: e == nil, Mods: map[string]Modifier{"cmd": {Subtitle: "记住此项目的默认 IDE", Valid: e == nil}}, Variables: map[string]string{"vsc_target": target, "vsc_editor": editor}})
+		items = append(items, Item{
+			Title:    appNames[editor],
+			Subtitle: subtitle,
+			Arg:      string(b),
+			Valid:    e == nil,
+			Mods: map[string]Modifier{
+				"cmd": {Subtitle: "记住此项目的默认 IDE", Valid: e == nil},
+			},
+			Variables: map[string]string{"vsc_target": target, "vsc_editor": editor},
+		})
 	}
 	return Feedback{Items: items}
 }

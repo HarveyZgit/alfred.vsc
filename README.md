@@ -8,10 +8,21 @@ V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node
 
 本次构建的安装包需要 macOS 13+、Alfred 5 和 Powerpack。导入 `build/vsc.alfredworkflow`，在工作流配置中填写 Git 项目根目录，例如 `~/Code,~/Projects`。安装包包含 Apple Silicon / Intel 通用二进制，不需要选择芯片架构。
 
-建议先导入隔离测试包 `build/vsc-dev.alfredworkflow`：关键词为 `vscd` / `vscdli`，偏好和缓存存放在 `/tmp/vsc-dev-v3`，可与旧版共存。测试包默认与正式版使用相同的项目来源配置，但不会迁移正式版隐藏记录。
+需要隔离开发验收时，可导入测试包 `build/vsc-dev.alfredworkflow`：关键词为 `vscd` / `vscdli`，偏好和缓存存放在 `/tmp/vsc-dev-v3`，可与旧版共存。测试包默认与正式版使用相同的项目来源配置，但不会迁移正式版隐藏记录。
+
+正式包的 Bundle ID 固定为 **`com.harvey.alfredapp.vsc.v3`**。已经使用这个 ID 安装并完成迁移的用户，之后直接导入新的 `vsc.alfredworkflow` 更新即可；无需再改 ID、复制数据或重跑迁移。保留原工作流后，可继续用 `vsco` / `vscoli` 访问旧版。
+
+| 工作流 | Bundle ID | 入口 |
+| --- | --- | --- |
+| V3 正式版 | `com.harvey.alfredapp.vsc.v3` | `vsc` / `vscli`，默认 ⌘⇧V |
+| V3 开发版 | `com.harvey.alfredapp.vsc.v3.dev` | `vscd` / `vscdli`，默认不绑定热键 |
+| 保留的旧版 | `com.harvey.alfredapp.vsc` | 用户改为 `vsco` / `vscoli` |
+
+正式版默认数据目录为 `~/Library/Application Support/Alfred/Workflow Data/com.harvey.alfredapp.vsc.v3`，与旧版及开发版隔离。安装包不包含用户配置、偏好或迁移记录，不覆盖这些数据。
 
 | 操作 | 行为 |
 | --- | --- |
+| Command + Shift + V | 唤醒 VSC 项目搜索，继续输入筛选项目 |
 | `vsc 关键词` | 按名称、路径、远程主机名模糊搜索，支持中文和多个词 |
 | `vsc d 关键词` / `vsc r 关键词` | 只看本地目录 / 远程目录 |
 | `vsc /` | 浏览配置根目录；多个根目录先选择，再用 Tab 逐层进入 |
@@ -21,6 +32,8 @@ V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node
 | Ctrl + Enter | 隐藏项目，不删除文件、不修改 VS Code 历史 |
 | Alt + Enter | 固定 / 取消固定，同等匹配程度下优先排列 |
 | `vscli` | 打开记录管理面板、刷新索引、恢复隐藏、诊断 |
+
+快捷键可在工作流的 Hotkey 节点修改；若 Alfred 导入后未启用或快捷键已被占用，可在该节点重新录入。默认热键仅正式包提供，开发包不会抢占。
 
 列表默认返回前 50 项。名称匹配优先，同等匹配时固定项目优先，之后沿用 VS Code 历史顺序。目录浏览可以打开非 Git 子目录，但不会自行把它加入项目历史。
 
@@ -99,6 +112,14 @@ python3 scripts/build_workflow.py --target macos --skip-build --dev
 可用 `--go /absolute/path/to/go` 指定编译器。`--target linux` 只构建 Linux，`--target macos` 只构建 macOS。二进制和安装包在 `build/`，校验和在 `build/SHA256SUMS`。测试开发包可用 `python3 scripts/dev_install.py --open` 在 macOS 导入。
 
 Linux 验收覆盖真实 SQLite / WAL、真实 Git 仓库与 worktree、分支切换、并发偏好写入、后台索引，以及替身 IDE 进程收到的完整参数。它不能代替 Alfred UI、macOS 应用启动或真实远程连接测试。具体待测项见 [macOS 验收清单](docs/MACOS-ACCEPTANCE.zh-CN.md)，设计与选型见 [技术设计](docs/ARCHITECTURE.zh-CN.md)。
+
+开发代码按职责组织，目录说明见 [技术设计](docs/ARCHITECTURE.zh-CN.md)。Go 使用 `gofmt`，Python 使用 Ruff 0.11.13，面板 JS / HTML / CSS 与浏览器验收脚本使用 Prettier 3.5.3；仓库提供 `.editorconfig`、`ruff.toml`、`.prettierrc.json`。这些格式化工具仅供开发使用，不是成品运行依赖：
+
+```sh
+gofmt -w cmd internal
+uvx --from ruff==0.11.13 ruff format scripts
+npm exec --yes --package prettier@3.5.3 -- prettier --write 'internal/workflow/panel/*' scripts/panel_browser_acceptance.cjs
+```
 
 ## 从 V2 升级
 
