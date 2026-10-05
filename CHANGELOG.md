@@ -2,6 +2,8 @@
 
 ## v3.0.0
 
+- 前端依赖统一使用固定版本 pnpm 与冻结锁文件；CLI、面板 API、浏览器成品验收统一放到 `tests/e2e/`。
+
 - 管理面板改用 React + TypeScript、Rspack 与 shadcn UI；构建产物仍内嵌于单二进制，Node 仅用于开发构建。
 - 验收 JSON 和诊断日志改由 CI artifact 保存，不再作为文档源码入库。
 - 正式包固定使用 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；已迁移的正式版安装可直接更新。
