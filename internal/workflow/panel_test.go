@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -55,7 +56,7 @@ func TestPanelProtectsPreferencesAndServesEmbeddedUI(t *testing.T) {
 	if err != nil || cfg.Managed != nil {
 		t.Fatalf("unauthorized mutation: %+v %v", cfg, err)
 	}
-	for _, path := range []string{"/", "/app.js", "/style.css"} {
+	for _, path := range append([]string{"/"}, panelAssetPaths(t, p)...) {
 		w := panelRequest(t, p, "GET", path, nil)
 		if w.Code != 200 || w.Body.Len() < 100 || !strings.Contains(w.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
 			t.Fatalf("asset %s: %d", path, w.Code)
@@ -233,16 +234,9 @@ func TestPanelMigrationShowsLatestIncrementalReport(t *testing.T) {
 
 func TestPanelStaticRoutesRestrictPathsAndTypes(t *testing.T) {
 	_, p := panelFixture(t)
-	entries, err := panelAssets.ReadDir("panel")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, entry := range entries {
-		name := entry.Name()
-		if entry.IsDir() || !strings.HasSuffix(name, ".js") && !strings.HasSuffix(name, ".css") {
-			continue
-		}
-		w := panelRequest(t, p, http.MethodGet, "/"+name, nil)
+	for _, assetPath := range panelAssetPaths(t, p) {
+		name := assetPath
+		w := panelRequest(t, p, http.MethodGet, assetPath, nil)
 		wantType := "text/javascript; charset=utf-8"
 		if strings.HasSuffix(name, ".css") {
 			wantType = "text/css; charset=utf-8"
@@ -251,12 +245,33 @@ func TestPanelStaticRoutesRestrictPathsAndTypes(t *testing.T) {
 			t.Fatalf("asset %s: status=%d type=%q", name, w.Code, w.Header().Get("Content-Type"))
 		}
 	}
-	for _, path := range []string{"/missing.js", "/index.html", "/nested/app.js", "/../app.js", "/%2e%2e/app.js", "/panel/app.js", "/config.json"} {
+	for _, path := range []string{"/missing.js", "/assets/", "/.hidden", "/assets/.hidden", "/nested/app.js", "/../app.js", "/%2e%2e/app.js", "/panel/app.js", "/config.json"} {
 		if w := panelRequest(t, p, http.MethodGet, path, nil); w.Code != http.StatusNotFound {
 			t.Fatalf("unexpected static route %s: %d", path, w.Code)
 		}
 	}
-	if w := panelRequest(t, p, http.MethodPost, "/app.js", nil); w.Code != http.StatusMethodNotAllowed {
+	if w := panelRequest(t, p, http.MethodPost, panelAssetPaths(t, p)[0], nil); w.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("static mutation: %d", w.Code)
 	}
+}
+
+func panelAssetPaths(t *testing.T, p *panel) []string {
+	t.Helper()
+	w := panelRequest(t, p, http.MethodGet, "/", nil)
+	matches := regexp.MustCompile(`(?:src|href)=["']([^"']+\.(?:js|css))["']`).FindAllStringSubmatch(w.Body.String(), -1)
+	paths := make([]string, 0, len(matches))
+	var hasJS, hasCSS bool
+	for _, match := range matches {
+		asset := match[1]
+		if !strings.HasPrefix(asset, "/") || strings.HasPrefix(asset, "//") {
+			t.Fatalf("nonlocal panel asset %q", asset)
+		}
+		paths = append(paths, asset)
+		hasJS = hasJS || strings.HasSuffix(asset, ".js")
+		hasCSS = hasCSS || strings.HasSuffix(asset, ".css")
+	}
+	if !hasJS || !hasCSS {
+		t.Fatalf("panel HTML lacks built JS/CSS: %s", w.Body.String())
+	}
+	return paths
 }

@@ -14,3 +14,7 @@ yalc.lock
 /.vsc-dev/
 __pycache__/
 *.pyc
+
+# Generated validation reports and frontend compiler output
+/docs/validation/*.json
+/internal/workflow/panel/dist/

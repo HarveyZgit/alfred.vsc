@@ -55,14 +55,14 @@ Alfred 负责输入变化时终止前一查询并显示当前查询结果。每�
 
 `go test -race ./...` 验证源码行为与并发；`scripts/acceptance.py` 用实际二进制、真实 SQLite / WAL、真实 Git / worktree，以及替身 IDE 子进程验证集成。
 
-性能样本包含进程启动、SQLite 获取历史、缓存读取、匹配、可见 HEAD、JSON 输出和测试端接收解析。每规模 36 次顺序查询，随后 40 次、间隔 30ms 的连续输入；返回上限 50。记录首次导入和缓存已存在两种情况。首次大量历史导入涉及所有目录的规范化，不应以热查询延迟宣传。具体成品结果见 [验收记录](VALIDATION.zh-CN.md) 和 `build/acceptance.json`。
+性能样本包含进程启动、SQLite 获取历史、缓存读取、匹配、可见 HEAD、JSON 输出和测试端接收解析。每规模 36 次顺序查询，随后 40 次、间隔 30ms 的连续输入；返回上限 50。记录首次导入和缓存已存在两种情况。首次大量历史导入涉及所有目录的规范化，不应以热查询延迟宣传。重跑步骤见 [验收说明](VALIDATION.zh-CN.md)，每次成品结果保存在 `build/acceptance.json` 和对应提交的 CI artifact 中。
 
 打包从 Linux 交叉编译 macOS arm64 / amd64，将两份不改动的 Mach-O slice 合并为 universal binary。验证架构、偏移对齐、内容一致、ZIP 权限、CRC、Alfred 动作图和版本。没有在 Linux 假执行 macOS 二进制；真实 Alfred UI / IDE / SSH / Container 由 [macOS 清单](MACOS-ACCEPTANCE.zh-CN.md) 验收。
 
 
 ## 按需记录管理面板
 
-`vsc manage` 启动独立的本机 HTTP 子进程并打开默认浏览器；`manage --serve` 用于前台运行和验收。页面通过 Go embed 随二进制分发，无前端运行时或外部资源。仅绑定 127.0.0.1 随机端口，API 要求 256 位随机令牌，同时校验 Host 与 Origin；页面禁止嵌入和执行内联脚本，用户路径全部通过 textContent 渲染。20 分钟没有 API 操作自动退出，也支持手动关闭。
+`vsc manage` 启动独立的本机 HTTP 子进程并打开默认浏览器；`manage --serve` 用于前台运行和验收。页面通过 Go embed 随二进制分发，无前端运行时或外部资源。仅绑定 127.0.0.1 随机端口，API 要求 256 位随机令牌，同时校验 Host 与 Origin；页面禁止嵌入和执行内联脚本，用户路径由 React 的默认文本转义渲染，不使用原始 HTML 注入。20 分钟没有 API 操作自动退出，也支持手动关闭。
 
 管理列表读取同一 VS Code 历史 / 索引和偏好，每页最多 50 条本地状态探测，远程不探测。隐藏、固定和 IDE 更新继续使用 preferences.lock 与原子替换。递归扫描及迁移由显式按钮触发，在管理服务内部串行执行，不加入 query 流程。搜索不依赖面板服务。
 
@@ -85,12 +85,14 @@ Go 核心保留 `internal/workflow` 包，按职责分文件，跨文件仍使�
 | `preferences.go`、`storage.go` | 用户偏好、文件锁、原子写入和缓存编码 |
 | `migration.go`、`migration_source.go` | 迁移事务、旧数据解析与来源判断 |
 | `panel.go`、`panel_routes.go`、`panel_records.go`、`panel_settings.go`、`panel_migration.go` | 面板进程生命周期、HTTP 路由和各业务接口 |
-| `internal/workflow/panel/` | HTML/CSS，以及 `api` / `dom` / `records` / `settings` / `migration` 原生 JS 模块；`app.js` 只负责初始化 |
+| `web/src/` | React 页面、API 客户端和 shadcn UI 组件 |
+| `web/` 构建配置 | TypeScript、Rspack、Tailwind 与 npm 锁文件 |
+| `internal/workflow/panel/dist/` | 生成的 HTML 和带内容哈希的 JS/CSS，Go embed 编入二进制；不入库 |
 | `*_test.go`、`test_helpers_test.go` | 按领域命名的测试和共享 fixture |
 | `public/`、`public/assets/` | Alfred 模板、工作流图标和结果图标 |
 | `scripts/` | 生成、打包、CLI / 面板 / 浏览器验收与包验证；旧版迁移 shell 入口 |
-| `docs/validation/` | 与二进制 SHA-256 对应的原始验收报告 |
+| `build/`、CI artifact | 与二进制 SHA-256 对应的原始验收报告与诊断日志；不入库 |
 
-JS 模块直接由二进制内嵌服务返回，无打包器、CDN 或新增运行依赖。静态 HTTP 路由使用明确文件白名单，并检查 MIME 类型和非法路径。
+Rspack 在 Go 编译前构建 React 页面；Go 只内嵌静态产物。Node/npm 是开发工具，成品无需安装，查询路径不加载 JavaScript 或启动面板。组件使用 shadcn 的源码组织方式与 Radix primitives，样式由 Tailwind 编译为本地 CSS，无 CDN。静态路由只返回内嵌文件，拒绝目录、隐藏路径与路径穿越，并检查请求方法及 MIME 类型。
 
 正式包 ID 固定为 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；正式包不携带开发模式变量或临时数据路径。默认 Hotkey 使用 Alfred 已有导出协议（V 键码 9，⌘⇧ 修饰掩码 1179648），连接项目 Script Filter，输入参数为空；开发包不包含该热键。

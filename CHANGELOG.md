@@ -2,6 +2,8 @@
 
 ## v3.0.0
 
+- 管理面板改用 React + TypeScript、Rspack 与 shadcn UI；构建产物仍内嵌于单二进制，Node 仅用于开发构建。
+- 验收 JSON 和诊断日志改由 CI artifact 保存，不再作为文档源码入库。
 - 正式包固定使用 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；已迁移的正式版安装可直接更新。
 - 正式包默认 Command + Shift + V 唤醒项目搜索，开发包不注册此热键。
 - 提供内嵌记录管理面板；按职责整理 Go 核心、前端模块、测试与图标，统一源码格式。

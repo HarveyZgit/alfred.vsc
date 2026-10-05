@@ -133,6 +133,13 @@ def main():
         ).stdout
         if not version.startswith("go version go"):
             raise ValueError("--go must point to the Go compiler")
+        npm = shutil.which("npm")
+        if not npm:
+            raise ValueError(
+                "Node.js and npm are required to build the panel; end users do not need them"
+            )
+        subprocess.run([npm, "ci", "--prefix", "web"], cwd=ROOT, check=True)
+        subprocess.run([npm, "run", "build", "--prefix", "web"], cwd=ROOT, check=True)
         for name in names:
             system, arch = TARGETS[name]
             environment = dict(os.environ, CGO_ENABLED="0", GOOS=system, GOARCH=arch)

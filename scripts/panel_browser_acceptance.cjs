@@ -1,5 +1,5 @@
-// Optional UI acceptance: requires Playwright and Chromium on the developer machine.
-// No frontend dependencies are shipped in the workflow.
+// Browser acceptance requires development-only Node.js, Playwright and Chromium.
+// Built React frontend assets ship embedded in the native binary.
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -47,87 +47,199 @@ db.execute('INSERT INTO ItemTable VALUES (?,?)',('recently.opened',json.dumps({'
   });
   const server = spawn(binary, ['manage', '--serve'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   const errors = [];
+  const failedRequests = [];
+  const externalRequests = [];
   let browser;
+  let acceptanceTimeout;
   const startupTimeout = setTimeout(() => server.kill(), 5000);
   try {
-    const lines = readline.createInterface({ input: server.stdout });
-    const [url] = await once(lines, 'line');
-    clearTimeout(startupTimeout);
-    browser = await chromium.launch({
-      executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium',
-      headless: true,
-      args: ['--no-sandbox'],
-    });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 960 } });
-    page.on('pageerror', (e) => errors.push(e.message));
-    await page.goto(url);
-    await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '下一页', exact: true }).click();
-    await page.getByText('2 / 2 页 · 58 项', { exact: true }).waitFor();
-    assert(await page.getByRole('button', { name: '下一页', exact: true }).isDisabled());
-    await page.getByRole('searchbox').fill('Atlas');
-    await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '隐藏', exact: true }).click();
-    await page.getByRole('button', { name: '恢复显示', exact: true }).waitFor();
-    await page.getByLabel('筛选记录').selectOption('hidden');
-    await page.getByRole('button', { name: '恢复显示', exact: true }).click();
-    await page
-      .getByText('没有匹配的项目。可修改筛选条件或刷新 Git 索引。', { exact: true })
-      .waitFor();
-    await page.getByLabel('筛选记录').selectOption('');
-    await page.getByRole('button', { name: '固定', exact: true }).click();
-    await page.getByRole('button', { name: '取消固定', exact: true }).waitFor();
-    await page.getByLabel('Atlas 的 IDE').selectOption('zed');
-    await page.reload();
-    await page.getByRole('searchbox').fill('Atlas');
-    await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
-    assert.equal(await page.getByLabel('Atlas 的 IDE').inputValue(), 'zed');
-    await page.getByRole('button', { name: '目录与 IDE', exact: true }).click();
-    await page.getByLabel('Git 扫描根目录').fill(path.join(base, 'projects'));
-    await page.getByLabel('默认 IDE', { exact: true }).selectOption('cursor');
-    await page.getByRole('button', { name: '保存配置', exact: true }).click();
-    await page
-      .getByText('当前使用面板设置，优先于 Alfred 变量和 config.json 顶层同名项。', { exact: true })
-      .waitFor();
-    await page.getByRole('button', { name: '旧版迁移', exact: true }).click();
-    await page.getByLabel('旧版数据目录或 .records.cache.json 路径').fill(source);
-    await page.getByRole('button', { name: '预览当前迁移范围', exact: true }).click();
-    await page.getByText('预览完成。确认列表后可执行补迁移。', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '执行补迁移', exact: true }).click();
-    await page.getByText('补迁移完成，原始数据与偏好备份已保留。', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '项目记录', exact: true }).click();
-    await page.getByRole('searchbox').fill('');
-    await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '刷新 Git 索引', exact: true }).click();
-    await page.getByText('Git 索引已刷新。', { exact: true }).waitFor();
-    fs.mkdirSync('build', { recursive: true });
-    await page.screenshot({ path: 'build/panel-browser.png' });
-    await page.setViewportSize({ width: 390, height: 844 });
-    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    await page.getByRole('button', { name: '关闭面板服务', exact: true }).click();
-    await page.getByText('面板服务已关闭，可以关闭此标签页。', { exact: true }).waitFor();
-    assert.deepEqual(errors, []);
-    fs.writeFileSync(
-      'build/panel-browser-acceptance.json',
-      JSON.stringify(
-        {
-          binary_sha256: crypto.createHash('sha256').update(fs.readFileSync(binary)).digest('hex'),
-          browser: await browser.version(),
-          checks: [
-            'pagination, debounced search, hide/restore, pin, IDE persistence',
-            'browser reload keeps session',
-            'save settings, migration preview/apply and saved result',
-            'embedded CSS/JS, responsive width, no page errors, close service',
-          ],
-        },
-        null,
-        2,
-      ) + '\n',
-    );
-    console.log(
-      'PASS: Chromium panel interactions, reload, settings, migration, responsive layout; screenshot and report in build/',
-    );
+    await Promise.race([
+      (async () => {
+        const lines = readline.createInterface({ input: server.stdout });
+        const [url] = await once(lines, 'line');
+        clearTimeout(startupTimeout);
+        browser = await chromium.launch({
+          executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium',
+          headless: true,
+          args: ['--no-sandbox'],
+        });
+        const page = await browser.newPage({ viewport: { width: 1280, height: 960 } });
+        page.on('pageerror', (e) => errors.push(e.message));
+        page.on('console', (message) => {
+          if (/content security policy|content-security-policy|\bCSP\b/i.test(message.text())) {
+            errors.push(message.text());
+          }
+        });
+        page.on('requestfailed', (request) => {
+          const abortedAPIRead =
+            request.method() === 'GET' &&
+            new URL(request.url()).pathname.startsWith('/api/') &&
+            request.failure()?.errorText === 'net::ERR_ABORTED';
+          if (!abortedAPIRead) failedRequests.push(request.url());
+        });
+        page.on('request', (request) => {
+          if (new URL(request.url()).origin !== new URL(url).origin)
+            externalRequests.push(request.url());
+        });
+        const response = await page.goto(url);
+        assert(response.headers()['content-security-policy'].includes("script-src 'self'"));
+        assert(!response.headers()['content-security-policy'].includes("'unsafe-inline'"));
+        await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '下一页', exact: true }).click();
+        await page.getByText('2 / 2 页 · 58 项', { exact: true }).waitFor();
+        assert(await page.getByRole('button', { name: '下一页', exact: true }).isDisabled());
+        // Hold the older search response until the newer query has rendered.
+        let releaseOldSearch, capturedOldSearch, finishedOldSearch;
+        const oldSearchGate = new Promise((resolve) => {
+          releaseOldSearch = resolve;
+        });
+        const oldSearchCaptured = new Promise((resolve) => {
+          capturedOldSearch = resolve;
+        });
+        const oldSearchFinished = new Promise((resolve) => {
+          finishedOldSearch = resolve;
+        });
+        const recordsPattern = '**/api/records?*';
+        const holdOldSearch = async (route) => {
+          if (new URL(route.request().url()).searchParams.get('q') !== 'Atlas') {
+            await route.continue();
+            return;
+          }
+          const oldResponse = await route.fetch();
+          capturedOldSearch();
+          await oldSearchGate;
+          try {
+            await route.fulfill({ response: oldResponse });
+          } catch (error) {
+            if (route.request().failure()?.errorText !== 'net::ERR_ABORTED') throw error;
+          } finally {
+            finishedOldSearch();
+          }
+        };
+        await page.route(recordsPattern, holdOldSearch);
+        await page.getByRole('searchbox').fill('Atlas');
+        await oldSearchCaptured;
+        await page.getByRole('searchbox').fill('Demo-00');
+        await page.getByLabel('Demo-00 的 IDE').waitFor();
+        releaseOldSearch();
+        await oldSearchFinished;
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        );
+        assert(await page.getByLabel('Demo-00 的 IDE').isVisible());
+        assert.equal(await page.getByLabel('Atlas 的 IDE').count(), 0);
+        await page.unroute(recordsPattern, holdOldSearch);
+        await page.getByRole('searchbox').fill('Atlas');
+        await page.getByLabel('Atlas 的 IDE').waitFor();
+        await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '隐藏', exact: true }).click();
+        await page.getByRole('button', { name: '恢复显示', exact: true }).waitFor();
+        await page.getByLabel('筛选记录').selectOption('hidden');
+        await page.getByRole('button', { name: '恢复显示', exact: true }).click();
+        await page
+          .getByText('没有匹配的项目。可修改筛选条件或刷新 Git 索引。', { exact: true })
+          .waitFor();
+        await page.getByLabel('筛选记录').selectOption('');
+        await page.getByRole('button', { name: '固定', exact: true }).click();
+        await page.getByRole('button', { name: '取消固定', exact: true }).waitFor();
+        await page.getByLabel('Atlas 的 IDE').selectOption('zed');
+        await page.reload();
+        await page.getByRole('searchbox').fill('Atlas');
+        await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
+        assert.equal(await page.getByLabel('Atlas 的 IDE').inputValue(), 'zed');
+        let releaseSettings, capturedSettings;
+        const settingsGate = new Promise((resolve) => {
+          releaseSettings = resolve;
+        });
+        const settingsCaptured = new Promise((resolve) => {
+          capturedSettings = resolve;
+        });
+        const settingsPattern = '**/api/settings';
+        const holdSettings = async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          const settingsResponse = await route.fetch();
+          capturedSettings();
+          await settingsGate;
+          await route.fulfill({ response: settingsResponse });
+        };
+        await page.route(settingsPattern, holdSettings);
+        await page.getByRole('tab', { name: '目录与 IDE', exact: true }).click();
+        await settingsCaptured;
+        assert(await page.getByRole('button', { name: '保存配置', exact: true }).isDisabled());
+        assert(await page.getByLabel('Git 扫描根目录').isDisabled());
+        releaseSettings();
+        await page.getByRole('button', { name: '保存配置', exact: true }).click({ trial: true });
+        assert.equal(
+          await page.getByLabel('Git 扫描根目录').inputValue(),
+          path.join(base, 'projects'),
+        );
+        await page.unroute(settingsPattern, holdSettings);
+        await page.getByLabel('Git 扫描根目录').fill(path.join(base, 'projects'));
+        await page.getByLabel('默认 IDE', { exact: true }).selectOption('cursor');
+        await page.getByRole('button', { name: '保存配置', exact: true }).click();
+        await page
+          .getByText('当前使用面板设置，优先于 Alfred 变量和 config.json 顶层同名项。', {
+            exact: true,
+          })
+          .waitFor();
+        await page.getByRole('tab', { name: '旧版迁移', exact: true }).click();
+        await page.getByLabel('旧版数据目录或 .records.cache.json 路径').fill(source);
+        await page.getByRole('button', { name: '预览当前迁移范围', exact: true }).click();
+        await page.getByText('预览完成。确认列表后可执行补迁移。', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '执行补迁移', exact: true }).click();
+        await page.getByText('补迁移完成，原始数据与偏好备份已保留。', { exact: true }).waitFor();
+        await page.getByRole('tab', { name: '项目记录', exact: true }).click();
+        await page.getByRole('searchbox').fill('');
+        await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '刷新 Git 索引', exact: true }).click();
+        await page.getByText('Git 索引已刷新。', { exact: true }).waitFor();
+        fs.mkdirSync('build', { recursive: true });
+        await page.screenshot({ path: 'build/panel-browser.png' });
+        await page.setViewportSize({ width: 390, height: 844 });
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        await page.getByRole('button', { name: '关闭面板服务', exact: true }).click();
+        await page.getByText('面板服务已关闭，可以关闭此标签页。', { exact: true }).waitFor();
+        assert.deepEqual(errors, []);
+        assert.deepEqual(failedRequests, []);
+        assert.deepEqual(externalRequests, []);
+        fs.writeFileSync(
+          'build/panel-browser-acceptance.json',
+          JSON.stringify(
+            {
+              binary_sha256: crypto
+                .createHash('sha256')
+                .update(fs.readFileSync(binary))
+                .digest('hex'),
+              browser: await browser.version(),
+              checks: [
+                'pagination, debounced search, hide/restore, pin, IDE persistence',
+                'browser reload keeps session',
+                'settings cannot save before initial load; stale search response cannot replace current query',
+                'save settings, migration preview/apply and saved result',
+                'embedded CSS/JS, responsive width, no page errors, close service',
+              ],
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+        console.log(
+          'PASS: Chromium panel interactions, reload, settings, migration, responsive layout; screenshot and report in build/',
+        );
+      })(),
+      new Promise((_, reject) => {
+        acceptanceTimeout = setTimeout(
+          () => reject(new Error('Browser acceptance exceeded 90 seconds')),
+          90000,
+        );
+      }),
+    ]);
   } finally {
+    clearTimeout(acceptanceTimeout);
     clearTimeout(startupTimeout);
     if (browser) await browser.close();
     if (server.exitCode === null) {

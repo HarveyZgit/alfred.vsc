@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import selectors
 import sqlite3
@@ -97,12 +98,20 @@ def main():
                         else payload
                     )
 
-            assert b"app.js" in request("/", auth=False)
-            assert b'type="module"' in request("/", auth=False)
-            for module in ("app", "api", "dom", "records", "settings", "migration"):
-                assert request("/" + module + ".js", auth=False)
-            assert b"fetch(" in request("/api.js", auth=False)
-            assert request("/style.css", auth=False)
+            html = request("/", auth=False)
+            assets = re.findall(rb'(?:src|href)=["\']([^"\']+\.(?:js|css))["\']', html)
+            assert any(asset.endswith(b".js") for asset in assets)
+            assert any(asset.endswith(b".css") for asset in assets)
+            for asset in assets:
+                assert asset.startswith(b"/") and not asset.startswith(b"//"), asset
+                assert request(asset.decode(), auth=False)
+            for missing_asset in (
+                "/assets/missing.js",
+                "/assets/",
+                "/.hidden",
+                "/%2e%2e/config.json",
+            ):
+                request(missing_asset, auth=False, status=404)
             request("/api/records", auth=False, status=401)
             request(
                 "/api/settings",
