@@ -22,6 +22,8 @@ V3 使用 Go 原生二进制。安装工作流后，**无需安装 Python、Node
 
 正式版默认数据目录为 `~/Library/Application Support/Alfred/Workflow Data/com.harvey.alfredapp.vsc.v3`，与旧版及开发版隔离。安装包不包含用户配置、偏好或迁移记录，不覆盖这些数据。
 
+首次运行遇到 Apple 无法验证提示，或导入后看到多个 VSC，请按 [安装排查](docs/INSTALLATION.zh-CN.md) 处理。当前安装包未做 Apple 公证，新下载的二进制可能需要重新放行。
+
 | 操作 | 行为 |
 | --- | --- |
 | Command + Shift + V | 唤醒 VSC 项目搜索，继续输入筛选项目 |
