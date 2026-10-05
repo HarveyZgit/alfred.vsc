@@ -96,9 +96,11 @@ Alfred 的工作流配置提供根目录、默认 IDE 和四个 CLI 路径。CLI
 
 ## 构建与验收
 
-开发需要 Go 1.26+、Python 3.9+（构建和验收脚本），验收脚本还需 Git。**这些都不是成品运行依赖。** Linux amd64 成品是静态链接 ELF；macOS 是单个 universal Mach-O，使用系统提供的库，不需要额外运行时。不同操作系统不能共用同一个二进制。
+开发需要 Go 1.26+、Node.js 22+（React 页面构建）、Python 3.9+（构建和验收脚本），验收脚本还需 Git。**这些都不是成品运行依赖。** Linux amd64 成品是静态链接 ELF；macOS 是单个 universal Mach-O，使用系统提供的库，不需要额外运行时。不同操作系统不能共用同一个二进制。
 
 ```sh
+npm ci --prefix web
+npm run build --prefix web                  # 必须先生成 Go embed 使用的页面
 go test -race ./...
 go vet ./...
 go mod verify
@@ -109,16 +111,20 @@ python3 scripts/verify_package.py             # ZIP、权限、Alfred 接线、M
 python3 scripts/build_workflow.py --target macos --skip-build --dev
 ```
 
+管理页面使用 React + TypeScript、Rspack 和 shadcn UI 组件，源码位于 `web/`。构建脚本会先执行 `npm ci` 与页面构建，再编译 Go；产物 `internal/workflow/panel/dist/` 不入库。`--skip-build` 只打包已有二进制，不需要 Node。
+
 可用 `--go /absolute/path/to/go` 指定编译器。`--target linux` 只构建 Linux，`--target macos` 只构建 macOS。二进制和安装包在 `build/`，校验和在 `build/SHA256SUMS`。测试开发包可用 `python3 scripts/dev_install.py --open` 在 macOS 导入。
+
+`scripts/panel_browser_acceptance.cjs` 使用 Playwright + Chromium 点击真实页面，验证搜索、隐藏、IDE 设置、迁移及移动布局；它仅用于开发验收，不打入工作流。报告存于 `build/` 和 CI artifact，重跑步骤见 [验收说明](docs/VALIDATION.zh-CN.md)。
 
 Linux 验收覆盖真实 SQLite / WAL、真实 Git 仓库与 worktree、分支切换、并发偏好写入、后台索引，以及替身 IDE 进程收到的完整参数。它不能代替 Alfred UI、macOS 应用启动或真实远程连接测试。具体待测项见 [macOS 验收清单](docs/MACOS-ACCEPTANCE.zh-CN.md)，设计与选型见 [技术设计](docs/ARCHITECTURE.zh-CN.md)。
 
-开发代码按职责组织，目录说明见 [技术设计](docs/ARCHITECTURE.zh-CN.md)。Go 使用 `gofmt`，Python 使用 Ruff 0.11.13，面板 JS / HTML / CSS 与浏览器验收脚本使用 Prettier 3.5.3；仓库提供 `.editorconfig`、`ruff.toml`、`.prettierrc.json`。这些格式化工具仅供开发使用，不是成品运行依赖：
+开发代码按职责组织，目录说明见 [技术设计](docs/ARCHITECTURE.zh-CN.md)。Go 使用 `gofmt`，Python 使用 Ruff 0.11.13，面板 TS / TSX / CSS 与浏览器验收脚本使用 Prettier 3.5.3；仓库提供 `.editorconfig`、`ruff.toml`、`.prettierrc.json`。这些格式化工具仅供开发使用，不是成品运行依赖：
 
 ```sh
 gofmt -w cmd internal
 uvx --from ruff==0.11.13 ruff format scripts
-npm exec --yes --package prettier@3.5.3 -- prettier --write 'internal/workflow/panel/*' scripts/panel_browser_acceptance.cjs
+npm exec --yes --package prettier@3.5.3 -- prettier --write 'web/src/**/*.{ts,tsx,css}' 'web/*.{json,cjs,mjs,html}' scripts/panel_browser_acceptance.cjs
 ```
 
 ## 从 V2 升级

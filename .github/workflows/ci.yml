@@ -16,8 +16,23 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build embedded React panel
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          npm ci --prefix web 2>&1 | tee build/frontend-install.log
+          npm run build --prefix web 2>&1 | tee build/frontend-build.log
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -27,33 +42,49 @@ jobs:
           python-version: '3.12'
       - name: Check Go formatting and generated workflow
         run: |
-          test -z "$(gofmt -l cmd internal)"
-          python3 scripts/generate_workflow.py
-          git diff --exit-code -- public/info.plist
-      - run: go mod verify
-      - run: go test -race ./...
-      - run: go vet ./...
-      - run: go build -trimpath -o build/vsc-host ./cmd/vsc
-      - run: python3 scripts/acceptance.py --binary build/vsc-host
-      - run: python3 scripts/panel_acceptance.py --binary build/vsc-host
+          set -o pipefail
+          {
+            test -z "$(gofmt -l cmd internal)" || exit 1
+            python3 scripts/generate_workflow.py || exit 1
+            git diff --exit-code -- public/info.plist
+          } 2>&1 | tee build/generated-workflow-check.log
+      - name: Verify Go dependencies, tests and analysis
+        shell: bash
+        run: |
+          set -o pipefail
+          go mod verify 2>&1 | tee build/go-mod-verify.log
+          go test -race ./... 2>&1 | tee build/go-test-race.log
+          go vet ./... 2>&1 | tee build/go-vet.log
+      - name: Build and accept host binary
+        run: |
+          set -o pipefail
+          go build -trimpath -o build/vsc-host ./cmd/vsc 2>&1 | tee build/go-build-host.log
+          python3 scripts/acceptance.py --binary build/vsc-host 2>&1 | tee build/acceptance-host.log
+          python3 scripts/panel_acceptance.py --binary build/vsc-host 2>&1 | tee build/panel-acceptance-host.log
       - if: runner.os == 'Linux'
         run: |
-          python3 scripts/build_workflow.py
-          python3 scripts/build_workflow.py --target macos --skip-build --dev
-          python3 scripts/verify_package.py build/vsc.alfredworkflow build/vsc-dev.alfredworkflow
-          python3 scripts/acceptance.py --benchmark --output build/acceptance-linux.json
-          python3 scripts/panel_acceptance.py
+          set -o pipefail
+          python3 scripts/build_workflow.py 2>&1 | tee build/package-build.log
+          python3 scripts/build_workflow.py --target macos --skip-build --dev 2>&1 | tee build/package-dev.log
+          python3 scripts/verify_package.py build/vsc.alfredworkflow build/vsc-dev.alfredworkflow 2>&1 | tee build/package-verify.log
+          python3 scripts/acceptance.py --benchmark --output build/acceptance-linux.json 2>&1 | tee build/acceptance-linux.log
+          python3 scripts/panel_acceptance.py 2>&1 | tee build/panel-acceptance-linux.log
       - if: runner.os == 'macOS'
         run: |
-          python3 scripts/build_workflow.py --target macos
-          lipo -archs build/vsc
+          set -o pipefail
+          python3 scripts/build_workflow.py --target macos 2>&1 | tee build/package-build.log
+          lipo -archs build/vsc 2>&1 | tee build/lipo.log
       - if: runner.os == 'macOS'
         name: Verify Go arm64 ad-hoc signature
         # Go internally signs arm64, while its amd64 output is intentionally unsigned.
-        run: codesign --verify --verbose=2 build/vsc-darwin-arm64
+        run: |
+          set -o pipefail
+          codesign --verify --verbose=2 build/vsc-darwin-arm64 2>&1 | tee build/codesign.log
       - if: runner.os == 'macOS'
         name: Run universal macOS binary
-        run: build/vsc version
+        run: |
+          set -o pipefail
+          build/vsc version 2>&1 | tee build/universal-version.log
       - if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
@@ -69,3 +100,13 @@ jobs:
             docs/MACOS-ACCEPTANCE.zh-CN.md
             docs/MIGRATION.zh-CN.md
             scripts/migrate-v2.sh
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ runner.os }}
+          if-no-files-found: ignore
+          retention-days: 30
+          path: |
+            build/*.log
+            build/*acceptance*.json

@@ -6,12 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
+	"mime"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 )
 
-//go:embed panel/*
+//go:embed panel/dist
 var panelAssets embed.FS
 
 func (p *panel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -24,34 +27,42 @@ func (p *panel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !strings.HasPrefix(r.URL.Path, "/api/") {
-		name := map[string]string{
-			"/":             "index.html",
-			"/app.js":       "app.js",
-			"/style.css":    "style.css",
-			"/api.js":       "api.js",
-			"/dom.js":       "dom.js",
-			"/records.js":   "records.js",
-			"/settings.js":  "settings.js",
-			"/migration.js": "migration.js",
-		}[r.URL.Path]
+		name := strings.TrimPrefix(r.URL.Path, "/")
 		if name == "" {
+			name = "index.html"
+		}
+		if !fs.ValidPath(name) || strings.Contains(name, "\\") {
 			http.NotFound(w, r)
 			return
+		}
+		for _, component := range strings.Split(name, "/") {
+			if strings.HasPrefix(component, ".") {
+				http.NotFound(w, r)
+				return
+			}
 		}
 		if r.Method != http.MethodGet {
 			http.Error(w, "method", 405)
 			return
 		}
-		body, err := panelAssets.ReadFile("panel/" + name)
+		body, err := panelAssets.ReadFile("panel/dist/" + name)
 		if err != nil {
 			http.NotFound(w, r)
 			return
 		}
-		contentType := "text/javascript; charset=utf-8"
-		if name == "index.html" {
-			contentType = "text/html; charset=utf-8"
-		} else if name == "style.css" {
+		extension := path.Ext(name)
+		contentType := mime.TypeByExtension(extension)
+		// Keep executable asset types independent of the host's MIME database.
+		switch extension {
+		case ".js":
+			contentType = "text/javascript; charset=utf-8"
+		case ".css":
 			contentType = "text/css; charset=utf-8"
+		case ".html":
+			contentType = "text/html; charset=utf-8"
+		}
+		if contentType == "" {
+			contentType = "application/octet-stream"
 		}
 		w.Header().Set("Content-Type", contentType)
 		_, _ = w.Write(body)
