@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { Records } from './features/records';
 import { SettingsPanel } from './features/settings';
 import { Migration } from './features/migration';
+import logo from '../../public/icon.png';
 
 export function App() {
   const [tab, setTab] = useState('records');
@@ -35,7 +36,7 @@ export function App() {
     <>
       <header>
         <div className="brand">
-          <span className="logo">V</span>
+          <img className="logo" src={logo} alt="VSC" width={42} height={42} />
           <div>
             <h1>项目管理</h1>
             <p>VSC · 你的项目入口</p>

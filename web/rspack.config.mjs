@@ -18,6 +18,11 @@ export default {
   module: {
     rules: [
       {
+        test: /\.png$/,
+        type: 'asset/resource',
+        generator: { filename: 'assets/[name].[contenthash][ext]' },
+      },
+      {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         loader: 'builtin:swc-loader',
