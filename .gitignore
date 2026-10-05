@@ -2,6 +2,7 @@ build
 node_modules
 yarn-error.log
 .**.json
+!.prettierrc.json
 *.env
 logs
 
