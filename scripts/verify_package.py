@@ -27,7 +27,13 @@ def verify(package):
         expected.update(
             (
                 f"docs/{name}.zh-CN.md"
-                for name in ("ARCHITECTURE", "VALIDATION", "MACOS-ACCEPTANCE", "MIGRATION")
+                for name in (
+                    "ARCHITECTURE",
+                    "VALIDATION",
+                    "MACOS-ACCEPTANCE",
+                    "MIGRATION",
+                    "INSTALLATION",
+                )
             )
         )
         expected.add("scripts/migrate-v2.sh")

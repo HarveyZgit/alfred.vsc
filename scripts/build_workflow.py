@@ -73,7 +73,13 @@ def package(binary, output, development=False):
     files.update(
         {
             f"docs/{name}.zh-CN.md": ROOT / f"docs/{name}.zh-CN.md"
-            for name in ("ARCHITECTURE", "VALIDATION", "MACOS-ACCEPTANCE", "MIGRATION")
+            for name in (
+                "ARCHITECTURE",
+                "VALIDATION",
+                "MACOS-ACCEPTANCE",
+                "MIGRATION",
+                "INSTALLATION",
+            )
         }
     )
     files.update(
