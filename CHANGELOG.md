@@ -1,5 +1,28 @@
 # VSC CHANGELOG
 
+## v3.0.0
+
+- 图标使用带透明通道的 PNG，补充重复工作流与 Gatekeeper 安装排查。
+
+- 工作流与管理面板统一使用紫色编辑器文件夹图标。
+- 前端依赖统一使用固定版本 pnpm 与冻结锁文件；CLI、面板 API、浏览器成品验收统一放到 `tests/e2e/`。
+
+- 管理面板改用 React + TypeScript、Rspack 与 shadcn UI；构建产物仍内嵌于单二进制，Node 仅用于开发构建。
+- 验收 JSON 和诊断日志改由 CI artifact 保存，不再作为文档源码入库。
+- 正式包固定使用 `com.harvey.alfredapp.vsc.v3`，开发包为 `.v3.dev`；已迁移的正式版安装可直接更新。
+- 正式包默认 Command + Shift + V 唤醒项目搜索，开发包不注册此热键。
+- 提供内嵌记录管理面板；按职责整理 Go 核心、前端模块、测试与图标，统一源码格式。
+
+- 使用 Go 单二进制重写，支持 macOS Apple Silicon / Intel 通用包，运行不再需要 Python 或 Node。
+- 来源收敛为 VS Code 目录历史与配置根目录下 Git 仓库的并集；移除文件与 workspace 文件。
+- SQLite 只读实时同步、可丢弃快照、后台仓库发现，查询不递归扫描。
+- 可见本地结果每次读取最新分支，支持 worktree；远程不查询或显示分支。
+- VS Code / Zed / Trae / Cursor 选择器、项目默认 IDE、新窗口、固定、隐藏与恢复。
+- 原子持久化与并发写锁、隔离开发安装包。
+- 新增迁移脚本：预览、完整备份、范围内隐藏和旧使用顺序迁移、未迁移清单及补迁移指引；可重复执行。
+- 添加 Go 单元与竞态测试、真实 Linux 二进制验收、性能测试及跨平台 CI。
+- 目录浏览明确区分多个根目录，按当前层级搜索；不再宣称旧版未实现的全树递归模糊浏览。
+
 ## v2.1.0 (2026-03-03)
 
 ### ✨ New Feature: Directory Browse Mode
