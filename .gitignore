@@ -2,8 +2,19 @@ build
 node_modules
 yarn-error.log
 .**.json
+!.prettierrc.json
 *.env
 logs
 
 .yalc
 yalc.lock
+
+# Native build outputs and local development state
+/vsc
+/.vsc-dev/
+__pycache__/
+*.pyc
+
+# Generated validation reports and frontend compiler output
+/docs/validation/*.json
+/internal/workflow/panel/dist/
