@@ -31,9 +31,10 @@ type Item struct {
 }
 
 type Feedback struct {
-	Items    []Item   `json:"items"`
-	Rerun    float64  `json:"rerun,omitempty"`
-	Warnings []string `json:"_warnings,omitempty"`
+	Items         []Item   `json:"items"`
+	SkipKnowledge bool     `json:"skipknowledge,omitempty"`
+	Rerun         float64  `json:"rerun,omitempty"`
+	Warnings      []string `json:"_warnings,omitempty"`
 }
 
 func requestJSON(target, editor string) string {

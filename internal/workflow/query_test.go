@@ -6,8 +6,46 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func TestQueryExactNameAndAlfredOrdering(t *testing.T) {
+	c := fixture(t)
+	db := database(t, c)
+	coding := repo(t, filepath.Join(c.Home, "coding"), "main")
+	backend := repo(t, filepath.Join(c.Home, "backend"), "fresh-branch")
+	other := repo(t, filepath.Join(c.Home, "proxy-backend"), "main")
+	setHistory(t, db, "recently.opened", []map[string]string{
+		{"folderUri": coding.URI}, {"folderUri": other.URI}, {"folderUri": backend.URI},
+	})
+	for _, query := range []string{"backend", "", "not-a-project"} {
+		feedback, err := Query(c, query)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := json.Marshal(feedback)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var decoded map[string]any
+		if err := json.Unmarshal(data, &decoded); err != nil {
+			t.Fatal(err)
+		}
+		if decoded["skipknowledge"] != true {
+			t.Fatalf("query %q allows Alfred to reorder results: %s", query, data)
+		}
+		if query == "backend" {
+			got := targets(feedback)
+			if len(got) != 1 || got[0] != backend.URI {
+				t.Fatalf("exact search returned %v", got)
+			}
+			if !strings.Contains(feedback.Items[0].Subtitle, "fresh-branch") {
+				t.Fatalf("missing current branch: %s", data)
+			}
+		}
+	}
+}
 
 func BenchmarkQueryTenThousand(b *testing.B) {
 	base := b.TempDir()
