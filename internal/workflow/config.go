@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const Version = "3.0.0"
+const Version = "3.0.1"
 
 // ManagedSettings are explicit panel overrides, applied after Alfred variables.
 type ManagedSettings struct {
