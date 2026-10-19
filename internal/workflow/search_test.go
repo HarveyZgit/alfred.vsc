@@ -9,7 +9,7 @@ func TestUnicodeRankingAndKindFilter(t *testing.T) {
 	a := Project{ID: "a", Name: "中文项目", Path: "/研发/中文项目", Kind: "folder"}
 	b := Project{ID: "b", Name: "中文远程", Kind: "remote", Authority: "ssh-remote+devbox"}
 	prefs := emptyPreferences()
-	for _, tt := range []struct{ query, id string }{{"中文项目", "a"}, {"d 中项", "a"}, {"r devbox", "b"}} {
+	for _, tt := range []struct{ query, id string }{{"中文项目", "a"}, {"d 中 项", "a"}, {"r devbox", "b"}} {
 		got := rank([]Project{a, b}, prefs, tt.query, 50)
 		if len(got) == 0 || got[0].ID != tt.id {
 			t.Fatalf("%s: %v", tt.query, got)
@@ -37,7 +37,14 @@ func TestExactNameRestrictsSearch(t *testing.T) {
 		{"remote scope", "r backend", nil, 50, []string{"remote"}},
 		{"limit after exact selection", "backend", nil, 1, []string{"exact"}},
 		{"hidden exact", "backend", []string{"exact"}, 50, []string{"remote"}},
-		{"fuzzy fallback", "bcknd", nil, 1, []string{"exact"}},
+		{"no character skipping", "bcknd", nil, 50, []string{}},
+		{"contiguous fallback", "back", nil, 1, []string{"exact"}},
+		{"space separated words", "back end", nil, 50, []string{"exact", "remote", "suffix", "nested"}},
+		{"word order independent", "end back", nil, 50, []string{"exact", "remote", "suffix", "nested"}},
+		{"case and Unicode whitespace", "  BACK\t\u3000END  ", nil, 50, []string{"exact", "remote", "suffix", "nested"}},
+		{"all words required", "back missing", nil, 50, []string{}},
+		{"name and host words", "r devbox back", nil, 50, []string{"remote"}},
+		{"path and name words", "packages ai-kit", nil, 50, []string{"nested"}},
 		{"path fallback", "proxy-backend/packages", nil, 50, []string{"nested"}},
 		{"authority fallback", "r devbox", nil, 50, []string{"remote"}},
 		{"hidden exacts permit fallback", "backend", []string{"exact", "remote"}, 1, []string{"suffix"}},
