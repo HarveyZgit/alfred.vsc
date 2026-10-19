@@ -136,10 +136,16 @@ def main():
                 assert list(records(feedback)) == [search_paths[1].as_uri()]
                 assert "search-branch" in feedback["items"][0]["subtitle"]
         assert set(records(query("proxy-backend/packages"))) == {search_paths[3].as_uri()}
+        for text in ("back end", "END back", "  back\t\u3000end  "):
+            assert set(records(query(text))) == {p.as_uri() for p in search_paths[1:]}
+        assert set(records(query("packages ai-kit"))) == {search_paths[3].as_uri()}
+        assert not records(query("bcknd"))
+        assert not records(query("back missing"))
         assert all(path.as_uri() in records(query()) for path in search_paths)
         history(entries)
         report["checks"].append(
-            "typing prefixes, exact-name-only results, path fallback, current branch and skipknowledge"
+            "typing prefixes, exact names, space-separated substrings without character skipping, "
+            "path fallback, current branch and skipknowledge"
         )
         git(local, "switch", "-c", "fresh-branch")
         assert "fresh-branch" in records(query("literal"))[local.as_uri()]["subtitle"]
