@@ -3,11 +3,10 @@ package workflow
 import (
 	"sort"
 	"strings"
-	"unicode"
 	"unicode/utf8"
 )
 
-func fuzzy(query, key string) (int, bool) {
+func substringScore(query, key string) (int, bool) {
 	query = strings.ToLower(query)
 	key = strings.ToLower(key)
 	if query == "" {
@@ -20,24 +19,17 @@ func fuzzy(query, key string) (int, bool) {
 		}
 		return base + 100 - min(utf8.RuneCountInString(key), 100), true
 	}
-	q := []rune(query)
-	k := []rune(key)
-	index, total, previous := 0, 0, -2
-	for i, ch := range k {
-		if index < len(q) && ch == q[index] {
-			if previous == i-1 {
-				total += 10
-			} else {
-				total++
-			}
-			if i == 0 || strings.ContainsRune("-_/ ", k[i-1]) {
-				total += 5
-			}
-			index++
-			previous = i
+	return 0, false
+}
+
+func containsWords(query, key string) bool {
+	key = strings.ToLower(key)
+	for _, token := range strings.Fields(strings.ToLower(query)) {
+		if !strings.Contains(key, token) {
+			return false
 		}
 	}
-	return total + 100 - min(len(k), 100), index == len(q)
+	return true
 }
 
 func parseQuery(query string) (string, string) {
@@ -56,7 +48,7 @@ func parseQuery(query string) (string, string) {
 
 func rank(projects []Project, prefs Preferences, query string, limit int) []Project {
 	kind, query := parseQuery(query)
-	tokens := strings.FieldsFunc(strings.ToLower(query), unicode.IsSpace)
+	tokens := strings.Fields(strings.ToLower(query))
 	type match struct {
 		score    int
 		position int
@@ -67,20 +59,30 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		legacy[id] = i + 1
 	}
 	matches := make([]match, 0, len(projects))
+	var exactMatches []match
 	for i, p := range projects {
 		if prefs.Hidden[p.ID] || kind != "" && p.Kind != kind {
+			continue
+		}
+		// A complete name narrows the result set before ranking or limiting it.
+		// Keep all eligible namesakes so local and remote copies remain selectable.
+		if query != "" && strings.EqualFold(query, p.Name) {
+			exactMatches = append(exactMatches, match{position: i, pinned: prefs.Pinned[p.ID]})
+			continue
+		}
+		if len(exactMatches) > 0 {
 			continue
 		}
 		total := 0
 		ok := true
 		key := p.Name + " " + p.Path + " " + p.Authority + " " + p.Label
 		for _, token := range tokens {
-			value, found := fuzzy(token, key)
+			value, found := substringScore(token, key)
 			if !found {
 				ok = false
 				break
 			}
-			nameScore, nameMatch := fuzzy(token, p.Name)
+			nameScore, nameMatch := substringScore(token, p.Name)
 			if nameMatch {
 				value = max(value, nameScore+1000)
 			}
@@ -89,6 +91,9 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		if ok {
 			matches = append(matches, match{total, i, prefs.Pinned[p.ID]})
 		}
+	}
+	if len(exactMatches) > 0 {
+		matches = exactMatches
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
 		a, b := matches[i], matches[j]

@@ -23,7 +23,7 @@ func browse(c Config, query string, prefs Preferences) (Feedback, error) {
 			items := []Item{}
 			for i, r := range roots {
 				key := fmt.Sprintf("%d", i+1)
-				if rest == "" || strings.Contains(strings.ToLower(r), strings.ToLower(rest)) || rest == key {
+				if containsWords(rest, r) || rest == key {
 					items = append(items, Item{Title: filepath.Base(r), Subtitle: r, Valid: false, Autocomplete: "/" + key + "/"})
 				}
 			}
@@ -72,7 +72,7 @@ func browse(c Config, query string, prefs Preferences) (Feedback, error) {
 		if e != nil || !info.IsDir() {
 			continue
 		}
-		if _, ok := fuzzy(search, entry.Name()); !ok {
+		if !containsWords(search, entry.Name()) {
 			continue
 		}
 		p, e := localProject(name)
