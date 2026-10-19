@@ -118,6 +118,29 @@ def main():
         report["checks"].append(
             "source union, exclusions, real Git worktree, remote without branches"
         )
+        search_paths = [
+            base / "Users/example/Work/Code/sample-workspace/coding",
+            base / "work/backend",
+            base / "work/proxy-backend",
+            base / "work/proxy-backend/packages/ai-kit",
+        ]
+        for path in search_paths:
+            path.mkdir(parents=True, exist_ok=True)
+        history([{"folderUri": path.as_uri()} for path in search_paths])
+        git(search_paths[1], "init", "-b", "search-branch")
+        for text in ("b", "ba", "back", "backend", " BACKEND ", "d backend"):
+            feedback = query(text)
+            assert feedback["skipknowledge"] is True
+            assert search_paths[1].as_uri() in records(feedback)
+            if text.strip().lower() in ("backend", "d backend"):
+                assert list(records(feedback)) == [search_paths[1].as_uri()]
+                assert "search-branch" in feedback["items"][0]["subtitle"]
+        assert set(records(query("proxy-backend/packages"))) == {search_paths[3].as_uri()}
+        assert all(path.as_uri() in records(query()) for path in search_paths)
+        history(entries)
+        report["checks"].append(
+            "typing prefixes, exact-name-only results, path fallback, current branch and skipknowledge"
+        )
         git(local, "switch", "-c", "fresh-branch")
         assert "fresh-branch" in records(query("literal"))[local.as_uri()]["subtitle"]
         history(entries[1:])

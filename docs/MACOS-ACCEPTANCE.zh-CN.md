@@ -34,3 +34,10 @@ Linux 的二进制与参数验收已自动化。以下测试需要真实 Alfred 
 2. 按 Command + Shift + V，确认唤醒 VSC 项目搜索而不是直接打开 IDE，空查询不带入选中文本；继续输入、退格、Enter 打开均应正常。若导入后热键未启用或被其他应用占用，在 Hotkey 节点检查并重新录入。
 3. 更新前后确认面板根目录、隐藏 / 固定、项目默认 IDE 与迁移记录保留，数据目录仍为 `.../Workflow Data/com.harvey.alfredapp.vsc.v3`。
 4. 保留的旧版 `vsco` / `vscoli` 仍正常。开发包使用 `.v3.dev` 和 `vscd` / `vscdli`，不注册默认热键。上述真实快捷键和导入行为需实机验证，包结构检查不能代替。
+
+## 完整名称搜索回归
+
+1. 准备来源内的 `coding`、`backend`、`proxy-backend` 和 `proxy-backend/packages/ai-kit`。分别通过 `vsc backend` 和 Command + Shift + V 后输入 `backend` 搜索，结果应只包含完整同名的 `backend`；本地和远程有多个同名目录时均应保留。
+2. 输入 `b`、`ba`、`back`、`backend`，再退格、清空：完整名称时收窄，其他输入恢复模糊匹配，空查询恢复列表。输入 `d backend` / `r backend` 验证本地 / 远程范围；隐藏同名目录后，其他候选仍可通过模糊搜索找到。
+3. 在宽泛查询下多次打开 `coding`，再搜索 `backend`，确认使用历史不会将它混入结果。对多个模糊结果，确认 Alfred 展示顺序与 Debugger 中 JSON 的 `items` 一致；输出应含 `skipknowledge: true`。
+4. 在 `backend` 切换 Git 分支后重复搜索，分支应立即更新。以上 Alfred 界面行为需在 Mac 实测，Linux 验收只验证 CLI 的结果、排序设置及分支读取。
