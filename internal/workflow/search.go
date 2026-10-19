@@ -67,8 +67,18 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		legacy[id] = i + 1
 	}
 	matches := make([]match, 0, len(projects))
+	var exactMatches []match
 	for i, p := range projects {
 		if prefs.Hidden[p.ID] || kind != "" && p.Kind != kind {
+			continue
+		}
+		// A complete name narrows the result set before ranking or limiting it.
+		// Keep all eligible namesakes so local and remote copies remain selectable.
+		if query != "" && strings.EqualFold(query, p.Name) {
+			exactMatches = append(exactMatches, match{position: i, pinned: prefs.Pinned[p.ID]})
+			continue
+		}
+		if len(exactMatches) > 0 {
 			continue
 		}
 		total := 0
@@ -89,6 +99,9 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		if ok {
 			matches = append(matches, match{total, i, prefs.Pinned[p.ID]})
 		}
+	}
+	if len(exactMatches) > 0 {
+		matches = exactMatches
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
 		a, b := matches[i], matches[j]

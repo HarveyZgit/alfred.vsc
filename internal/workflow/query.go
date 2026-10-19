@@ -23,7 +23,8 @@ func Query(c Config, query string) (Feedback, error) {
 	}
 	warnings = append(warnings, index.Warnings...)
 	projects := rank(merge(history, index.Projects), prefs, query, c.Limit)
-	feedback := Feedback{Items: render(c, projects, prefs), Warnings: warnings}
+	// Preserve our relevance/pin/source order instead of Alfred's learned UID order.
+	feedback := Feedback{Items: render(c, projects, prefs), SkipKnowledge: true, Warnings: warnings}
 	if pending {
 		feedback.Rerun = 0.5
 	}
