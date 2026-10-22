@@ -3,7 +3,7 @@ import { api, token } from '../api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { EditorSelect } from '../components/editor-select';
-import type { PanelActions, RecordsData } from '../types';
+import type { CleanupResult, PanelActions, RecordsData } from '../types';
 
 export function Records({ active, closed, pending, act, message }: PanelActions) {
   const [search, setSearch] = useState('');
@@ -117,6 +117,34 @@ export function Records({ active, closed, pending, act, message }: PanelActions)
         <Button id="reload" disabled={disabled || loading} onClick={refresh}>
           刷新列表
         </Button>
+      </div>
+      <div className="record-actions">
+        <Button
+          id="cleanup"
+          disabled={disabled}
+          aria-describedby="cleanup-help"
+          onClick={() =>
+            act('cleanup', async () => {
+              message('正在检查全部本地记录…');
+              const result = await api<CleanupResult>('records/cleanup', {});
+              refresh();
+              message(
+                [
+                  result.hidden
+                    ? `已隐藏 ${result.hidden} 条失效记录，可在「已隐藏」中恢复。`
+                    : '没有发现需要清理的失效目录。',
+                  ...(result.skipped ? [`${result.skipped} 条记录无法确认状态，已保留。`] : []),
+                  ...(result.warnings || []),
+                ].join(' '),
+              );
+            })
+          }
+        >
+          {pending === 'cleanup' ? '正在检查…' : '清理失效记录'}
+        </Button>
+        <p id="cleanup-help" className="hint">
+          检查全部未隐藏的本地记录，隐藏不存在或已变成文件的目录；不受当前筛选影响，可随时恢复。
+        </p>
       </div>
       <p id="warnings" className="hint">
         {[

@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"path/filepath"
 	"strings"
 )
 
@@ -9,8 +10,12 @@ func Query(c Config, query string) (Feedback, error) {
 	if e != nil {
 		return Feedback{}, e
 	}
-	if strings.HasPrefix(strings.TrimSpace(query), "/") {
-		return browse(c, strings.TrimSpace(query), prefs)
+	input := strings.TrimSpace(query)
+	if input == "/" || strings.HasPrefix(input, "./") {
+		return browse(c, input, prefs)
+	}
+	if filepath.IsAbs(input) || input == "~" || strings.HasPrefix(input, "~/") {
+		return queryPath(c, input, prefs), nil
 	}
 	history, warnings := loadHistory(c)
 	if len(prefs.LegacyOrder) > 0 && historyOrderKey(history) != prefs.LegacyHistory {

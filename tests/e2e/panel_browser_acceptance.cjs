@@ -197,6 +197,27 @@ db.execute('INSERT INTO ItemTable VALUES (?,?)',('recently.opened',json.dumps({'
         await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
         await page.getByRole('button', { name: '刷新 Git 索引', exact: true }).click();
         await page.getByText('Git 索引已刷新。', { exact: true }).waitFor();
+        // Cleanup covers every source record, even when the UI only shows Atlas.
+        await page.getByRole('searchbox').fill('Atlas');
+        await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '清理失效记录', exact: true }).click();
+        await page
+          .getByText('已隐藏 56 条失效记录，可在「已隐藏」中恢复。', { exact: true })
+          .waitFor();
+        await page.getByLabel('筛选记录').selectOption('hidden');
+        await page.getByRole('searchbox').fill('');
+        await page.getByText('1 / 2 页 · 56 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '清理失效记录', exact: true }).click();
+        await page.getByText('没有发现需要清理的失效目录。', { exact: true }).waitFor();
+        await page.getByRole('searchbox').fill('Archived');
+        await page.getByText('1 / 1 页 · 1 项', { exact: true }).waitFor();
+        await page.getByRole('button', { name: '恢复显示', exact: true }).click();
+        await page
+          .getByText('没有匹配的项目。可修改筛选条件或刷新 Git 索引。', { exact: true })
+          .waitFor();
+        await page.getByLabel('筛选记录').selectOption('');
+        await page.getByRole('searchbox').fill('');
+        await page.getByText('1 / 2 页 · 58 项', { exact: true }).waitFor();
         fs.mkdirSync('build', { recursive: true });
         await page.screenshot({ path: 'build/panel-browser.png' });
         await page.setViewportSize({ width: 390, height: 844 });
@@ -217,6 +238,7 @@ db.execute('INSERT INTO ItemTable VALUES (?,?)',('recently.opened',json.dumps({'
               browser: await browser.version(),
               checks: [
                 'pagination, debounced search, hide/restore, pin, IDE persistence',
+                'one-click cleanup covers all pages despite search filter; repeat and restore',
                 'browser reload keeps session',
                 'settings cannot save before initial load; stale search response cannot replace current query',
                 'save settings, migration preview/apply and saved result',
