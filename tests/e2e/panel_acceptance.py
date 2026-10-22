@@ -11,6 +11,7 @@ import selectors
 import sqlite3
 import subprocess
 import tempfile
+import time
 import traceback
 import urllib.error
 import urllib.parse
@@ -113,6 +114,7 @@ def main():
             ):
                 request(missing_asset, auth=False, status=404)
             request("/api/records", auth=False, status=401)
+            request("/api/records/cleanup", {}, auth=False, status=401)
             request(
                 "/api/settings",
                 {"roots": [], "editor": "zed", "editors": {}},
@@ -130,13 +132,26 @@ def main():
             checks.append("panel overrides Alfred variables; explicit Git indexing")
             rows = request("/api/records")["items"]
             row = next(r for r in rows if r["uri"] == repo.as_uri())
-            assert row["branch"] == "main"
+
+            def require_branch(record, expected):
+                # A busy runner can exceed the UI's intentional 30 ms probe budget.
+                # Retry only its explicit timeout, never a stale or absent branch
+                # on a supposedly available directory.
+                deadline = time.monotonic() + 2
+                while record["status"] == "读取超时" and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    record = next(
+                        r for r in request("/api/records")["items"] if r["id"] == record["id"]
+                    )
+                assert record.get("branch") == expected, record
+
+            require_branch(row, "main")
             assert next(r for r in rows if r["uri"] == missing.as_uri())["status"] == "目录不存在"
             assert "branch" not in next(r for r in rows if r["uri"] == remote)
             (repo / ".git/HEAD").write_text("ref: refs/heads/panel-fresh\n")
-            assert (
-                next(r for r in request("/api/records")["items"] if r["id"] == row["id"])["branch"]
-                == "panel-fresh"
+            require_branch(
+                next(r for r in request("/api/records")["items"] if r["id"] == row["id"]),
+                "panel-fresh",
             )
             checks.append(
                 "fresh local branch; explicit missing-directory reason; remote without branch"
@@ -171,6 +186,26 @@ def main():
             )
             checks.append(
                 "hide/restore changes actual CLI results; pin and per-project IDE persist"
+            )
+            original_db = (base / "state.vscdb").read_bytes()
+            cleaned = request("/api/records/cleanup", {})
+            assert cleaned["hidden"] == 1 and cleaned["skipped"] == 0
+            hidden = request("/api/records?filter=hidden")["items"]
+            assert len(hidden) == 1 and hidden[0]["uri"] == missing.as_uri()
+            assert request("/api/records/cleanup", {})["hidden"] == 0
+            all_results = json.loads(
+                subprocess.check_output([str(binary), "query", ""], env=env, text=True, timeout=5)
+            )
+            assert {
+                json.loads(item["arg"])["target"]
+                for item in all_results["items"]
+                if item.get("uid")
+            } == {repo.as_uri(), remote}
+            assert (base / "state.vscdb").read_bytes() == original_db
+            request("/api/record", {"id": hidden[0]["id"], "action": "hidden", "enabled": False})
+            assert request("/api/records?filter=hidden")["total"] == 0
+            checks.append(
+                "cleanup hides only missing local records; repeat, CLI exclusion, restore and unchanged VS Code DB"
             )
             source = base / "legacy.json"
             source.write_text(

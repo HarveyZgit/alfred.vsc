@@ -16,11 +16,11 @@ func TestBrowseRootIdentityAndTraversal(t *testing.T) {
 	if e != nil || len(f.Items) != 2 || f.Items[0].Autocomplete == f.Items[1].Autocomplete {
 		t.Fatalf("roots: %v %v", f, e)
 	}
-	f, e = browse(c, "/1/same/", emptyPreferences())
+	f, e = browse(c, "./1/same/", emptyPreferences())
 	if e != nil || len(targets(f)) != 1 || !strings.Contains(targets(f)[0], "/one/") {
 		t.Fatalf("drill: %v %v", f, e)
 	}
-	if _, e = browse(c, "/1/../../", emptyPreferences()); e == nil {
+	if _, e = browse(c, "./1/../../", emptyPreferences()); e == nil {
 		t.Fatal("traversal allowed")
 	}
 }
@@ -34,8 +34,8 @@ func TestBrowseSpaceSeparatedWords(t *testing.T) {
 		query string
 		count int
 	}{
-		{"/back end", 1}, {"/END back", 1}, {"/bcknd", 0},
-		{"/back missing", 0}, {"/中 项", 1}, {"/中项", 0},
+		{"./back end", 1}, {"./END back", 1}, {"./bcknd", 0},
+		{"./back missing", 0}, {"./中 项", 1}, {"./中项", 0},
 	} {
 		feedback, err := browse(c, tt.query, emptyPreferences())
 		if err != nil {

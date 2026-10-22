@@ -193,6 +193,34 @@ def main():
                 else ["--folder-uri", remote]
             )
             assert json.loads(argv.read_text()) == want
+        direct = base / "outside roots" / "新目录 $(whoami) # %"
+        direct.mkdir(parents=True)
+        path_env = dict(
+            env, VSC_DEFAULT_EDITOR="cursor", VSC_DIRECTORIES=str(base / "missing-configured-root")
+        )
+        prefs_before = (base / "data/preferences.json").read_bytes()
+        history_before = db.execute("SELECT value FROM ItemTable").fetchall()
+        argv.unlink()
+        direct_feedback = json.loads(run("query", str(direct) + "/", environment=path_env).stdout)
+        assert len(direct_feedback["items"]) == 1
+        candidate = direct_feedback["items"][0]
+        assert candidate["valid"] and "Cursor" in candidate["title"]
+        assert "打开输入的目录" in candidate["title"]
+        assert not argv.exists()  # query offers the action; it does not launch the IDE
+        run("open", "--request", candidate["arg"], environment=path_env)
+        assert json.loads(argv.read_text()) == ["--", str(direct)]
+        assert direct.as_uri() not in records(query())
+        assert (base / "data/preferences.json").read_bytes() == prefs_before
+        assert db.execute("SELECT value FROM ItemTable").fetchall() == history_before
+        direct_file = direct / "file.txt"
+        direct_file.write_text("not a directory")
+        for path in (direct_file, direct / "missing"):
+            result = json.loads(run("query", str(path), environment=path_env).stdout)
+            assert len(result["items"]) == 1 and not result["items"][0]["valid"]
+        report["checks"].append(
+            "absolute unlisted path bypasses configured roots; explicit default-IDE open, "
+            "literal argv, no implicit launch/import, and invalid path feedback"
+        )
         run("open", "--target", container, "--editor", "zed", success=False)
         fake.write_text("#!/bin/sh\nexit 7\n")
         assert (
@@ -211,7 +239,10 @@ def main():
         report["checks"].append(
             "SQLite read-only committed view, empty source removes stale history"
         )
-        assert any(i.get("autocomplete", "").endswith("/") for i in query("/")["items"])
+        (local / "browse-child").mkdir()
+        completion = records(query("/"))[local.as_uri()]["autocomplete"]
+        assert completion.startswith("./") and completion.endswith("/")
+        assert set(records(query(completion))) == {(local / "browse-child").as_uri()}
         report["checks"].append("directory browsing")
         (base / "cache/index.cache").unlink()
         background = dict(env, VSC_NO_BACKGROUND="0")

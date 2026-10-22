@@ -120,6 +120,12 @@ func (p *panel) api(w http.ResponseWriter, r *http.Request) (any, error) {
 		return map[string]bool{"ok": true}, nil
 	case "POST /api/record":
 		return panelChangeRecord(c, w, r)
+	case "POST /api/records/cleanup":
+		if !p.busy.TryLock() {
+			return nil, fmt.Errorf("正在扫描、迁移或清理，请稍后重试")
+		}
+		defer p.busy.Unlock()
+		return panelCleanupRecords(c, w, r)
 	case "POST /api/rebuild":
 		if !p.busy.TryLock() {
 			return nil, fmt.Errorf("正在扫描或迁移，请稍后重试")
