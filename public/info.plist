@@ -11,7 +11,7 @@
 	<key>description</key>
 	<string>VS Code 目录与 Git 仓库的快速入口</string>
 	<key>version</key>
-	<string>3.0.1</string>
+	<string>3.0.2</string>
 	<key>webaddress</key>
 	<string>https://github.com/HarveyZgit/alfred.vsc</string>
 	<key>disabled</key>
