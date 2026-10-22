@@ -11,6 +11,7 @@ import selectors
 import sqlite3
 import subprocess
 import tempfile
+import time
 import traceback
 import urllib.error
 import urllib.parse
@@ -131,13 +132,26 @@ def main():
             checks.append("panel overrides Alfred variables; explicit Git indexing")
             rows = request("/api/records")["items"]
             row = next(r for r in rows if r["uri"] == repo.as_uri())
-            assert row["branch"] == "main"
+
+            def require_branch(record, expected):
+                # A busy runner can exceed the UI's intentional 30 ms probe budget.
+                # Retry only its explicit timeout, never a stale or absent branch
+                # on a supposedly available directory.
+                deadline = time.monotonic() + 2
+                while record["status"] == "读取超时" and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    record = next(
+                        r for r in request("/api/records")["items"] if r["id"] == record["id"]
+                    )
+                assert record.get("branch") == expected, record
+
+            require_branch(row, "main")
             assert next(r for r in rows if r["uri"] == missing.as_uri())["status"] == "目录不存在"
             assert "branch" not in next(r for r in rows if r["uri"] == remote)
             (repo / ".git/HEAD").write_text("ref: refs/heads/panel-fresh\n")
-            assert (
-                next(r for r in request("/api/records")["items"] if r["id"] == row["id"])["branch"]
-                == "panel-fresh"
+            require_branch(
+                next(r for r in request("/api/records")["items"] if r["id"] == row["id"]),
+                "panel-fresh",
             )
             checks.append(
                 "fresh local branch; explicit missing-directory reason; remote without branch"
