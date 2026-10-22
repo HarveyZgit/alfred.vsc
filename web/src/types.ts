@@ -22,6 +22,11 @@ export type RecordsData = {
   index_stale: boolean;
   data_dir: string;
 };
+export type CleanupResult = {
+  hidden: number;
+  skipped: number;
+  warnings?: string[];
+};
 export type Settings = {
   roots: string[];
   editor: string;
