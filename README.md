@@ -135,6 +135,8 @@ uvx --from ruff==0.11.13 ruff format scripts tests/e2e
 pnpm dlx prettier@3.5.3 --write 'web/src/**/*.{ts,tsx,css}' 'web/*.{json,cjs,mjs,html}' tests/e2e/panel_browser_acceptance.cjs
 ```
 
+正式版本通过 GitHub Actions 自动发布：合并版本 PR 后推送 `X.Y.Z` 标签，Linux/macOS 验收通过后自动上传安装包、迁移脚本与校验和并发布 Release。完整步骤与重试方法见[发布指南](docs/RELEASING.zh-CN.md)。
+
 ## 从 V2 升级
 
 先安装隔离测试包，确认后再替换正式版。使用随包提供的迁移脚本：
