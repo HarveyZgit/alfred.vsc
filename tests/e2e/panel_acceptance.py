@@ -113,6 +113,7 @@ def main():
             ):
                 request(missing_asset, auth=False, status=404)
             request("/api/records", auth=False, status=401)
+            request("/api/records/cleanup", {}, auth=False, status=401)
             request(
                 "/api/settings",
                 {"roots": [], "editor": "zed", "editors": {}},
@@ -171,6 +172,26 @@ def main():
             )
             checks.append(
                 "hide/restore changes actual CLI results; pin and per-project IDE persist"
+            )
+            original_db = (base / "state.vscdb").read_bytes()
+            cleaned = request("/api/records/cleanup", {})
+            assert cleaned["hidden"] == 1 and cleaned["skipped"] == 0
+            hidden = request("/api/records?filter=hidden")["items"]
+            assert len(hidden) == 1 and hidden[0]["uri"] == missing.as_uri()
+            assert request("/api/records/cleanup", {})["hidden"] == 0
+            all_results = json.loads(
+                subprocess.check_output([str(binary), "query", ""], env=env, text=True, timeout=5)
+            )
+            assert {
+                json.loads(item["arg"])["target"]
+                for item in all_results["items"]
+                if item.get("uid")
+            } == {repo.as_uri(), remote}
+            assert (base / "state.vscdb").read_bytes() == original_db
+            request("/api/record", {"id": hidden[0]["id"], "action": "hidden", "enabled": False})
+            assert request("/api/records?filter=hidden")["total"] == 0
+            checks.append(
+                "cleanup hides only missing local records; repeat, CLI exclusion, restore and unchanged VS Code DB"
             )
             source = base / "legacy.json"
             source.write_text(
