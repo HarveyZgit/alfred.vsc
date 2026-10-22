@@ -11,7 +11,7 @@ Linux 的二进制与参数验收已自动化。以下测试需要真实 Alfred 
 7. Shift + Enter 验证各 IDE 新窗口行为；VS Code / Cursor / Trae CLI 的版本差异以真实应用为准。
 8. VS Code 验证 SSH 和 Dev Container；Cursor / Trae 验证已安装远程支持的 SSH；Zed 验证明文 SSH alias。容器或编码 SSH authority 不应被错误转为 Zed SSH 地址。
 9. Ctrl + Enter 隐藏，刷新仓库后仍隐藏；管理菜单恢复；Alt + Enter 固定后排序生效。确认 Cmd、Ctrl、Alt、Shift 的修饰键连接与提示一致。
-10. `vscd /` 用 Tab 选择根目录 / 子目录、返回上级；相同子目录名不会跨根目录串线。
+10. `vscd /` 用 Tab 选择根目录 / 子目录、返回上级；补全应使用 `./...`，相同子目录名不会跨根目录串线。旧的 `/项目/` 相对浏览输入改用 `./项目/`。
 11. 首次无缓存、增加仓库、临时拔掉外置盘时观察后台索引和提示；确认输入不等待全盘扫描。慢挂载属于需实机验证的性能场景。
 12. 对 Apple Silicon 和 Intel 的可用机器分别检查二进制；可执行 `lipo -archs vsc`、`codesign --verify vsc-darwin-arm64`（Go 自动对 arm64 做 ad-hoc 签名，amd64 默认无签名，不能把整个 universal 当成所有架构都签名的产物）。包未做 Developer ID 公证，若系统阻止，按系统的可信软件允许流程处理。
 
@@ -43,3 +43,10 @@ Linux 的二进制与参数验收已自动化。以下测试需要真实 Alfred 
 3. 在宽泛查询下多次打开 `coding`，再搜索 `backend`，确认使用历史不会将它混入结果。对多个匹配结果，确认 Alfred 展示顺序与 Debugger 中 JSON 的 `items` 一致；输出应含 `skipknowledge: true`。
 4. 在 `backend` 切换 Git 分支后重复搜索，分支应立即更新。以上 Alfred 界面行为需在 Mac 实测，Linux 验收只验证 CLI 的结果、排序设置及分支读取。
 5. 输入 `back end`、`end back`，应匹配含有这两个连续片段的项目；输入 `bcknd` 不应匹配 `backend`，输入 `back missing` 不应只凭 `back` 命中。中文用 `中 项` 可匹配 `中文项目`，`中项` 不应匹配。
+
+## 绝对路径与临时打开
+
+1. 配置一个不存在的 Git 根目录，粘贴实际存在且未收录的绝对目录路径（含空格、中文及尾部 `/`）。候选应为「用默认 IDE 打开输入的目录？」，不应报配置根目录的 lstat 错误；输入本身不启动 IDE，按 Enter 后才用当前默认 IDE 打开该目录。
+2. 验证 `~/...`、单根 / 多根 / 无根目录设置、已收录目录的项目 IDE 偏好。未收录目录临时打开不加入自建记录，明确输入已隐藏目录也不会自动恢复其隐藏状态。
+3. 文件、不存在的目录不可打开；普通路径中的空格、`$`、`#`、`%` 按字面传递。正常名称搜索以及 `/` → Tab → `./...` → 返回上级仍应正常。
+4. 分别从 `vsc` 和 ⌘⇧V 入口执行，确认实际 IDE 打开的是输入目录；Linux 的替身 IDE 参数验收不能代替真实 macOS IDE 验收。

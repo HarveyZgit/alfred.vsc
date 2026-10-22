@@ -10,9 +10,12 @@ import (
 func browse(c Config, query string, prefs Preferences) (Feedback, error) {
 	// Root selection is explicit when several roots exist, so same-name folders
 	// never get merged into one autocomplete navigation state.
-	rest := strings.TrimPrefix(query, "/")
+	rest := strings.TrimPrefix(query, "./")
+	if query == "/" {
+		rest = ""
+	}
 	roots := c.Roots
-	prefix := "/"
+	prefix := "./"
 	root := ""
 	if len(roots) == 0 {
 		return Feedback{Items: []Item{{Title: "请配置项目根目录", Subtitle: "VSC_DIRECTORIES", Valid: false}}}, nil
@@ -24,7 +27,7 @@ func browse(c Config, query string, prefs Preferences) (Feedback, error) {
 			for i, r := range roots {
 				key := fmt.Sprintf("%d", i+1)
 				if containsWords(rest, r) || rest == key {
-					items = append(items, Item{Title: filepath.Base(r), Subtitle: r, Valid: false, Autocomplete: "/" + key + "/"})
+					items = append(items, Item{Title: filepath.Base(r), Subtitle: r, Valid: false, Autocomplete: "./" + key + "/"})
 				}
 			}
 			return Feedback{Items: items}, nil
@@ -32,13 +35,13 @@ func browse(c Config, query string, prefs Preferences) (Feedback, error) {
 		for i, r := range roots {
 			if parts[0] == fmt.Sprintf("%d", i+1) {
 				root = r
-				prefix = "/" + parts[0] + "/"
+				prefix = "./" + parts[0] + "/"
 				rest = parts[1]
 				break
 			}
 		}
 		if root == "" {
-			return Feedback{Items: []Item{{Title: "请选择项目根目录", Valid: false, Autocomplete: "/"}}}, nil
+			return Feedback{Items: []Item{{Title: "请选择项目根目录", Valid: false, Autocomplete: "./"}}}, nil
 		}
 	} else {
 		root = roots[0]
