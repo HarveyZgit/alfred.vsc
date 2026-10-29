@@ -214,7 +214,8 @@ def main():
         assert direct.as_uri() not in records(query())
         after_direct = json.loads((base / "data/preferences.json").read_text())
         before_direct = json.loads(prefs_before)
-        assert after_direct.pop("recent_projects")[0] == hashlib.sha256(direct.as_uri().encode()).hexdigest()[:32]
+        canonical_target = json.loads(candidate["arg"])["target"]
+        assert after_direct.pop("recent_projects")[0] == hashlib.sha256(canonical_target.encode()).hexdigest()[:32]
         before_direct.pop("recent_projects", None)
         assert after_direct == before_direct
         assert db.execute("SELECT value FROM ItemTable").fetchall() == history_before
