@@ -23,7 +23,8 @@
 - 校验标签、CLI、前端、Workflow 和第三方声明的版本号一致，且对应 CHANGELOG 小节非空。
 - 在 Linux 和 macOS 上运行现有测试、构建、二进制验收与包验证。
 - 从已验证的 Linux 构建暂存正式 universal Workflow、迁移脚本和只包含这两个附件的 `SHA256SUMS`。普通 PR 也会生成 `vsc-release` artifact，便于合并前检查。
-- 两个平台全部成功后，发布任务检查标签提交属于 `main` 历史，使用该次运行的 `vsc-release` artifact，不重新构建。
+- 两个平台全部成功后，独立 macOS 任务下载该次运行的 `vsc-release` artifact，核对版本、Workflow 配置和附件摘要，再直接运行包内 universal 二进制完成 CLI 与面板验收，不重新构建。
+- 成品 macOS 验收通过后，发布任务检查标签提交属于 `main` 历史，使用同一份 `vsc-release` artifact，不重新构建。
 - 根据 CHANGELOG 创建草稿，上传三个附件，下载并逐字节核对，再公开为正式版本并标记 Latest。
 
 发布任务单独获得 `contents: write`，通过 GitHub Actions 自带的 `GITHUB_TOKEN` 调用 GitHub CLI，无需额外 device 登录或个人 token。仓库/组织策略需要允许该任务写入仓库内容。普通测试任务只具有读取权限。

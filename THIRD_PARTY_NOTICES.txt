@@ -1,4 +1,4 @@
-Third-party notices for VSC 3.0.2
+Third-party notices for VSC 3.0.3
 
 Go runtime and standard library:
 Copyright 2009 The Go Authors.

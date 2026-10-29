@@ -11,6 +11,7 @@ type Preferences struct {
 	Hidden        map[string]bool   `json:"hidden"`
 	Pinned        map[string]bool   `json:"pinned"`
 	Editors       map[string]string `json:"editors"`
+	Recent        []string          `json:"recent_projects,omitempty"`
 	Migrated      bool              `json:"legacy_migrated"`
 	LegacyImports map[string]bool   `json:"legacy_imports,omitempty"`
 	LegacyOrder   []string          `json:"legacy_order,omitempty"`
@@ -42,6 +43,7 @@ func loadPreferences(c Config) (Preferences, error) {
 	if p.Editors == nil {
 		p.Editors = map[string]string{}
 	}
+	p.Recent = recentProjects(p.Recent)
 	return p, nil
 }
 

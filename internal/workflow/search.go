@@ -53,6 +53,11 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		score    int
 		position int
 		pinned   bool
+		recent   int
+	}
+	recent := make(map[string]int, len(prefs.Recent))
+	for i, id := range prefs.Recent {
+		recent[id] = i + 1
 	}
 	legacy := make(map[string]int, len(prefs.LegacyOrder))
 	for i, id := range prefs.LegacyOrder {
@@ -67,7 +72,7 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 		// A complete name narrows the result set before ranking or limiting it.
 		// Keep all eligible namesakes so local and remote copies remain selectable.
 		if query != "" && strings.EqualFold(query, p.Name) {
-			exactMatches = append(exactMatches, match{position: i, pinned: prefs.Pinned[p.ID]})
+			exactMatches = append(exactMatches, match{position: i, pinned: prefs.Pinned[p.ID], recent: recent[p.ID]})
 			continue
 		}
 		if len(exactMatches) > 0 {
@@ -89,7 +94,7 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 			total += value
 		}
 		if ok {
-			matches = append(matches, match{total, i, prefs.Pinned[p.ID]})
+			matches = append(matches, match{total, i, prefs.Pinned[p.ID], recent[p.ID]})
 		}
 	}
 	if len(exactMatches) > 0 {
@@ -97,11 +102,20 @@ func rank(projects []Project, prefs Preferences, query string, limit int) []Proj
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
 		a, b := matches[i], matches[j]
-		if a.score != b.score {
-			return a.score > b.score
-		}
 		if a.pinned != b.pinned {
 			return a.pinned
+		}
+		if a.recent != b.recent {
+			if a.recent == 0 {
+				return false
+			}
+			if b.recent == 0 {
+				return true
+			}
+			return a.recent < b.recent
+		}
+		if a.score != b.score {
+			return a.score > b.score
 		}
 		ar, br := legacy[projects[a.position].ID], legacy[projects[b.position].ID]
 		if ar != 0 && br != 0 && ar != br {

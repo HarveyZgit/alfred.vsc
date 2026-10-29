@@ -1,6 +1,6 @@
 {
   "name": "vsc",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Native Alfred project launcher for VS Code directories and Git repositories",
   "author": "Harvey Z",
   "license": "MIT",

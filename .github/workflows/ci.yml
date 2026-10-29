@@ -72,6 +72,7 @@ jobs:
           go mod verify 2>&1 | tee build/go-mod-verify.log
           go test -race ./... 2>&1 | tee build/go-test-race.log
           go vet ./... 2>&1 | tee build/go-vet.log
+          go test ./internal/workflow -run '^$' -bench BenchmarkRecentRanking -benchmem 2>&1 | tee build/recent-ranking-benchmark.log
       - name: Build and accept host binary
         run: |
           set -o pipefail
@@ -137,9 +138,58 @@ jobs:
           retention-days: 30
           path: build/release/
 
+  release-candidate:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsc-release
+          path: build/release
+      - name: Verify and accept the exact release candidate on macOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee build/release-candidate-verify.log
+          import hashlib, json, pathlib, plistlib, subprocess, sys, zipfile
+          sys.path.insert(0, 'scripts')
+          import release
+          directory = pathlib.Path('build/release')
+          assert (directory / 'SHA256SUMS').read_text() == release.checksums(directory)
+          version, _ = release.release_metadata(pathlib.Path('.'))
+          package = directory / 'vsc.alfredworkflow'
+          with zipfile.ZipFile(package) as archive:
+              assert archive.testzip() is None
+              assert archive.read('info.plist') == pathlib.Path('public/info.plist').read_bytes()
+              assert archive.read('scripts/migrate-v2.sh') == pathlib.Path('scripts/migrate-v2.sh').read_bytes()
+              config = plistlib.loads(archive.read('info.plist'))
+              assert config['version'] == version
+              assert config['bundleid'] == 'com.harvey.alfredapp.vsc.v3'
+              binary = pathlib.Path('build/release-vsc')
+              binary.write_bytes(archive.read('vsc'))
+              binary.chmod(0o755)
+          assert subprocess.check_output([str(binary), 'version'], text=True).strip() == version
+          print(json.dumps({'version': version, 'workflow_sha256': hashlib.sha256(package.read_bytes()).hexdigest(), 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest()}))
+          PY
+          python3 tests/e2e/acceptance.py --binary build/release-vsc --output build/acceptance-release-candidate.json 2>&1 | tee build/acceptance-release-candidate.log
+          python3 tests/e2e/panel_acceptance.py --binary build/release-vsc 2>&1 | tee build/panel-release-candidate.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-release-candidate
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            build/*.log
+            build/*acceptance*.json
+
   release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    needs: test
+    needs: [test, release-candidate]
     runs-on: ubuntu-latest
     permissions:
       contents: write
