@@ -171,10 +171,14 @@ func Run(args []string, out, stderr io.Writer) int {
 			if e = ExecuteOpen(plan); e != nil {
 				return fail(e)
 			}
-			if *remember {
-				if e = changePreferences(c, func(prefs *Preferences) error { prefs.Editors[p.ID] = plan.Editor; return nil }); e != nil {
-					return fail(e)
+			if e = changePreferences(c, func(prefs *Preferences) error {
+				rememberProject(prefs, p.ID)
+				if *remember {
+					prefs.Editors[p.ID] = plan.Editor
 				}
+				return nil
+			}); e != nil {
+				return fail(fmt.Errorf("已启动 %s，但保存项目偏好失败: %w", plan.Editor, e))
 			}
 			return 0
 		}

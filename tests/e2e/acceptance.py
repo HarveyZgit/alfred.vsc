@@ -15,6 +15,8 @@ import tempfile
 import time
 from urllib.parse import unquote, urlsplit
 
+from recent_acceptance import accept_recent
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -210,7 +212,11 @@ def main():
         run("open", "--request", candidate["arg"], environment=path_env)
         assert json.loads(argv.read_text()) == ["--", str(direct)]
         assert direct.as_uri() not in records(query())
-        assert (base / "data/preferences.json").read_bytes() == prefs_before
+        after_direct = json.loads((base / "data/preferences.json").read_text())
+        before_direct = json.loads(prefs_before)
+        assert after_direct.pop("recent_projects")[0] == hashlib.sha256(direct.as_uri().encode()).hexdigest()[:32]
+        before_direct.pop("recent_projects", None)
+        assert after_direct == before_direct
         assert db.execute("SELECT value FROM ItemTable").fetchall() == history_before
         direct_file = direct / "file.txt"
         direct_file.write_text("not a directory")
@@ -341,6 +347,12 @@ def main():
                     (p / ".git/HEAD").write_text("ref: refs/heads/perf-main\n")
                     projects.append({"folderUri": p.as_uri()})
                 history(projects)
+                performance_prefs = json.loads((base / "data/preferences.json").read_text())
+                performance_prefs["recent_projects"] = [
+                    hashlib.sha256(p["folderUri"].encode()).hexdigest()[:32]
+                    for p in reversed(projects[-1000:])
+                ]
+                (base / "data/preferences.json").write_text(json.dumps(performance_prefs))
                 cold = timed("project")
                 for _ in range(3):
                     timed("project")
@@ -362,6 +374,7 @@ def main():
                 report["benchmarks"].append(
                     {
                         "projects": count,
+                        "recent_projects": 1000,
                         "first_source_import_ms": round(cold, 3),
                         "warm_queries": stats(samples),
                         "typing_30ms_interval": stats(burst),
@@ -369,6 +382,7 @@ def main():
                     }
                 )
         db.close()
+    report["checks"].extend(accept_recent(binary))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps(report, ensure_ascii=False, indent=2))
